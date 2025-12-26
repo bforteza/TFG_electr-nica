@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Pruebas2" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Pruebas2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="`pkg-config gtkmm-3.0 --cflags`" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="`pkg-config gtkmm-3.0 --libs`" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Pruebas2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="/usr/include/mysql" />
+		</Compiler>
+		<Linker>
+			<Add option="`pkg-config gtkmm-3.0 --libs`" />
+			<Add library="/usr/local/lib/liblitesql-util.so" />
+			<Add library="/usr/local/lib/liblitesql-util.a" />
+			<Add library="/usr/local/lib/liblitesql.so" />
+			<Add library="/usr/local/lib/liblitesql.a" />
+			<Add library="/usr/lib/aarch64-linux-gnu/libmysqlclient.so" />
+			<Add library="/lib/libnfc.so" />
+		</Linker>
+		<Unit filename="include/AdminStack.h" />
+		<Unit filename="include/Globals.h" />
+		<Unit filename="include/IniStack.h" />
+		<Unit filename="include/KeyCreateStack.h" />
+		<Unit filename="include/KeySelectStack.h" />
+		<Unit filename="include/KeyViewStack.h" />
+		<Unit filename="include/Models.h" />
+		<Unit filename="include/NFC.h" />
+		<Unit filename="include/NfcManager.h" />
+		<Unit filename="include/UserCreateStack.h" />
+		<Unit filename="include/UsersViewStack.h" />
+		<Unit filename="include/application.h" />
+		<Unit filename="include/datos.hpp" />
+		<Unit filename="include/window.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="src/AdminStack.cpp" />
+		<Unit filename="src/Globals.cpp" />
+		<Unit filename="src/IniStack.cpp" />
+		<Unit filename="src/KeyCreateStack.cpp" />
+		<Unit filename="src/KeySelectStack.cpp" />
+		<Unit filename="src/KeyViewStack.cpp" />
+		<Unit filename="src/NfcManager.cpp" />
+		<Unit filename="src/UserCreateStack.cpp" />
+		<Unit filename="src/UsersViewStack.cpp" />
+		<Unit filename="src/application.cpp" />
+		<Unit filename="src/datos.cpp" />
+		<Unit filename="src/window.cpp" />
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

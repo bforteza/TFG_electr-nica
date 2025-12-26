@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE database SYSTEM "lite sql.dtd"> 
+
+
+<database name="datos" namespace="kdb">
+    <object name="Person">
+        <field name="name" type="string"/>
+        <field name="password" type="string"/>
+        <field name="uid" type="string"/>
+        <field name="a1" type="boolean"/>
+        <field name="a2" type="boolean"/> 
+    </object>
+    <object name="Key">
+        <field name="name" type="string"/>
+        <field name="ubi" type="string"/>
+        <field name="commentary" type="string"/>
+        <field name="pos" type="integer" default="0"/>
+        <field name="active" type="boolean"/>
+        <field name="uid" type="string"/>
+    </object>
+    <relation id="Acces">
+        <relate object="Person" handle="keys" limit="many"/>
+        <relate object="Key" handle="owners" limit="many"/>
+    </relation>
+    <relation id="Keep">
+        <relate object="Person" handle="keepkeys" limit="one"/>
+        <relate object="Key"    handle="keeper" limit="many"/>
+    </relation>
+</database>    
+
