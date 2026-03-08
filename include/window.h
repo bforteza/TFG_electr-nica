@@ -1,37 +1,42 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#define PATH "./ui/MainWindow.glade"
-
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/builder.h>
-#include <gtkmm/entry.h>
 #include <gtkmm/stack.h>
-#include <gtkmm/button.h>
 #include "home_stack.h"
-#include "solenoid_panel.h"
 #include "login_stack.h"
 
+// Ventana principal de la aplicación.
+// Gestiona la navegación entre las pantallas principales:
+//   LoginStack → HomeStack  (cuando se identifica un usuario)
+//   LoginStack → KeyLoginStack (pendiente; cuando se acerca una llave para devolución)
 class Window : public Gtk::ApplicationWindow {
-    public:
+public:
     Window(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
-    virtual ~Window();
+    ~Window();
 
+    // Carga la ventana desde MainWindow.glade y devuelve el puntero.
     static Window* create();
 
-    private:
-    Glib::RefPtr<Gtk::Builder>  builder;
+    // Vuelve a la pantalla de login y reinicia el polling NFC.
+    void OnBackButtonClicked();
 
-    Gtk::Stack*         PANTALLAS;
+private:
+    Glib::RefPtr<Gtk::Builder> builder_;
 
-    friend class HomeStack;
-    friend class SolenoidPanel;
-    LoginStack inistack;
-    HomeStack adminstack;
-    SolenoidPanel keysstack;
+    // Stack raíz que contiene LoginStack y HomeStack.
+    Gtk::Stack* main_stack_;
 
-    void UserLogged(std::shared_ptr<kdb::Person> logged);
-    void on_BackButton_clicked();
+    LoginStack login_stack_;
+    HomeStack  home_stack_;
+
+    // Llamado cuando LoginStack identifica un usuario válido.
+    void OnUserLogged(std::shared_ptr<kdb::Person> person);
+
+    // Llamado cuando LoginStack identifica una llave válida (devolución).
+    // TODO: navegar a KeyLoginStack cuando esté implementado.
+    void OnKeyLogged(std::shared_ptr<kdb::Key> key);
 };
 
 #endif // WINDOW_H

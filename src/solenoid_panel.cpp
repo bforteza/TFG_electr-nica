@@ -6,5 +6,5 @@ SolenoidPanel::SolenoidPanel(const Glib::RefPtr<Gtk::Builder>& builder, Window *
     if (!BackButtonKeySelect) {
         throw std::runtime_error("No \"BackButtonKeySelect\" object in INI.glade" );
     }
-      BackButtonKeySelect->signal_clicked().connect(sigc::mem_fun(*f, &Window::on_BackButton_clicked));
+      BackButtonKeySelect->signal_clicked().connect(sigc::mem_fun(*f, &Window::OnBackButtonClicked));
 }
