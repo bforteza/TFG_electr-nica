@@ -3,11 +3,11 @@
 #include <iostream>
 
 
-#include "datos.hpp"
+#include "db_schema.hpp"
 #include "litesql.hpp"
-#include "NfcManager.h"
+#include "nfc_manager.h"
 #include "application.h"
-#include "Globals.h"
+#include "globals.h"
 #include "mysql.h"
 
 
@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
     try{
        // litesql::conne conn("mysql://usuario:clau@localhost/miBaseDeDatos");
-        static kdb::datos dbt("mysql","user=usuario;password=pene;database=miBaseDeDatos");
+        static kdb::DbSchema dbt("mysql","user=usuario;password=pene;database=miBaseDeDatos");
      //   dbt.create();
         // using SQLite3 as backend
        db = &dbt;

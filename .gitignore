@@ -1,0 +1,15 @@
+# Binarios compilados
+bin/
+obj/
+
+# Base de datos local
+*.db
+
+# Archivos de Code::Blocks generados automáticamente
+*.depend
+*.layout
+*.cscope_file_list
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db

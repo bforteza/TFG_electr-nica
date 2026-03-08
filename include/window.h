@@ -8,9 +8,9 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/stack.h>
 #include <gtkmm/button.h>
-#include "AdminStack.h"
-#include "KeySelectStack.h"
-#include "IniStack.h"
+#include "home_stack.h"
+#include "solenoid_panel.h"
+#include "login_stack.h"
 
 class Window : public Gtk::ApplicationWindow {
     public:
@@ -22,20 +22,17 @@ class Window : public Gtk::ApplicationWindow {
     private:
     Glib::RefPtr<Gtk::Builder>  builder;
 
-
     Gtk::Stack*         PANTALLAS;
 
-    friend class AdminStack;
-    friend class KeySelectStack;
-    friend class IniStack;
-    IniStack inistack;
-    AdminStack adminstack;
-    KeySelectStack keysstack;
+    friend class HomeStack;
+    friend class SolenoidPanel;
+    friend class LoginStack;
+    LoginStack inistack;
+    HomeStack adminstack;
+    SolenoidPanel keysstack;
 
     void UserLogged(std::shared_ptr<kdb::Person> logged);
     void on_BackButton_clicked();
-
-  //  void setHeaderBar();
 };
 
 #endif // WINDOW_H
