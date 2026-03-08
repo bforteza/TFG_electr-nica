@@ -72,7 +72,7 @@
         <property name="can-focus">False</property>
         <property name="transition-duration">150</property>
         <child>
-          <object class="GtkBox" id="IniStack">
+          <object class="GtkBox" id="LoginStack">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
@@ -168,6 +168,60 @@
                 <property name="position">3</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="margin-end">10</property>
+                <property name="margin-bottom">10</property>
+                <property name="spacing">4</property>
+                <child>
+                  <object class="GtkButton" id="LangCaButton">
+                    <property name="label">CA</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="LangEsButton">
+                    <property name="label">ES</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="LangEnButton">
+                    <property name="label">EN</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="name">INI</property>
@@ -175,7 +229,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="KeySelectStack">
+          <object class="GtkBox" id="SolenoidPanel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
@@ -246,7 +300,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="AdminStack">
+          <object class="GtkBox" id="HomeStack">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
@@ -307,7 +361,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkStack" id="AdminStacks">
+              <object class="GtkStack" id="HomeInnerStack">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
@@ -430,7 +484,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="ViewUserStack">
+                  <object class="GtkBox" id="UsersViewStack">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
@@ -545,7 +599,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="UserCreate">
+                  <object class="GtkScrolledWindow" id="UserCreateStack">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="hscrollbar-policy">never</property>
@@ -849,7 +903,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="KeyCreate">
+                  <object class="GtkScrolledWindow" id="KeyCreateStack">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="hscrollbar-policy">never</property>
@@ -1125,7 +1179,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="ViewKeyStack">
+                  <object class="GtkBox" id="KeyViewStack">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>

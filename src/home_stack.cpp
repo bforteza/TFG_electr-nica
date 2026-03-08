@@ -47,9 +47,9 @@ keyviewstk(builder)
     //HistoryButton->signal_clicked().connect(sigc::mem_fun(*this, &HomeStack::on_HistoryButton_clicked));
 
 
-    builder->get_widget("AdminStacks", AdminStackO);
+    builder->get_widget("HomeInnerStack", AdminStackO);
     if (!AdminStackO)
-        throw std::runtime_error("No \"AdminStackO\" object in INI.glade" );
+        throw std::runtime_error("No \"HomeInnerStack\" object in MainWindow.glade" );
 
     //Labels
     builder->get_widget("NameLabel", NameLabel);

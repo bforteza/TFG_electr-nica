@@ -1,6 +1,7 @@
 #include "login_stack.h"
 #include "globals.h"
 #include "translations.h"
+#include <sigc++/adaptors/bind.h>
 
 LoginStack::LoginStack(const Glib::RefPtr<Gtk::Builder>& builder)
 {
@@ -26,6 +27,27 @@ LoginStack::LoginStack(const Glib::RefPtr<Gtk::Builder>& builder)
         throw std::runtime_error("No \"LoginDescLabel\" object in MainWindow.glade");
     }
 
+    builder->get_widget("LangCaButton", lang_ca_button_);
+    if (!lang_ca_button_)
+        throw std::runtime_error("No \"LangCaButton\" object in MainWindow.glade");
+    lang_ca_button_->signal_clicked().connect(
+        sigc::bind(sigc::mem_fun(*this, &LoginStack::OnLangSelected), Language::kCatalan));
+
+    builder->get_widget("LangEsButton", lang_es_button_);
+    if (!lang_es_button_)
+        throw std::runtime_error("No \"LangEsButton\" object in MainWindow.glade");
+    lang_es_button_->signal_clicked().connect(
+        sigc::bind(sigc::mem_fun(*this, &LoginStack::OnLangSelected), Language::kSpanish));
+
+    builder->get_widget("LangEnButton", lang_en_button_);
+    if (!lang_en_button_)
+        throw std::runtime_error("No \"LangEnButton\" object in MainWindow.glade");
+    lang_en_button_->signal_clicked().connect(
+        sigc::bind(sigc::mem_fun(*this, &LoginStack::OnLangSelected), Language::kEnglish));
+
+    // Suscribe RefreshLabels a la señal global de cambio de idioma.
+    language_changed.connect(sigc::mem_fun(*this, &LoginStack::RefreshLabels));
+
     // Conecta el dispatcher del NfcManager para recibir notificaciones
     // en el hilo principal de GTK cuando se detecta un dispositivo.
     nfcman->aviso.connect([&]() {
@@ -43,6 +65,12 @@ void LoginStack::RefreshLabels()
 {
     title_label_->set_text(Tr().login.title);
     desc_label_->set_text(Tr().login.description);
+}
+
+void LoginStack::OnLangSelected(Language lang)
+{
+    current_language = lang;
+    language_changed.emit();
 }
 
 void LoginStack::OnPasswordEntered()

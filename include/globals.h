@@ -3,9 +3,14 @@
 
 #include "db_schema.hpp"
 #include "nfc_manager.h"
+#include <sigc++/signal.h>
 #include <string>
 #include <unordered_map>
 #include <stdexcept>
+
+// Señal global emitida tras cambiar current_language.
+// Cada stack se suscribe en su constructor para refrescar sus textos.
+inline sigc::signal<void> language_changed;
 
 
 extern kdb::DbSchema* db;

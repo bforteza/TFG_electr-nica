@@ -7,6 +7,7 @@
 #include <gtkmm/label.h>
 #include <string>
 #include "db_schema.hpp"
+#include "translations.h"
 
 // Gestiona la pantalla de inicio de sesión.
 // El usuario puede identificarse mediante contraseña o tarjeta NFC.
@@ -29,7 +30,7 @@ public:
     // Llamar tras cambiar current_language.
     void RefreshLabels();
 
-protected:
+private:
     // Campo de entrada de contraseña/identificación manual.
     Gtk::Entry* password_entry_;
 
@@ -42,11 +43,19 @@ protected:
     // Etiqueta con el texto descriptivo sobre cómo identificarse.
     Gtk::Label* desc_label_;
 
+    // Botones de selección de idioma.
+    Gtk::Button* lang_ca_button_;
+    Gtk::Button* lang_es_button_;
+    Gtk::Button* lang_en_button_;
+
     // Llamado cuando el usuario pulsa Enter en el campo de contraseña.
     void OnPasswordEntered();
 
     // Llamado cuando el NfcManager detecta un dispositivo.
     void OnNfcDetected(const std::string& uid);
+
+    // Cambia el idioma activo y notifica a todos los stacks.
+    void OnLangSelected(Language lang);
 };
 
 #endif // LOGIN_STACK_H
