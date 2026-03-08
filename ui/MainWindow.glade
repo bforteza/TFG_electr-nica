@@ -919,7 +919,7 @@
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkLabel" id="KeyCreateNameLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Nom de clau</property>
@@ -933,7 +933,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkLabel" id="KeyCreateUbiLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Ubicació</property>
@@ -963,7 +963,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkLabel" id="KeyCreateCommentaryLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Comentaris</property>
@@ -1138,7 +1138,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkLabel" id="KeyCreatePositionLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Posició</property>

@@ -4,208 +4,241 @@
 #include "globals.h"
 #include <string>
 
+KeyCreateStack::KeyCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
+    builder->get_widget("KeyNameEntry", key_name_entry_);
+    if (!key_name_entry_)
+        throw std::runtime_error("No \"KeyNameEntry\" object in MainWindow.glade");
 
-KeyCreateStack::KeyCreateStack(const Glib::RefPtr<Gtk::Builder>& builder)
-{
-       //Entry
-    builder->get_widget("KeyNameEntry", KeyNameEntry);
-    if (!KeyNameEntry) {
-        throw std::runtime_error("No \"KeyNameEntry\" object in INI.glade" );
-    }
+    builder->get_widget("UbiKeyEntry", ubi_entry_);
+    if (!ubi_entry_)
+        throw std::runtime_error("No \"UbiKeyEntry\" object in MainWindow.glade");
 
-    builder->get_widget("UbiKeyEntry", UbiKeyEntry);
-    if (!UbiKeyEntry) {
-        throw std::runtime_error("No \"UbiKeyEntry\" object in INI.glade" );
-    }
+    builder->get_widget("ComentaryEntry", commentary_entry_);
+    if (!commentary_entry_)
+        throw std::runtime_error("No \"ComentaryEntry\" object in MainWindow.glade");
 
-    builder->get_widget("ComentaryEntry", ComentaryEntry);
-    if (!ComentaryEntry) {
-        throw std::runtime_error("No \"ComentaryEntry\" object in INI.glade" );
-    }
-    builder->get_widget("PositionEntry", PositionEntry);
-    if (!PositionEntry) {
-        throw std::runtime_error("No \"PositionEntry\" object in INI.glade" );
-    }
+    builder->get_widget("PositionEntry", position_entry_);
+    if (!position_entry_)
+        throw std::runtime_error("No \"PositionEntry\" object in MainWindow.glade");
 
-    //Buttons
-    builder->get_widget("KeyGenerateButton", KeyGenerateButton);
-    if (!KeyGenerateButton) {
-        throw std::runtime_error("No \"KeyGenerateButton\" object in INI.glade" );
-    }
-    KeyGenerateButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyCreateStack::on_KeyGenerateButton_clicked));
+    builder->get_widget("KeyGenerateButton", generate_button_);
+    if (!generate_button_)
+        throw std::runtime_error("No \"KeyGenerateButton\" object in MainWindow.glade");
+    generate_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyCreateStack::OnGenerateButtonClicked));
 
-    builder->get_widget("AddUserButton", AddUserButton);
-    if (!AddUserButton) {
-        throw std::runtime_error("No \"AddUserButton\" object in INI.glade" );
-    }
-    AddUserButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyCreateStack::on_AddUserButton_clicked));
+    builder->get_widget("AddUserButton", add_user_button_);
+    if (!add_user_button_)
+        throw std::runtime_error("No \"AddUserButton\" object in MainWindow.glade");
+    add_user_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyCreateStack::OnAddUserButtonClicked));
 
-    builder->get_widget("AddUidKeyButton", AddUidKeyButton);
-    if (!AddUidKeyButton) {
-        throw std::runtime_error("No \"AddUidKeyButton\" object in INI.glade" );
-    }
-    AddUidKeyButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyCreateStack::on_AddUidKeyButton_clicked));
+    builder->get_widget("AddUidKeyButton", add_uid_button_);
+    if (!add_uid_button_)
+        throw std::runtime_error("No \"AddUidKeyButton\" object in MainWindow.glade");
+    add_uid_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyCreateStack::OnAddUidButtonClicked));
 
+    builder->get_widget("KeyCreateNameLabel", name_label_);
+    if (!name_label_)
+        throw std::runtime_error("No \"KeyCreateNameLabel\" object in MainWindow.glade");
 
-    //labels
-    builder->get_widget("KeyNameErrorLabel", KeyNameErrorLabel);
-    if (!KeyNameErrorLabel) {
-        throw std::runtime_error("No \"KeyNameErrorLabel\" object in INI.glade" );
-    }
-    builder->get_widget("PositionErrorLabel", PositionErrorLabel);
-    if (!PositionErrorLabel) {
-        throw std::runtime_error("No \"PositionErrorLabel\" object in INI.glade" );
-    }
-    builder->get_widget("UidKeyErrorLabel", UidKeyErrorLabel);
-    if (!UidKeyErrorLabel) {
-        throw std::runtime_error("No \"UidKeyErrorLabel\" object in INI.glade" );
-    }
-    //text
-     builder->get_widget("UidKeyText", UidKeyText);
-    if (!UidKeyText) {
-        throw std::runtime_error("No \"UidKeyText\" object in INI.glade" );
-    }
+    builder->get_widget("KeyCreateUbiLabel", ubi_label_);
+    if (!ubi_label_)
+        throw std::runtime_error("No \"KeyCreateUbiLabel\" object in MainWindow.glade");
+
+    builder->get_widget("KeyCreateCommentaryLabel", commentary_label_);
+    if (!commentary_label_)
+        throw std::runtime_error("No \"KeyCreateCommentaryLabel\" object in MainWindow.glade");
+
+    builder->get_widget("KeyCreatePositionLabel", position_label_);
+    if (!position_label_)
+        throw std::runtime_error("No \"KeyCreatePositionLabel\" object in MainWindow.glade");
+
+    builder->get_widget("KeyNameErrorLabel", name_error_label_);
+    if (!name_error_label_)
+        throw std::runtime_error("No \"KeyNameErrorLabel\" object in MainWindow.glade");
+
+    builder->get_widget("PositionErrorLabel", position_error_label_);
+    if (!position_error_label_)
+        throw std::runtime_error("No \"PositionErrorLabel\" object in MainWindow.glade");
+
+    builder->get_widget("UidKeyErrorLabel", uid_error_label_);
+    if (!uid_error_label_)
+        throw std::runtime_error("No \"UidKeyErrorLabel\" object in MainWindow.glade");
+
+    builder->get_widget("UidKeyText", uid_text_view_);
+    if (!uid_text_view_)
+        throw std::runtime_error("No \"UidKeyText\" object in MainWindow.glade");
+
+    // Suscribe RefreshLabels al cambio de idioma global.
+    language_changed.connect(sigc::mem_fun(*this, &KeyCreateStack::RefreshLabels));
+    RefreshLabels();
 }
 
-void KeyCreateStack::on_KeyGenerateButton_clicked(){
-    KeyNameErrorLabel->set_text("");
-     bool ValidCreation = 1;
+void KeyCreateStack::RefreshLabels() {
+    // Etiquetas de campo del formulario.
+    name_label_->set_label(Tr().key_create.lbl_key_name);
+    ubi_label_->set_label(Tr().key_create.lbl_location);
+    commentary_label_->set_label(Tr().key_create.lbl_comments);
+    position_label_->set_label(Tr().key_create.lbl_position);
 
-    if (CreateKeyMode){
+    // Botones de acción.
+    add_user_button_->set_label(Tr().key_create.btn_add_users);
+    add_uid_button_->set_label(Tr().key_create.btn_add_nfc);
+    // El botón de confirmar tiene etiqueta distinta según el modo activo.
+    if (create_mode_)
+        generate_button_->set_label(Tr().key_create.btn_create);
+    else if (edit_mode_)
+        generate_button_->set_label(Tr().key_create.btn_edit);
+}
 
-        //Test Name repetition
-        if( KeyNameEntry->get_text_length()< 3){
-            KeyNameErrorLabel->set_text("Atenció: nom molt breu");
-            ValidCreation *= 0;
+// --- Iniciadores públicos ---
+
+void KeyCreateStack::CreateKey() {
+    Reset();
+    create_mode_ = true;
+    RefreshLabels();
+}
+
+void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> key) {
+    Reset();
+    edited_key_ = key;
+    key_name_entry_->set_text((std::string)key->name);
+    ubi_entry_->set_text((std::string)key->ubi);
+    commentary_entry_->set_text((std::string)key->commentary);
+    position_entry_->set_text(to_string(key->pos));
+    uid_text_view_->get_buffer()->set_text((std::string)key->uid);
+    edit_mode_ = true;
+    RefreshLabels();
+}
+
+// --- Manejadores de botones ---
+
+void KeyCreateStack::OnGenerateButtonClicked() {
+    name_error_label_->set_text("");
+    bool valid = true;
+
+    if (create_mode_) {
+        // Validar longitud del nombre.
+        if (key_name_entry_->get_text_length() < 3) {
+            name_error_label_->set_text(Tr().key_create.error_name_too_short);
+            valid = false;
         }
-        if(litesql::select<kdb::Key>(*db, kdb::Key::Name == KeyNameEntry->get_text()).count() ){
-            KeyNameErrorLabel->set_text("Atenció nom de clau existent");
-            ValidCreation *= 0;
+        // Validar nombre único.
+        if (litesql::select<kdb::Key>(*db, kdb::Key::Name == key_name_entry_->get_text()).count()) {
+            name_error_label_->set_text(Tr().key_create.error_name_exists);
+            valid = false;
         }
-        //Test Uid repetition
-        if(litesql::select<kdb::Person>(*db, kdb::Person::Uid == UidKeyText->get_buffer()->get_text()).count() +
-            litesql::select<kdb::Key>(*db, kdb::Key::Uid == UidKeyText->get_buffer()->get_text()).count()){
-            UidKeyErrorLabel->set_text("Atenció: tarjeta en us");
-            ValidCreation *= 0;
+        // Validar UID único (no usado ni en persona ni en llave).
+        std::string uid = uid_text_view_->get_buffer()->get_text();
+        if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).count() +
+            litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid).count()) {
+            uid_error_label_->set_text(Tr().key_create.error_card_in_use);
+            valid = false;
         }
-        //Test Key position
-        std::string AuxPos = PositionEntry->get_text();
-        if (to_position(AuxPos)) {
-            if(litesql::select<kdb::Key>(*db, kdb::Key::Pos == to_position(AuxPos)).count() ){
-                PositionErrorLabel->set_text("Posicións no disponibles:");
-                for(auto iter: (litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0).orderBy(kdb::Key::Pos).all())){
-                        PositionErrorLabel->set_text(PositionErrorLabel->get_text() + " " + to_string((int)iter.pos));
-                }
-                ValidCreation *= 0;
+        // Validar posición.
+        std::string pos_str = position_entry_->get_text();
+        if (to_position(pos_str)) {
+            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == to_position(pos_str)).count()) {
+                std::string msg = Tr().key_create.error_position_unavailable;
+                for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0)
+                                    .orderBy(kdb::Key::Pos).all())
+                    msg += " " + to_string((int)k.pos);
+                position_error_label_->set_text(msg);
+                valid = false;
             }
         } else {
-            PositionErrorLabel->set_text("Atenció: posició no válida");
-            ValidCreation *= 0;
+            position_error_label_->set_text(Tr().key_create.error_position_invalid);
+            valid = false;
         }
 
-
-        if( ValidCreation){
-            kdb::Key AddedKey(*db);
-            AddedKey.name = (std::string) KeyNameEntry->get_text();
-            AddedKey.ubi = (std::string) UbiKeyEntry->get_text();
-            AddedKey.commentary = (std::string) ComentaryEntry->get_text();
-            AddedKey.uid = (std::string) UidKeyText->get_buffer()->get_text();
-            AddedKey.pos = (int) to_position(PositionEntry->get_text());
-            AddedKey.update();
-            KeyEdit(std::make_shared<kdb::Key>(AddedKey));
+        if (valid) {
+            kdb::Key new_key(*db);
+            new_key.name        = (std::string)key_name_entry_->get_text();
+            new_key.ubi         = (std::string)ubi_entry_->get_text();
+            new_key.commentary  = (std::string)commentary_entry_->get_text();
+            new_key.uid         = (std::string)uid_text_view_->get_buffer()->get_text();
+            new_key.pos         = (int)to_position(position_entry_->get_text());
+            new_key.update();
+            // Entra en modo edición con la llave recién creada.
+            KeyEdit(std::make_shared<kdb::Key>(new_key));
         }
 
-    } else if (EditKeyMode){
-
-        //Test Name repetition
-        if( KeyNameEntry->get_text_length()< 3){
-            KeyNameErrorLabel->set_text("Atenció: nom molt breu");
-            ValidCreation *= 0;
+    } else if (edit_mode_) {
+        // Validar longitud del nombre.
+        if (key_name_entry_->get_text_length() < 3) {
+            name_error_label_->set_text(Tr().key_create.error_name_too_short);
+            valid = false;
         }
-        if(litesql::select<kdb::Key>(*db, kdb::Key::Name == KeyNameEntry->get_text()
-                                     && kdb::Key::Id != EditedKey->id).count() ){
-            KeyNameErrorLabel->set_text("Atenció nom de clau existent");
-            ValidCreation *= 0;
+        // Validar nombre único (excluyendo la llave actual).
+        if (litesql::select<kdb::Key>(*db, kdb::Key::Name == key_name_entry_->get_text()
+                                          && kdb::Key::Id != edited_key_->id).count()) {
+            name_error_label_->set_text(Tr().key_create.error_name_exists);
+            valid = false;
         }
-        //Test Uid repetition
-        if(litesql::select<kdb::Person>(*db, kdb::Person::Uid == UidKeyText->get_buffer()->get_text()).count() +
-            litesql::select<kdb::Key>(*db, kdb::Key::Uid == UidKeyText->get_buffer()->get_text()
-                                      && kdb::Key::Id != EditedKey->id).count()){
-            UidKeyErrorLabel->set_text("Atenció: tarjeta en us");
-            ValidCreation *= 0;
+        // Validar UID único (excluyendo la llave actual).
+        std::string uid = uid_text_view_->get_buffer()->get_text();
+        if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).count() +
+            litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid
+                                          && kdb::Key::Id != edited_key_->id).count()) {
+            uid_error_label_->set_text(Tr().key_create.error_card_in_use);
+            valid = false;
         }
-        //Test Key position
-        std::string AuxPos = PositionEntry->get_text();
-        if (to_position(AuxPos)) {
-            if(litesql::select<kdb::Key>(*db, kdb::Key::Pos == to_position(AuxPos) && kdb::Key::Id != EditedKey->id).count() ){
-                PositionErrorLabel->set_text("Posicións no disponibles:");
-                for(auto iter: (litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0).orderBy(kdb::Key::Pos).all())){
-                        PositionErrorLabel->set_text(PositionErrorLabel->get_text() + " " + to_string((int)iter.pos));
-                }
-                ValidCreation *= 0;
+        // Validar posición (excluyendo la posición actual de la misma llave).
+        std::string pos_str = position_entry_->get_text();
+        if (to_position(pos_str)) {
+            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == to_position(pos_str)
+                                              && kdb::Key::Id != edited_key_->id).count()) {
+                std::string msg = Tr().key_create.error_position_unavailable;
+                for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0)
+                                    .orderBy(kdb::Key::Pos).all())
+                    msg += " " + to_string((int)k.pos);
+                position_error_label_->set_text(msg);
+                valid = false;
             }
         } else {
-            PositionErrorLabel->set_text("Atenció: posició no válida");
-            ValidCreation *= 0;
+            position_error_label_->set_text(Tr().key_create.error_position_invalid);
+            valid = false;
         }
 
-        if( ValidCreation){
-
-            EditedKey->name = (std::string) KeyNameEntry->get_text();
-            EditedKey->ubi = (std::string) UbiKeyEntry->get_text();
-            EditedKey->commentary = (std::string) ComentaryEntry->get_text();
-            EditedKey->uid = (std::string) UidKeyText->get_buffer()->get_text();
-            EditedKey->pos = (int) to_position(PositionEntry->get_text());
-            EditedKey->update();
-
+        if (valid) {
+            edited_key_->name       = (std::string)key_name_entry_->get_text();
+            edited_key_->ubi        = (std::string)ubi_entry_->get_text();
+            edited_key_->commentary = (std::string)commentary_entry_->get_text();
+            edited_key_->uid        = (std::string)uid_text_view_->get_buffer()->get_text();
+            edited_key_->pos        = (int)to_position(position_entry_->get_text());
+            edited_key_->update();
         }
     }
 }
 
-void KeyCreateStack::on_AddUserButton_clicked(){
-
+void KeyCreateStack::OnAddUserButtonClicked() {
+    // TODO: abrir vista de selección de usuarios para vincularlos a la llave.
 }
 
-void KeyCreateStack::on_AddUidKeyButton_clicked(){
-     std::string uid = nfcman->NfcDetect(1);
-    if(!uid.empty()){
-        UidKeyText->get_buffer()->set_text(uid);
-    } else {
-       UidKeyText->get_buffer()->set_text("Introdueix la tarjeta desitjada");
-    }
+void KeyCreateStack::OnAddUidButtonClicked() {
+    std::string uid = nfcman->NfcDetect(1);
+    if (!uid.empty())
+        uid_text_view_->get_buffer()->set_text(uid);
+    else
+        uid_text_view_->get_buffer()->set_text(Tr().key_create.prompt_scan_card);
 }
 
-void KeyCreateStack::CreateKey(){
-    reset();
+// --- Auxiliares privados ---
 
-    KeyGenerateButton->set_label("Crear clau");
-    CreateKeyMode = 1;
-}
+void KeyCreateStack::Reset() {
+    key_name_entry_->set_text("");
+    ubi_entry_->set_text("");
+    commentary_entry_->set_text("");
+    position_entry_->set_text("");
+    uid_text_view_->get_buffer()->set_text("");
 
-void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> InKey){
-    reset();
-    EditedKey = InKey;
-    KeyNameEntry->set_text((std::string) InKey->name);
-    UbiKeyEntry->set_text((std::string) InKey->ubi);
-    ComentaryEntry->set_text((std::string) InKey->commentary);
-    PositionEntry->set_text(to_string(InKey->pos));
-    UidKeyText->get_buffer()->set_text((std::string) InKey->uid);
+    name_error_label_->set_text("");
+    position_error_label_->set_text("");
+    uid_error_label_->set_text("");
 
-    EditKeyMode = 1;
-}
-
-void KeyCreateStack::reset(){
-    KeyNameEntry->set_text("");
-    UbiKeyEntry->set_text("");
-    ComentaryEntry->set_text("");
-    PositionEntry->set_text("");
-    UidKeyText->get_buffer()->set_text("");
-
-    KeyNameErrorLabel->set_text("");
-    PositionErrorLabel->set_text("");
-    UidKeyErrorLabel->set_text("");
-
-    EditKeyMode = 0;
-    CreateKeyMode = 0;
-    EditedKey = nullptr;
+    edit_mode_   = false;
+    create_mode_ = false;
+    edited_key_  = nullptr;
 }
