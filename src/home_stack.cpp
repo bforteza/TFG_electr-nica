@@ -1,227 +1,234 @@
 #include "home_stack.h"
 #include "window.h"
 #include "globals.h"
-HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* f):father(f),builder(builder),
-usersviewstack(builder),
-usercreatestk(builder),
-keycreatestk(builder),
-keyviewstk(builder)
+
+HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
+    : window_(window),
+      users_view_stack_(builder),
+      user_create_stack_(builder),
+      key_create_stack_(builder),
+      key_view_stack_(builder)
 {
-    builder->get_widget("BackButtonAdmin", BackButtonAdmin);
-    if (!BackButtonAdmin) {
-        throw std::runtime_error("No \"BackButtonAdmin\" object in INI.glade" );
-    }
-      BackButtonAdmin->signal_clicked().connect(sigc::mem_fun(*this, &HomeStack::on_BackButton_clicked));
+    builder->get_widget("BackButtonAdmin", back_button_admin_);
+    if (!back_button_admin_)
+        throw std::runtime_error("No \"BackButtonAdmin\" object in MainWindow.glade");
+    back_button_admin_->signal_clicked().connect(
+        sigc::mem_fun(*this, &HomeStack::OnBackButtonClicked));
 
+    builder->get_widget("UserCreateButton", user_create_button_);
+    if (!user_create_button_)
+        throw std::runtime_error("No \"UserCreateButton\" object in MainWindow.glade");
+    user_create_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &HomeStack::OnUserCreateButtonClicked));
 
-    builder->get_widget("UserCreateButton", UserCreateButton);
-    if (!UserCreateButton) {
-        throw std::runtime_error("No \"UserCreateButton\" object in INI.glade" );
-    }
-    UserCreateButton->signal_clicked().connect(sigc::mem_fun(*this, &HomeStack::on_UserCreateButton_clicked));
+    builder->get_widget("KeyCreateButton", key_create_button_);
+    if (!key_create_button_)
+        throw std::runtime_error("No \"KeyCreateButton\" object in MainWindow.glade");
+    key_create_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &HomeStack::OnKeyCreateButtonClicked));
 
+    builder->get_widget("ViewUsersButton", view_users_button_);
+    if (!view_users_button_)
+        throw std::runtime_error("No \"ViewUsersButton\" object in MainWindow.glade");
+    view_users_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &HomeStack::OnViewUsersButtonClicked));
 
-    builder->get_widget("KeyCreateButton", KeyCreateButton);
-    if (!KeyCreateButton) {
-        throw std::runtime_error("No \"KeyCreateButton\" object in INI.glade" );
-    }
-    KeyCreateButton->signal_clicked().connect(sigc::mem_fun(*this, &HomeStack::on_KeyCreateButton_clicked));
+    builder->get_widget("ViewKeysButton", view_keys_button_);
+    if (!view_keys_button_)
+        throw std::runtime_error("No \"ViewKeysButton\" object in MainWindow.glade");
+    view_keys_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &HomeStack::OnViewKeysButtonClicked));
 
-    builder->get_widget("ViewUsersButton", ViewUsersButton);
-    if (!ViewUsersButton) {
-        throw std::runtime_error("No \"ViewUsersButton\" object in INI.glade" );
-    }
-    ViewUsersButton->signal_clicked().connect(sigc::mem_fun(*this, &HomeStack::on_ViewUsersButton_clicked));
+    builder->get_widget("HistoryButton", history_button_);
+    if (!history_button_)
+        throw std::runtime_error("No \"HistoryButton\" object in MainWindow.glade");
+    // TODO: conectar HistoryButton cuando el historial esté implementado.
+    // history_button_->signal_clicked().connect(
+    //     sigc::mem_fun(*this, &HomeStack::OnHistoryButtonClicked));
 
+    builder->get_widget("HomeInnerStack", inner_stack_);
+    if (!inner_stack_)
+        throw std::runtime_error("No \"HomeInnerStack\" object in MainWindow.glade");
 
-    builder->get_widget("ViewKeysButton", ViewKeysButton);
-    if (!ViewKeysButton) {
-        throw std::runtime_error("No \"ViewKeysButton\" object in INI.glade" );
-    }
-    ViewKeysButton->signal_clicked().connect(sigc::mem_fun(*this, &HomeStack::on_ViewKeysButton_clicked));
+    builder->get_widget("NameLabel", name_label_);
+    if (!name_label_)
+        throw std::runtime_error("No \"NameLabel\" object in MainWindow.glade");
 
-    builder->get_widget("HistoryButton", HistoryButton);
-    if (!HistoryButton) {
-        throw std::runtime_error("No \"HistoryButton\" object in INI.glade" );
-    }
-    //HistoryButton->signal_clicked().connect(sigc::mem_fun(*this, &HomeStack::on_HistoryButton_clicked));
+    // Conecta las señales de las sub-vistas con los manejadores de este panel.
+    users_view_stack_.UserLink.connect(sigc::mem_fun(*this, &HomeStack::OnUserLinkKey));
+    users_view_stack_.UserUnLink.connect(sigc::mem_fun(*this, &HomeStack::OnUserUnlinkKey));
+    users_view_stack_.KeysView.connect(sigc::mem_fun(*this, &HomeStack::ShowKeysView));
+    users_view_stack_.UserEdit.connect(sigc::mem_fun(*this, &HomeStack::OnUserEdit));
 
+    key_view_stack_.KeyLink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
+    key_view_stack_.KeyUnLink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
+    key_view_stack_.UsersView.connect(sigc::mem_fun(*this, &HomeStack::ShowUsersView));
+    key_view_stack_.KeyEdit.connect(sigc::mem_fun(*this, &HomeStack::OnKeyEdit));
+    key_view_stack_.KeyKeeped.connect(sigc::mem_fun(*this, &HomeStack::OnKeyKept));
 
-    builder->get_widget("HomeInnerStack", AdminStackO);
-    if (!AdminStackO)
-        throw std::runtime_error("No \"HomeInnerStack\" object in MainWindow.glade" );
-
-    //Labels
-    builder->get_widget("NameLabel", NameLabel);
-    if(!NameLabel){
-        throw std::runtime_error("No NameLabel object in INI.glade");
-    }
-
-    //connectar señales
-    usersviewstack.UserLink.connect(sigc::mem_fun(*this, &HomeStack::UserLinkKey));
-    usersviewstack.UserUnLink.connect(sigc::mem_fun(*this, &HomeStack::UserUnLinkKey));
-    usersviewstack.KeysView.connect(sigc::mem_fun(*this, &HomeStack::KeysView));
-    usersviewstack.UserEdit.connect(sigc::mem_fun(*this, &HomeStack::UserEdit));
-
-    keyviewstk.KeyLink.connect(sigc::mem_fun(*this, &HomeStack::KeyLinkUser));
-    keyviewstk.KeyUnLink.connect(sigc::mem_fun(*this, &HomeStack::KeyUnLinkUser));
-    keyviewstk.UsersView.connect(sigc::mem_fun(*this, &HomeStack::UsersView));
-    keyviewstk.KeyEdit.connect(sigc::mem_fun(*this, &HomeStack::KeyEdit));
-    keyviewstk.KeyKeeped.connect(sigc::mem_fun(*this, &HomeStack::KeyKeeped));
-
-
+    // Suscribe RefreshLabels al cambio de idioma global.
+    language_changed.connect(sigc::mem_fun(*this, &HomeStack::RefreshLabels));
+    RefreshLabels();
 }
 
-//Initiator
+void HomeStack::RefreshLabels() {
+    user_create_button_->set_label(Tr().home.btn_create_user);
+    key_create_button_->set_label(Tr().home.btn_create_key);
+    view_keys_button_->set_label(Tr().home.btn_view_keys);
+    view_users_button_->set_label(Tr().home.btn_view_users);
+    history_button_->set_label(Tr().home.btn_history);
+}
 
-void HomeStack::PersonLogg(std::shared_ptr<kdb::Person> InPerson){
-    NameLabel->set_text((std::string)InPerson->name);
-    hide();
-    int acces = (int) InPerson->a1 + 2 * (int)InPerson->a2;
-    if (acces >= 0){
-        ViewKeysButton->show();
+// --- Iniciador ---
+
+void HomeStack::PersonLogged(std::shared_ptr<kdb::Person> person) {
+    name_label_->set_text((std::string)person->name);
+    HideButtons();
+
+    int access = (int)person->a1 + 2 * (int)person->a2;
+    if (access >= 0)
+        view_keys_button_->show();
+    if (access >= 1)
+        key_create_button_->show();
+    if (access >= 2) {
+        view_users_button_->show();
+        user_create_button_->show();
     }
-     if (acces>=1){
-        KeyCreateButton->show();
-    }
-     if (acces==2){
 
-        ViewUsersButton->show();
-        UserCreateButton->show();
-    }
-    Logged = InPerson;
+    logged_person_ = person;
 }
 
-//Button actions
+// --- Navegación ---
 
-void HomeStack::on_UserCreateButton_clicked(){
-    usercreatestk.CreateUser();
-   AdminStackO->set_visible_child("UserCreateStack");
-}
+void HomeStack::OnBackButtonClicked() {
+    key_selected_connection_.disconnect();
+    user_selected_connection_.disconnect();
+    aux_key_    = nullptr;
+    aux_person_ = nullptr;
 
-void HomeStack::on_ViewUsersButton_clicked(){
-    usersviewstack.view(litesql::select<kdb::Person>(*db).all());
-AdminStackO->set_visible_child("ViewUsersStack");
-}
-
-void HomeStack::on_ViewKeysButton_clicked(){
-    keyviewstk.view(Logged);
-    AdminStackO->set_visible_child("ViewKeyStack");
-}
-
-void HomeStack::on_BackButton_clicked(){
-    KeySelectedConnection.disconnect();
-    UserSelectedConnection.disconnect();
-    AuxKey= nullptr;
-    AuxPerson =nullptr;
-
-    if (AdminStackO->get_visible_child_name()=="AdminMainStack")
-        father->on_BackButton_clicked();
-    else if (Back == nullptr){
-        AdminStackO->set_visible_child("AdminMainStack");
+    if (inner_stack_->get_visible_child_name() == "AdminMainStack") {
+        window_->OnBackButtonClicked();
+    } else if (back_widget_ == nullptr) {
+        inner_stack_->set_visible_child("AdminMainStack");
     } else {
-        AdminStackO->set_visible_child(*Back);
-        Back = nullptr;
+        inner_stack_->set_visible_child(*back_widget_);
+        back_widget_ = nullptr;
     }
-
 }
 
-void HomeStack::on_KeyCreateButton_clicked(){
-    AdminStackO->set_visible_child("KeyCreateStack");
+void HomeStack::OnUserCreateButtonClicked() {
+    user_create_stack_.CreateUser();
+    inner_stack_->set_visible_child("UserCreateStack");
 }
 
-//Internal auxiliars
-
-void HomeStack::KeysView(std::vector<kdb::Key> in){
-    keyviewstk.view(in);
-    Back = AdminStackO->get_visible_child();
-    AdminStackO->set_visible_child("ViewKeyStack");
+void HomeStack::OnViewUsersButtonClicked() {
+    users_view_stack_.view(litesql::select<kdb::Person>(*db).all());
+    inner_stack_->set_visible_child("ViewUsersStack");
 }
 
-void HomeStack::UsersView(std::vector<kdb::Person> in){
-    usersviewstack.view(in);
-    Back = AdminStackO->get_visible_child();
-    AdminStackO->set_visible_child("ViewUsersStack");
+void HomeStack::OnViewKeysButtonClicked() {
+    key_view_stack_.view(logged_person_);
+    inner_stack_->set_visible_child("ViewKeyStack");
 }
 
-void HomeStack::UserEdit(std::shared_ptr<kdb::Person> InPerson){
-    usercreatestk.UserEdit(InPerson);
-    Back = AdminStackO->get_visible_child();
-    AdminStackO->set_visible_child("UserCreateStack");
+void HomeStack::OnKeyCreateButtonClicked() {
+    inner_stack_->set_visible_child("KeyCreateStack");
 }
 
-void HomeStack::KeyEdit(std::shared_ptr<kdb::Key> InKey){
-    keycreatestk.KeyEdit(InKey);
-    Back = AdminStackO->get_visible_child();
-    AdminStackO->set_visible_child("KeyCreateStack");
+// --- Auxiliares internos ---
+
+void HomeStack::ShowKeysView(std::vector<kdb::Key> keys) {
+    key_view_stack_.view(keys);
+    back_widget_ = inner_stack_->get_visible_child();
+    inner_stack_->set_visible_child("ViewKeyStack");
 }
 
-void HomeStack::UserLinkKey(std::shared_ptr<kdb::Person> InPerson){
-    AuxPerson = InPerson;
+void HomeStack::ShowUsersView(std::vector<kdb::Person> users) {
+    users_view_stack_.view(users);
+    back_widget_ = inner_stack_->get_visible_child();
+    inner_stack_->set_visible_child("ViewUsersStack");
+}
 
-    if(AuxKey == nullptr){
-        keyviewstk.select((litesql::except(litesql::select<kdb::Key>(*db), AuxPerson->keys().get())).all());
-        Back = AdminStackO->get_visible_child();
-        KeySelectedConnection = keyviewstk.KeySelected.connect(sigc::mem_fun(*this, &HomeStack::KeyLinkUser));
-        AdminStackO->set_visible_child("ViewKeyStack");
+void HomeStack::OnUserEdit(std::shared_ptr<kdb::Person> person) {
+    user_create_stack_.UserEdit(person);
+    back_widget_ = inner_stack_->get_visible_child();
+    inner_stack_->set_visible_child("UserCreateStack");
+}
+
+void HomeStack::OnKeyEdit(std::shared_ptr<kdb::Key> key) {
+    key_create_stack_.KeyEdit(key);
+    back_widget_ = inner_stack_->get_visible_child();
+    inner_stack_->set_visible_child("KeyCreateStack");
+}
+
+void HomeStack::OnUserLinkKey(std::shared_ptr<kdb::Person> person) {
+    aux_person_ = person;
+
+    if (aux_key_ == nullptr) {
+        key_view_stack_.select(
+            (litesql::except(litesql::select<kdb::Key>(*db), aux_person_->keys().get())).all());
+        back_widget_ = inner_stack_->get_visible_child();
+        key_selected_connection_ = key_view_stack_.KeySelected.connect(
+            sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
+        inner_stack_->set_visible_child("ViewKeyStack");
     } else {
-        AuxPerson->keys().link(*AuxKey);
-        on_BackButton_clicked();
+        aux_person_->keys().link(*aux_key_);
+        OnBackButtonClicked();
     }
-
 }
 
-void HomeStack::KeyLinkUser(std::shared_ptr<kdb::Key> InKey){
-    AuxKey = InKey;
-    if(AuxPerson == nullptr){
-        usersviewstack.select((litesql::except(litesql::select<kdb::Person>(*db), AuxKey->owners().get())).all());
-        Back = AdminStackO->get_visible_child();
-        UserSelectedConnection = usersviewstack.UserSelected.connect(sigc::mem_fun(*this, &HomeStack::UserLinkKey));
-        AdminStackO->set_visible_child("ViewUsersStack");
+void HomeStack::OnKeyLinkUser(std::shared_ptr<kdb::Key> key) {
+    aux_key_ = key;
+
+    if (aux_person_ == nullptr) {
+        users_view_stack_.select(
+            (litesql::except(litesql::select<kdb::Person>(*db), aux_key_->owners().get())).all());
+        back_widget_ = inner_stack_->get_visible_child();
+        user_selected_connection_ = users_view_stack_.UserSelected.connect(
+            sigc::mem_fun(*this, &HomeStack::OnUserLinkKey));
+        inner_stack_->set_visible_child("ViewUsersStack");
     } else {
-        AuxPerson->keys().link(*AuxKey);
-         on_BackButton_clicked();
+        aux_person_->keys().link(*aux_key_);
+        OnBackButtonClicked();
     }
-
 }
 
-void HomeStack::UserUnLinkKey(std::shared_ptr<kdb::Person> InPerson){
-    AuxPerson = InPerson;
+void HomeStack::OnUserUnlinkKey(std::shared_ptr<kdb::Person> person) {
+    aux_person_ = person;
 
-    if(AuxKey == nullptr){
-        keyviewstk.select(InPerson->keys().get().all());
-        Back = AdminStackO->get_visible_child();
-        KeySelectedConnection = keyviewstk.KeySelected.connect(sigc::mem_fun(*this, &HomeStack::KeyUnLinkUser));
-        AdminStackO->set_visible_child("ViewKeyStack");
+    if (aux_key_ == nullptr) {
+        key_view_stack_.select(person->keys().get().all());
+        back_widget_ = inner_stack_->get_visible_child();
+        key_selected_connection_ = key_view_stack_.KeySelected.connect(
+            sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
+        inner_stack_->set_visible_child("ViewKeyStack");
     } else {
-        AuxPerson->keys().unlink(*AuxKey);
-         on_BackButton_clicked();
+        aux_person_->keys().unlink(*aux_key_);
+        OnBackButtonClicked();
     }
-
 }
 
-void HomeStack::KeyUnLinkUser(std::shared_ptr<kdb::Key> InKey){
-    AuxKey = InKey;
+void HomeStack::OnKeyUnlinkUser(std::shared_ptr<kdb::Key> key) {
+    aux_key_ = key;
 
-    if(AuxPerson == nullptr){
-        usersviewstack.select(InKey->owners().get().all());
-        Back = AdminStackO->get_visible_child();
-        AdminStackO->set_visible_child("ViewUsersStack");
+    if (aux_person_ == nullptr) {
+        users_view_stack_.select(key->owners().get().all());
+        back_widget_ = inner_stack_->get_visible_child();
+        inner_stack_->set_visible_child("ViewUsersStack");
     } else {
-        AuxPerson->keys().unlink(*AuxKey);
-        on_BackButton_clicked();
+        aux_person_->keys().unlink(*aux_key_);
+        OnBackButtonClicked();
     }
-
 }
 
-void HomeStack::KeyKeeped(std::shared_ptr<kdb::Key> InKey){
-    Logged->keepkeys().link(*InKey);
+void HomeStack::OnKeyKept(std::shared_ptr<kdb::Key> key) {
+    logged_person_->keepkeys().link(*key);
 }
 
-void HomeStack::hide(){
-    UserCreateButton->hide();
-    KeyCreateButton->hide();
-    ViewKeysButton->hide();
-    ViewUsersButton->hide();
-    HistoryButton->hide();
+void HomeStack::HideButtons() {
+    user_create_button_->hide();
+    key_create_button_->hide();
+    view_keys_button_->hide();
+    view_users_button_->hide();
+    history_button_->hide();
 }

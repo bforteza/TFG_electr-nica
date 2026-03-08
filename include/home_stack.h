@@ -10,67 +10,109 @@
 #include "key_create_stack.h"
 #include "key_view_stack.h"
 #include "db_schema.hpp"
-
+#include "translations.h"
 
 class Window;
 
-class HomeStack
-{
-    public:
-        HomeStack( const Glib::RefPtr<Gtk::Builder>& builder, Window *f);
+// Panel de administración, visible tras identificar un usuario.
+// Muestra los botones de acción disponibles según el nivel de acceso
+// y gestiona la navegación entre sus sub-vistas internas (HomeInnerStack).
+class HomeStack {
+public:
+    HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window);
 
-         void PersonLogg(std::shared_ptr<kdb::Person> InPerson);
+    // Inicializa el panel con el usuario identificado.
+    // Oculta todos los botones y muestra solo los que corresponden
+    // al nivel de acceso del usuario.
+    void PersonLogged(std::shared_ptr<kdb::Person> person);
 
-    protected:
-         Window* father;
-        Glib::RefPtr<Gtk::Builder>  builder;
+    // Actualiza los textos de los botones al idioma activo.
+    // Llamar tras cambiar current_language.
+    void RefreshLabels();
 
-        Gtk::Button*        BackButtonAdmin,
-                            *UserCreateButton,
-                            *KeyCreateButton,
-                            *ViewKeysButton,
-                            *ViewUsersButton,
-                            *HistoryButton;
+    // Navega atrás: si estamos en AdminMainStack vuelve al login;
+    // si no, retorna al panel anterior guardado en back_widget_.
+    void OnBackButtonClicked();
 
-        Gtk::Label*         NameLabel;
+private:
+    // Ventana principal; se usa para volver al login desde el panel raíz.
+    Window* window_;
 
-        Gtk::Stack*         AdminStackO;
-        Gtk::Widget*        Back = nullptr;
+    // Stack interno con las sub-vistas (UsersView, KeyView, UserCreate, KeyCreate).
+    Gtk::Stack* inner_stack_;
 
-        void on_UserCreateButton_clicked();
-        void on_ViewUsersButton_clicked();
-        void on_ViewKeysButton_clicked();
-        void on_BackButton_clicked();
-        void on_KeyCreateButton_clicked();
+    // Vista a la que volver con el botón atrás cuando hay historial de navegación.
+    Gtk::Widget* back_widget_ = nullptr;
 
-        void KeysView(std::vector<kdb::Key> in);
-        void UsersView(std::vector<kdb::Person> in);
-        void UserEdit(std::shared_ptr<kdb::Person> InPerson);
-        void KeyEdit(std::shared_ptr<kdb::Key> InKey);
+    // Botón de volver del panel de administración.
+    Gtk::Button* back_button_admin_;
 
-        void UserLinkKey(std::shared_ptr<kdb::Person> InPerson);
-        void UserUnLinkKey(std::shared_ptr<kdb::Person> InPerson);
-        void KeyLinkUser(std::shared_ptr<kdb::Key> InKey);
-        void KeyUnLinkUser(std::shared_ptr<kdb::Key> InKey);
+    // Botón para ir a la sub-vista de creación de usuario.
+    Gtk::Button* user_create_button_;
 
-        void KeyKeeped(std::shared_ptr<kdb::Key> InKey);
+    // Botón para ir a la sub-vista de creación de llave.
+    Gtk::Button* key_create_button_;
 
-        void hide();
+    // Botón para ir a la sub-vista de lista de llaves.
+    Gtk::Button* view_keys_button_;
 
-        UsersViewStack usersviewstack;
-        UserCreateStack usercreatestk;
-        KeyCreateStack keycreatestk;
-        KeyViewStack keyviewstk;
+    // Botón para ir a la sub-vista de lista de usuarios.
+    Gtk::Button* view_users_button_;
 
-        //linker auxiliars
+    // Botón para ir al historial de acciones (pendiente de implementar).
+    Gtk::Button* history_button_;
 
-        std::shared_ptr<kdb::Person> Logged;
+    // Etiqueta que muestra el nombre del usuario identificado.
+    Gtk::Label* name_label_;
 
-        std::shared_ptr<kdb::Person> AuxPerson;
-        std::shared_ptr<kdb::Key> AuxKey;
+    // Sub-vistas embebidas dentro de inner_stack_.
+    UsersViewStack  users_view_stack_;
+    UserCreateStack user_create_stack_;
+    KeyCreateStack  key_create_stack_;
+    KeyViewStack    key_view_stack_;
 
-        sigc::connection KeySelectedConnection;
-        sigc::connection UserSelectedConnection;
+    // Usuario actualmente identificado en el sistema.
+    std::shared_ptr<kdb::Person> logged_person_;
+
+    // Auxiliares para operaciones de vinculación: se preservan mientras se navega
+    // entre sub-vistas para completar el flujo de link/unlink en dos pasos.
+    std::shared_ptr<kdb::Person> aux_person_;
+    std::shared_ptr<kdb::Key>    aux_key_;
+
+    // Conexiones temporales de señales activas durante el modo selección.
+    // Se desconectan al pulsar atrás.
+    sigc::connection key_selected_connection_;
+    sigc::connection user_selected_connection_;
+
+    // Oculta todos los botones de acción antes de mostrar los que corresponden
+    // al nivel de acceso del usuario.
+    void HideButtons();
+
+    // Manejadores de los botones del panel principal.
+    void OnUserCreateButtonClicked();
+    void OnViewUsersButtonClicked();
+    void OnViewKeysButtonClicked();
+    void OnKeyCreateButtonClicked();
+
+    // Muestra la sub-vista de llaves/usuarios guardando la vista actual como
+    // destino de vuelta para el botón atrás.
+    void ShowKeysView(std::vector<kdb::Key> keys);
+    void ShowUsersView(std::vector<kdb::Person> users);
+
+    // Navega a la sub-vista de edición del elemento dado.
+    void OnUserEdit(std::shared_ptr<kdb::Person> person);
+    void OnKeyEdit(std::shared_ptr<kdb::Key> key);
+
+    // Flujo de vinculación en dos pasos:
+    // Si ya hay un aux_ guardado, vincula ambos elementos y vuelve atrás.
+    // Si no, abre la vista de selección del elemento que falta.
+    void OnUserLinkKey(std::shared_ptr<kdb::Person> person);
+    void OnUserUnlinkKey(std::shared_ptr<kdb::Person> person);
+    void OnKeyLinkUser(std::shared_ptr<kdb::Key> key);
+    void OnKeyUnlinkUser(std::shared_ptr<kdb::Key> key);
+
+    // Registra que el usuario identificado ha recogido la llave dada.
+    void OnKeyKept(std::shared_ptr<kdb::Key> key);
 };
 
 #endif // HOME_STACK_H
