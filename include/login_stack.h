@@ -25,12 +25,22 @@ public:
     // Limpia el mensaje de error e inicia el polling NFC.
     void Start();
 
+    // Actualiza los textos de la pantalla al idioma activo.
+    // Llamar tras cambiar current_language.
+    void RefreshLabels();
+
 protected:
     // Campo de entrada de contraseña/identificación manual.
     Gtk::Entry* password_entry_;
 
     // Etiqueta para mostrar mensajes de error al usuario.
     Gtk::Label* error_label_;
+
+    // Etiqueta con el título de la pantalla ("Introdueix credencials").
+    Gtk::Label* title_label_;
+
+    // Etiqueta con el texto descriptivo sobre cómo identificarse.
+    Gtk::Label* desc_label_;
 
     // Llamado cuando el usuario pulsa Enter en el campo de contraseña.
     void OnPasswordEntered();

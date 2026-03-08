@@ -1,5 +1,6 @@
 #include "login_stack.h"
 #include "globals.h"
+#include "translations.h"
 
 LoginStack::LoginStack(const Glib::RefPtr<Gtk::Builder>& builder)
 {
@@ -15,6 +16,16 @@ LoginStack::LoginStack(const Glib::RefPtr<Gtk::Builder>& builder)
         throw std::runtime_error("No \"LogErrorLabel\" object in MainWindow.glade");
     }
 
+    builder->get_widget("LoginTitleLabel", title_label_);
+    if (!title_label_) {
+        throw std::runtime_error("No \"LoginTitleLabel\" object in MainWindow.glade");
+    }
+
+    builder->get_widget("LoginDescLabel", desc_label_);
+    if (!desc_label_) {
+        throw std::runtime_error("No \"LoginDescLabel\" object in MainWindow.glade");
+    }
+
     // Conecta el dispatcher del NfcManager para recibir notificaciones
     // en el hilo principal de GTK cuando se detecta un dispositivo.
     nfcman->aviso.connect([&]() {
@@ -28,6 +39,12 @@ void LoginStack::Start()
     nfcman->startPolling();
 }
 
+void LoginStack::RefreshLabels()
+{
+    title_label_->set_text(Tr().login.title);
+    desc_label_->set_text(Tr().login.description);
+}
+
 void LoginStack::OnPasswordEntered()
 {
     std::string password = password_entry_->get_text();
@@ -36,7 +53,7 @@ void LoginStack::OnPasswordEntered()
             litesql::select<kdb::Person>(*db, kdb::Person::Password == password).one()));
         error_label_->set_text("");
     } catch (...) {
-        error_label_->set_text("Atenció: credencials no identificades");
+        error_label_->set_text(Tr().login.error_invalid_credentials);
     }
 }
 
@@ -49,10 +66,10 @@ void LoginStack::OnNfcDetected(const std::string& uid)
                                                       && kdb::Key::Active == 1).count();
 
     if (person_count + key_count == 0) {
-        error_label_->set_text("Atenció: dispositiu no reconegut");
+        error_label_->set_text(Tr().login.error_device_not_found);
     } else if (person_count + key_count > 1) {
         // Dos dispositivos con el mismo UID indica un error de configuración en la BD.
-        error_label_->set_text("ERROR: dos dispositius amb el mateix uid, contacta amb l'administrador");
+        error_label_->set_text(Tr().login.error_duplicate_uid);
     } else if (person_count) {
         nfcman->stopPolling();
         user_logged.emit(std::make_shared<kdb::Person>(
