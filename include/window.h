@@ -26,7 +26,6 @@ class Window : public Gtk::ApplicationWindow {
 
     friend class HomeStack;
     friend class SolenoidPanel;
-    friend class LoginStack;
     LoginStack inistack;
     HomeStack adminstack;
     SolenoidPanel keysstack;

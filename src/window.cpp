@@ -6,7 +6,7 @@
 
 void Window::on_BackButton_clicked(){
     PANTALLAS->set_visible_child("INI");
-    inistack.start();
+    inistack.Start();
 }
 
 
@@ -16,20 +16,16 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject, const Glib::RefP
       builder(builder),
       adminstack(builder, this),
       keysstack(builder, this),
-      inistack(builder, this){
-
-
-        //Pantallas
+      inistack(builder){
 
     builder->get_widget("PantallasStack", PANTALLAS);
     if (!PANTALLAS) {
-        throw std::runtime_error("No \"PANTALLAS\" object in INI.glade" );
+        throw std::runtime_error("No \"PANTALLAS\" object in INI.glade");
     }
-        //Boton Atrás
 
-    inistack.UserLogg.connect(sigc::mem_fun(*this, &Window::UserLogged));
+    inistack.user_logged.connect(sigc::mem_fun(*this, &Window::UserLogged));
 
-    inistack.start();
+    inistack.Start();
 
 
 }
