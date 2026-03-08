@@ -1,221 +1,215 @@
 #include "key_view_stack.h"
 #include "globals.h"
-KeyViewStack::KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder)
-{
-    //Buttons
-    builder->get_widget("AddUserToKeyButton", AddUserToKeyButton);
-    if (!AddUserToKeyButton) {
-        throw std::runtime_error("No \"AddUserToKeyButton\" object in INI.glade" );
-    }
-    AddUserToKeyButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyViewStack::on_AddUserToKeyButton_clicked));
 
+KeyViewStack::KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
+    builder->get_widget("AddUserToKeyButton", add_user_button_);
+    if (!add_user_button_)
+        throw std::runtime_error("No \"AddUserToKeyButton\" object in MainWindow.glade");
+    add_user_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyViewStack::OnAddUserButtonClicked));
 
-    builder->get_widget("RemoveUserToKeyButton", RemoveUserToKeyButton);
-    if (!RemoveUserToKeyButton) {
-        throw std::runtime_error("No \"RemoveUserToKeyButton\" object in INI.glade" );
-    }
-    RemoveUserToKeyButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyViewStack::on_RemoveUserToKeyButton_clicked));
+    builder->get_widget("RemoveUserToKeyButton", remove_user_button_);
+    if (!remove_user_button_)
+        throw std::runtime_error("No \"RemoveUserToKeyButton\" object in MainWindow.glade");
+    remove_user_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyViewStack::OnRemoveUserButtonClicked));
 
-    builder->get_widget("SelectKeyButton", SelectKeyButton);
-    if (!SelectKeyButton) {
-        throw std::runtime_error("No \"SelectKeyButton\" object in INI.glade" );
-    }
+    builder->get_widget("SelectKeyButton", select_key_button_);
+    if (!select_key_button_)
+        throw std::runtime_error("No \"SelectKeyButton\" object in MainWindow.glade");
+    select_key_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyViewStack::OnSelectKeyButtonClicked));
 
-    SelectKeyButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyViewStack::on_SelectKeyButton_clicked));
+    builder->get_widget("EditKeyButton", edit_key_button_);
+    if (!edit_key_button_)
+        throw std::runtime_error("No \"EditKeyButton\" object in MainWindow.glade");
+    edit_key_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyViewStack::OnEditKeyButtonClicked));
 
-    builder->get_widget("EditKeyButton", EditKeyButton);
-    if (!EditKeyButton) {
-        throw std::runtime_error("No \"EditKeyButton\" object in INI.glade" );
-    }
-    EditKeyButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyViewStack::on_EditKeyButton_clicked));
+    builder->get_widget("KeepKeyButton", keep_key_button_);
+    if (!keep_key_button_)
+        throw std::runtime_error("No \"KeepKeyButton\" object in MainWindow.glade");
+    keep_key_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyViewStack::OnKeepKeyButtonClicked));
 
-    builder->get_widget("KeepKeyButton", KeepKeyButton);
-    if (!KeepKeyButton) {
-        throw std::runtime_error("No \"KeepKeyButton\" object in INI.glade" );
-    }
-    KeepKeyButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyViewStack::on_KeepKeyButton_clicked));
+    builder->get_widget("ViewUsersOfKeyButton", view_users_button_);
+    if (!view_users_button_)
+        throw std::runtime_error("No \"ViewUsersOfKeyButton\" object in MainWindow.glade");
+    view_users_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyViewStack::OnViewUsersButtonClicked));
 
-    builder->get_widget("ViewUsersOfKeyButton", ViewUsersOfKeyButton);
-    if (!ViewUsersOfKeyButton) {
-        throw std::runtime_error("No \"ViewUsersOfKeyButton\" object in INI.glade" );
-    }
-    ViewUsersOfKeyButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyViewStack::on_ViewUsersOfKeyButton_clicked));
+    builder->get_widget("DeleteKeyButton", delete_key_button_);
+    if (!delete_key_button_)
+        throw std::runtime_error("No \"DeleteKeyButton\" object in MainWindow.glade");
+    delete_key_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyViewStack::OnDeleteKeyButtonClicked));
 
-    builder->get_widget("DeleteKeyButton", DeleteKeyButton);
-    if (!DeleteKeyButton) {
-        throw std::runtime_error("No \"DeleteKeyButton\" object in INI.glade" );
-    }
-    DeleteKeyButton->signal_clicked().connect(sigc::mem_fun(*this, &KeyViewStack::on_DeleteKeyButton_clicked));
+    builder->get_widget("ViewKeysTree", keys_tree_view_);
+    if (!keys_tree_view_)
+        throw std::runtime_error("No \"ViewKeysTree\" object in MainWindow.glade");
 
+    tree_model_ = Gtk::ListStore::create(columns_);
+    keys_tree_view_->set_model(tree_model_);
 
+    // Las cadenas de cabecera se establecen en RefreshLabels(); aquí solo se añaden las columnas.
+    keys_tree_view_->append_column("Id",          columns_.IdCol);
+    keys_tree_view_->append_column("",            columns_.NameCol);
+    keys_tree_view_->append_column("",            columns_.UbiCol);
+    keys_tree_view_->append_column("",            columns_.CommentaryCol);
+    keys_tree_view_->append_column("",            columns_.PosCol);
+    keys_tree_view_->append_column("",            columns_.ActiveCol);
+    keys_tree_view_->append_column("",            columns_.KeeperCol);
 
-    //view
-    builder->get_widget("ViewKeysTree", ViewKeysTree);
-    if (!ViewKeysTree) {
-        throw std::runtime_error("No \"ViewKeysTree\" object in INI.glade" );
-    }
+    id_column_          = keys_tree_view_->get_column(0);
+    name_column_        = keys_tree_view_->get_column(1);
+    ubi_column_         = keys_tree_view_->get_column(2);
+    commentary_column_  = keys_tree_view_->get_column(3);
+    pos_column_         = keys_tree_view_->get_column(4);
+    active_column_      = keys_tree_view_->get_column(5);
+    keeper_column_      = keys_tree_view_->get_column(6);
 
-    m_refTreeModel = Gtk::ListStore::create(m_Columns);
+    keys_tree_view_->set_enable_search(true);
+    keys_tree_view_->set_search_column(columns_.NameCol);
 
-  ViewKeysTree->set_model(m_refTreeModel);
-  //Fill the TreeView's model
-
-  ViewKeysTree->append_column("Id", m_Columns.IdCol);
-  ViewKeysTree->append_column("Nom", m_Columns.NameCol);
-  ViewKeysTree->append_column("Ubicació", m_Columns.UbiCol);
-  ViewKeysTree->append_column("Comentaris", m_Columns.CommentaryCol);
-  ViewKeysTree->append_column("Posició", m_Columns.PosCol);
-  ViewKeysTree->append_column("Activa", m_Columns.ActiveCol);
-  ViewKeysTree->append_column("Agafada", m_Columns.KeeperCol);
-
-  IdColumn = ViewKeysTree->get_column(0);
-  NameColumn = ViewKeysTree->get_column(1);
-  UbiColumn = ViewKeysTree->get_column(2);
-  CommentaryColumn = ViewKeysTree->get_column(3);
-  PosColumn = ViewKeysTree->get_column(4);
-  ActiveColumn = ViewKeysTree->get_column(5);
-  KeeperColumn = ViewKeysTree->get_column(6);
-
-  ViewKeysTree->set_enable_search(true);
-  ViewKeysTree->set_search_column(m_Columns.NameCol);
-
+    // Suscribe RefreshLabels al cambio de idioma global.
+    language_changed.connect(sigc::mem_fun(*this, &KeyViewStack::RefreshLabels));
+    RefreshLabels();
 }
 
-// Public initiators
+void KeyViewStack::RefreshLabels() {
+    add_user_button_->set_label(Tr().key_view.btn_add_user);
+    remove_user_button_->set_label(Tr().key_view.btn_remove_user);
+    select_key_button_->set_label(Tr().key_view.btn_select);
+    edit_key_button_->set_label(Tr().key_view.btn_edit);
+    keep_key_button_->set_label(Tr().key_view.btn_take);
+    view_users_button_->set_label(Tr().key_view.btn_view_users);
+    delete_key_button_->set_label(Tr().key_view.btn_delete);
 
-void KeyViewStack::view(std::shared_ptr<kdb::Person> InPerson){
-    SelectKeyButton->hide();
-    acces = (int) InPerson->a1 + 2 * (int)InPerson->a2;
-    configure();
-    if (acces == 0){
-    }
-     if (acces==1){
-        actual = InPerson->keys().get().all();
-    }
-     if (acces==2){
-        actual = litesql::select<kdb::Key>(*db).all();
-    }
-    actualizar();
+    name_column_->set_title(Tr().key_view.col_name);
+    ubi_column_->set_title(Tr().key_view.col_location);
+    commentary_column_->set_title(Tr().key_view.col_comments);
+    pos_column_->set_title(Tr().key_view.col_position);
+    active_column_->set_title(Tr().key_view.col_active);
+    keeper_column_->set_title(Tr().key_view.col_keeper);
 }
 
-void KeyViewStack::view(std::vector<kdb::Key> i){
-    SelectKeyButton->hide();
-    configure();
+// --- Iniciadores públicos ---
 
-    actual = i;
-    actualizar();
+void KeyViewStack::view(std::shared_ptr<kdb::Person> person) {
+    select_key_button_->hide();
+    access_ = (int)person->a1 + 2 * (int)person->a2;
+    Configure();
+    if (access_ >= 2)
+        current_keys_ = litesql::select<kdb::Key>(*db).all();
+    else
+        current_keys_ = person->keys().get().all();
+    Refresh();
 }
 
-void KeyViewStack::select(std::vector<kdb::Key> i){
-    SelectKeyButton->show();
-
-    AddUserToKeyButton->hide();
-    RemoveUserToKeyButton->hide();
-    EditKeyButton->hide();
-
-
-    actual = i;
-    actualizar();
+void KeyViewStack::view(std::vector<kdb::Key> keys) {
+    select_key_button_->hide();
+    Configure();
+    current_keys_ = keys;
+    Refresh();
 }
 
+void KeyViewStack::select(std::vector<kdb::Key> keys) {
+    select_key_button_->show();
+    add_user_button_->hide();
+    remove_user_button_->hide();
+    edit_key_button_->hide();
+    current_keys_ = keys;
+    Refresh();
+}
 
-// Auxiliar functions
+// --- Auxiliares internos ---
 
-int KeyViewStack::get_selection(){
-    auto sel = ViewKeysTree->get_selection();
-    if(auto iter = sel->get_selected())
-        return (*iter)[m_Columns.IdCol];
+int KeyViewStack::GetSelectionId() {
+    auto sel = keys_tree_view_->get_selection();
+    if (auto iter = sel->get_selected())
+        return (*iter)[columns_.IdCol];
     return 0;
 }
 
-std::shared_ptr<kdb::Key> KeyViewStack::get_selection_ptr(){
-    auto sel = ViewKeysTree->get_selection();
-    if(auto iter = sel->get_selected())
-        return std::make_shared<kdb::Key>(litesql::select<kdb::Key>(*db,kdb::Key::Id ==  (*iter)[m_Columns.IdCol]).one());
+std::shared_ptr<kdb::Key> KeyViewStack::GetSelectedKey() {
+    auto sel = keys_tree_view_->get_selection();
+    if (auto iter = sel->get_selected())
+        return std::make_shared<kdb::Key>(
+            litesql::select<kdb::Key>(*db, kdb::Key::Id == (*iter)[columns_.IdCol]).one());
     return nullptr;
 }
 
-void KeyViewStack::actualizar(){
-    m_refTreeModel->clear();
-    for(auto iter : actual ){
-        Gtk::TreeModel::Row row = *(m_refTreeModel->append());
-         row[m_Columns.NameCol]= (Glib::ustring) iter.name;
-         row[m_Columns.IdCol]= iter.id;
-         row[m_Columns.UbiCol] = iter.ubi;
-         row[m_Columns.CommentaryCol] = iter.commentary;
-         row[m_Columns.PosCol] = to_string(iter.pos);
-         row[m_Columns.ActiveCol] = iter.active;
-         try{
-            row[m_Columns.KeeperCol] = (Glib::ustring) iter.keeper().get().one().name;
-         }catch(...){}
-
-      }
-
-}
-
-//          Button actions
-
-void KeyViewStack::on_SelectKeyButton_clicked(){
-    int aux = get_selection();
-    if (aux){
-        KeySelected.emit(std::make_shared<kdb::Key>(litesql::select<kdb::Key>(*db,kdb::Key::Id == aux).one()));
+void KeyViewStack::Refresh() {
+    tree_model_->clear();
+    for (auto& key : current_keys_) {
+        Gtk::TreeModel::Row row = *(tree_model_->append());
+        row[columns_.IdCol]          = key.id;
+        row[columns_.NameCol]        = (Glib::ustring)key.name;
+        row[columns_.UbiCol]         = key.ubi;
+        row[columns_.CommentaryCol]  = key.commentary;
+        row[columns_.PosCol]         = to_string(key.pos);
+        row[columns_.ActiveCol]      = key.active;
+        try {
+            row[columns_.KeeperCol] = (Glib::ustring)key.keeper().get().one().name;
+        } catch (...) {}
     }
 }
 
-void KeyViewStack::on_EditKeyButton_clicked(){
-    std::shared_ptr<kdb::Key> aux = get_selection_ptr();
-    if (aux != nullptr){
-        KeyEdit.emit(aux);
+void KeyViewStack::Configure() {
+    if (access_ >= 0) {
+        keep_key_button_->show();
+        id_column_->set_visible(false);
+        active_column_->set_visible(false);
     }
+    if (access_ >= 1) {
+        add_user_button_->show();
+        remove_user_button_->show();
+        edit_key_button_->show();
+        delete_key_button_->show();
+        view_users_button_->show();
+    }
+    keys_tree_view_->columns_autosize();
 }
 
-void KeyViewStack::on_AddUserToKeyButton_clicked(){
-    std::shared_ptr<kdb::Key> aux = get_selection_ptr();
-    if (aux != nullptr){
-        KeyLink.emit(aux);
-    }
+// --- Manejadores de botones ---
+
+void KeyViewStack::OnSelectKeyButtonClicked() {
+    int id = GetSelectionId();
+    if (id)
+        key_selected.emit(
+            std::make_shared<kdb::Key>(litesql::select<kdb::Key>(*db, kdb::Key::Id == id).one()));
 }
 
-void KeyViewStack::on_RemoveUserToKeyButton_clicked(){
-    std::shared_ptr<kdb::Key> aux = get_selection_ptr();
-    if (aux != nullptr){
-        KeyUnLink.emit(aux);
-    }
+void KeyViewStack::OnEditKeyButtonClicked() {
+    auto key = GetSelectedKey();
+    if (key)
+        key_edit.emit(key);
 }
 
-void KeyViewStack::on_ViewUsersOfKeyButton_clicked(){
-    std::shared_ptr<kdb::Key> aux = get_selection_ptr();
-    if (aux != nullptr){
-        UsersView.emit(aux->owners().get().all());
-    }
+void KeyViewStack::OnAddUserButtonClicked() {
+    auto key = GetSelectedKey();
+    if (key)
+        key_link.emit(key);
 }
 
-void KeyViewStack::on_DeleteKeyButton_clicked(){
-
+void KeyViewStack::OnRemoveUserButtonClicked() {
+    auto key = GetSelectedKey();
+    if (key)
+        key_unlink.emit(key);
 }
 
-void KeyViewStack::on_KeepKeyButton_clicked(){
-    std::shared_ptr<kdb::Key> aux = get_selection_ptr();
-    if (aux != nullptr){
-        KeyKeeped.emit(aux);
-    }
+void KeyViewStack::OnViewUsersButtonClicked() {
+    auto key = GetSelectedKey();
+    if (key)
+        users_view.emit(key->owners().get().all());
 }
 
-bool KeyViewStack::configure(){
-   if (acces >= 0){
-        KeepKeyButton->show();
-        IdColumn->set_visible(false);
-        ActiveColumn->set_visible(false);
-    }
-     if (acces>=1){
-        AddUserToKeyButton->show();
-        RemoveUserToKeyButton->show();
-        EditKeyButton->show();
-        DeleteKeyButton->show();
-        ViewUsersOfKeyButton->show();
-    }
-     if (acces>=2){
+void KeyViewStack::OnDeleteKeyButtonClicked() {
+    // TODO: implementar eliminación de llave.
+}
 
-    }
-        ViewKeysTree->columns_autosize();
+void KeyViewStack::OnKeepKeyButtonClicked() {
+    auto key = GetSelectedKey();
+    if (key)
+        key_kept.emit(key);
 }

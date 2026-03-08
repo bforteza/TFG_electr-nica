@@ -60,11 +60,11 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     users_view_stack_.KeysView.connect(sigc::mem_fun(*this, &HomeStack::ShowKeysView));
     users_view_stack_.UserEdit.connect(sigc::mem_fun(*this, &HomeStack::OnUserEdit));
 
-    key_view_stack_.KeyLink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
-    key_view_stack_.KeyUnLink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
-    key_view_stack_.UsersView.connect(sigc::mem_fun(*this, &HomeStack::ShowUsersView));
-    key_view_stack_.KeyEdit.connect(sigc::mem_fun(*this, &HomeStack::OnKeyEdit));
-    key_view_stack_.KeyKeeped.connect(sigc::mem_fun(*this, &HomeStack::OnKeyKept));
+    key_view_stack_.key_link.connect(sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
+    key_view_stack_.key_unlink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
+    key_view_stack_.users_view.connect(sigc::mem_fun(*this, &HomeStack::ShowUsersView));
+    key_view_stack_.key_edit.connect(sigc::mem_fun(*this, &HomeStack::OnKeyEdit));
+    key_view_stack_.key_kept.connect(sigc::mem_fun(*this, &HomeStack::OnKeyKept));
 
     // Suscribe RefreshLabels al cambio de idioma global.
     language_changed.connect(sigc::mem_fun(*this, &HomeStack::RefreshLabels));
@@ -168,7 +168,7 @@ void HomeStack::OnUserLinkKey(std::shared_ptr<kdb::Person> person) {
         key_view_stack_.select(
             (litesql::except(litesql::select<kdb::Key>(*db), aux_person_->keys().get())).all());
         back_widget_ = inner_stack_->get_visible_child();
-        key_selected_connection_ = key_view_stack_.KeySelected.connect(
+        key_selected_connection_ = key_view_stack_.key_selected.connect(
             sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
         inner_stack_->set_visible_child("ViewKeyStack");
     } else {
@@ -199,7 +199,7 @@ void HomeStack::OnUserUnlinkKey(std::shared_ptr<kdb::Person> person) {
     if (aux_key_ == nullptr) {
         key_view_stack_.select(person->keys().get().all());
         back_widget_ = inner_stack_->get_visible_child();
-        key_selected_connection_ = key_view_stack_.KeySelected.connect(
+        key_selected_connection_ = key_view_stack_.key_selected.connect(
             sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
         inner_stack_->set_visible_child("ViewKeyStack");
     } else {
