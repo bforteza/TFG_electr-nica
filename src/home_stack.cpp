@@ -55,10 +55,10 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
         throw std::runtime_error("No \"NameLabel\" object in MainWindow.glade");
 
     // Conecta las señales de las sub-vistas con los manejadores de este panel.
-    users_view_stack_.UserLink.connect(sigc::mem_fun(*this, &HomeStack::OnUserLinkKey));
-    users_view_stack_.UserUnLink.connect(sigc::mem_fun(*this, &HomeStack::OnUserUnlinkKey));
-    users_view_stack_.KeysView.connect(sigc::mem_fun(*this, &HomeStack::ShowKeysView));
-    users_view_stack_.UserEdit.connect(sigc::mem_fun(*this, &HomeStack::OnUserEdit));
+    users_view_stack_.user_link.connect(sigc::mem_fun(*this, &HomeStack::OnUserLinkKey));
+    users_view_stack_.user_unlink.connect(sigc::mem_fun(*this, &HomeStack::OnUserUnlinkKey));
+    users_view_stack_.keys_view.connect(sigc::mem_fun(*this, &HomeStack::ShowKeysView));
+    users_view_stack_.user_edit.connect(sigc::mem_fun(*this, &HomeStack::OnUserEdit));
 
     key_view_stack_.key_link.connect(sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
     key_view_stack_.key_unlink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
@@ -184,7 +184,7 @@ void HomeStack::OnKeyLinkUser(std::shared_ptr<kdb::Key> key) {
         users_view_stack_.select(
             (litesql::except(litesql::select<kdb::Person>(*db), aux_key_->owners().get())).all());
         back_widget_ = inner_stack_->get_visible_child();
-        user_selected_connection_ = users_view_stack_.UserSelected.connect(
+        user_selected_connection_ = users_view_stack_.user_selected.connect(
             sigc::mem_fun(*this, &HomeStack::OnUserLinkKey));
         inner_stack_->set_visible_child("ViewUsersStack");
     } else {

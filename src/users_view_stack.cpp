@@ -1,147 +1,158 @@
 #include "users_view_stack.h"
 #include "globals.h"
 
+UsersViewStack::UsersViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
+    builder->get_widget("AddKeyToUserButton", add_key_button_);
+    if (!add_key_button_)
+        throw std::runtime_error("No \"AddKeyToUserButton\" object in MainWindow.glade");
+    add_key_button_->hide();
+    add_key_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UsersViewStack::OnAddKeyButtonClicked));
 
+    builder->get_widget("RemoveKeyToUserButton", remove_key_button_);
+    if (!remove_key_button_)
+        throw std::runtime_error("No \"RemoveKeyToUserButton\" object in MainWindow.glade");
+    remove_key_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UsersViewStack::OnRemoveKeyButtonClicked));
 
-UsersViewStack::UsersViewStack(const Glib::RefPtr<Gtk::Builder>& builder)
-{
-    //Buttons
-    builder->get_widget("AddKeyToUserButton", AddKeyToUserButton);
-    if (!AddKeyToUserButton) {
-        throw std::runtime_error("No \"AddKeyToUserButton\" object in INI.glade" );
-    }
-    AddKeyToUserButton->hide();
-    AddKeyToUserButton->signal_clicked().connect(sigc::mem_fun(*this, &UsersViewStack::on_AddKeyToUserButton_clicked));
+    builder->get_widget("SelectUserButton", select_user_button_);
+    if (!select_user_button_)
+        throw std::runtime_error("No \"SelectUserButton\" object in MainWindow.glade");
+    select_user_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UsersViewStack::OnSelectUserButtonClicked));
 
+    builder->get_widget("UserEditButton", edit_button_);
+    if (!edit_button_)
+        throw std::runtime_error("No \"UserEditButton\" object in MainWindow.glade");
+    edit_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UsersViewStack::OnEditButtonClicked));
 
-    builder->get_widget("RemoveKeyToUserButton", RemoveKeyToUserButton);
-    if (!RemoveKeyToUserButton) {
-        throw std::runtime_error("No \"RemoveKeyToUserButton\" object in INI.glade" );
-    }
-    RemoveKeyToUserButton->signal_clicked().connect(sigc::mem_fun(*this, &UsersViewStack::on_RemoveKeyToUserButton_clicked));
+    builder->get_widget("ViewKeysOfUserButton", view_keys_button_);
+    if (!view_keys_button_)
+        throw std::runtime_error("No \"ViewKeysOfUserButton\" object in MainWindow.glade");
+    view_keys_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UsersViewStack::OnViewKeysButtonClicked));
 
-    builder->get_widget("SelectUserButton", SelectUserButton);
-    if (!SelectUserButton) {
-        throw std::runtime_error("No \"SelectUserButton\" object in INI.glade" );
-    }
-    SelectUserButton->signal_clicked().connect(
-        sigc::mem_fun(*this, &UsersViewStack::on_SelectUserButton_clicked));
+    builder->get_widget("ViewUsersTree", users_tree_view_);
+    if (!users_tree_view_)
+        throw std::runtime_error("No \"ViewUsersTree\" object in MainWindow.glade");
 
-    builder->get_widget("UserEditButton", UserEditButton);
-    if (!UserEditButton) {
-        throw std::runtime_error("No \"UserEditButton\" object in INI.glade" );
-    }
+    tree_model_ = Gtk::ListStore::create(columns_);
+    users_tree_view_->set_model(tree_model_);
 
-    UserEditButton->signal_clicked().connect(
-        sigc::mem_fun(*this, &UsersViewStack::on_UserEditButton_clicked));
+    // Las cadenas de cabecera se establecen en RefreshLabels(); aquí solo se añaden las columnas.
+    users_tree_view_->append_column("Id",  columns_.IdCol);
+    users_tree_view_->append_column("",    columns_.m_col_name);
+    users_tree_view_->append_column("",    columns_.m_col_password);
+    users_tree_view_->append_column("",    columns_.UidCol);
 
-    builder->get_widget("ViewKeysOfUserButton", ViewKeysOfUserButton);
-    if (!ViewKeysOfUserButton) {
-        throw std::runtime_error("No \"ViewKeysOfUserButton\" object in INI.glade" );
-    }
-    ViewKeysOfUserButton->signal_clicked().connect(sigc::mem_fun(*this, &UsersViewStack::on_ViewKeysOfUserButton_clicked));
+    id_column_       = users_tree_view_->get_column(0);
+    name_column_     = users_tree_view_->get_column(1);
+    password_column_ = users_tree_view_->get_column(2);
+    uid_column_      = users_tree_view_->get_column(3);
 
-    //view
-    builder->get_widget("ViewUsersTree", ViewUsersTree);
-    if (!ViewUsersTree) {
-        throw std::runtime_error("No \"ViewUsersTree\" object in INI.glade" );
-    }
+    id_column_->set_visible(false);
 
-    m_refTreeModel = Gtk::ListStore::create(m_Columns);
-
-  ViewUsersTree->set_model(m_refTreeModel);
-  //Fill the TreeView's model
-  ViewUsersTree->append_column("Id",m_Columns.IdCol);
-  ViewUsersTree->append_column("Name", m_Columns.m_col_name);
-  ViewUsersTree->append_column("Password", m_Columns.m_col_password);
-  ViewUsersTree->append_column("Uid", m_Columns.UidCol);
+    // Suscribe RefreshLabels al cambio de idioma global.
+    language_changed.connect(sigc::mem_fun(*this, &UsersViewStack::RefreshLabels));
+    RefreshLabels();
 }
 
-//Function initiators
+void UsersViewStack::RefreshLabels() {
+    add_key_button_->set_label(Tr().users_view.btn_add_key);
+    remove_key_button_->set_label(Tr().users_view.btn_remove_key);
+    select_user_button_->set_label(Tr().users_view.btn_select);
+    edit_button_->set_label(Tr().users_view.btn_edit);
+    view_keys_button_->set_label(Tr().users_view.btn_view_keys);
 
-void UsersViewStack::view(std::vector<kdb::Person> i){
-
-    AddKeyToUserButton->show();
-    RemoveKeyToUserButton->show();
-    UserEditButton->show();
-    ViewKeysOfUserButton->show();
-
-    SelectUserButton->hide();
-
-    actual = i;
-    actualizar();
+    name_column_->set_title(Tr().users_view.col_name);
+    password_column_->set_title(Tr().users_view.col_password);
+    uid_column_->set_title(Tr().users_view.col_uid);
 }
 
-void UsersViewStack::select(std::vector<kdb::Person> i){
-    SelectUserButton->show();
+// --- Iniciadores públicos ---
 
-    AddKeyToUserButton->hide();
-    RemoveKeyToUserButton->hide();
-    UserEditButton->hide();
-    ViewKeysOfUserButton->hide();
+void UsersViewStack::view(std::vector<kdb::Person> users) {
+    add_key_button_->show();
+    remove_key_button_->show();
+    edit_button_->show();
+    view_keys_button_->show();
+    select_user_button_->hide();
 
-    actual = i;
-    actualizar();
+    current_users_ = users;
+    Refresh();
 }
 
-//Auxiliar function
+void UsersViewStack::select(std::vector<kdb::Person> users) {
+    select_user_button_->show();
+    add_key_button_->hide();
+    remove_key_button_->hide();
+    edit_button_->hide();
+    view_keys_button_->hide();
 
-int UsersViewStack::get_selection(){
-    auto sel = ViewUsersTree->get_selection();
-    if(auto iter = sel->get_selected())
-        return (*iter)[m_Columns.IdCol];
+    current_users_ = users;
+    Refresh();
+}
+
+// --- Auxiliares internos ---
+
+int UsersViewStack::GetSelectionId() {
+    auto sel = users_tree_view_->get_selection();
+    if (auto iter = sel->get_selected())
+        return (*iter)[columns_.IdCol];
     return 0;
 }
 
-std::shared_ptr<kdb::Person> UsersViewStack::get_selection_ptr(){
-    auto sel = ViewUsersTree->get_selection();
-    if(auto iter = sel->get_selected())
-        return std::make_shared<kdb::Person>(litesql::select<kdb::Person>(*db,kdb::Person::Id ==  (*iter)[m_Columns.IdCol]).one());
+std::shared_ptr<kdb::Person> UsersViewStack::GetSelectedPerson() {
+    auto sel = users_tree_view_->get_selection();
+    if (auto iter = sel->get_selected())
+        return std::make_shared<kdb::Person>(
+            litesql::select<kdb::Person>(*db, kdb::Person::Id == (*iter)[columns_.IdCol]).one());
     return nullptr;
 }
-//Refresh treeview with the data from vector actual
-void UsersViewStack::actualizar(){
-    m_refTreeModel->clear();
-    for(auto iter : actual ){
-        Gtk::TreeModel::Row row = *(m_refTreeModel->append());
 
-        row[m_Columns.IdCol] = (int) iter.id;
-        row[m_Columns.m_col_name]= iter.name;
-        row[m_Columns.UidCol]= iter.uid;
-        row[m_Columns.m_col_password] = iter.password;
-      }
-}
-
-//Button actions
-
-void UsersViewStack::on_AddKeyToUserButton_clicked(){
-    int aux=get_selection();
-    if (aux)
-    UserLink.emit(std::make_shared<kdb::Person>(litesql::select<kdb::Person>(*db,kdb::Person::Id == aux).one()));
-}
-
-void UsersViewStack::on_RemoveKeyToUserButton_clicked(){
-    int aux=get_selection();
-    if (aux)
-    UserUnLink.emit(std::make_shared<kdb::Person>(litesql::select<kdb::Person>(*db,kdb::Person::Id == aux).one()));
-}
-
-void UsersViewStack::on_ViewKeysOfUserButton_clicked(){
-     int aux=get_selection();
-    if (aux)
-    KeysView.emit((litesql::select<kdb::Person>(*db,kdb::Person::Id == aux).one()).keys().get().all());
-}
-
-void UsersViewStack::on_UserEditButton_clicked(){
-    std::shared_ptr<kdb::Person> aux = get_selection_ptr();
-    if (aux != nullptr){
-        UserEdit.emit(aux);
+void UsersViewStack::Refresh() {
+    tree_model_->clear();
+    for (auto& person : current_users_) {
+        Gtk::TreeModel::Row row = *(tree_model_->append());
+        row[columns_.IdCol]        = (int)person.id;
+        row[columns_.m_col_name]   = person.name;
+        row[columns_.m_col_password] = person.password;
+        row[columns_.UidCol]       = person.uid;
     }
 }
 
-void UsersViewStack::on_SelectUserButton_clicked(){
-    std::shared_ptr<kdb::Person> aux = get_selection_ptr();
-    if (aux != nullptr){
-        UserSelected.emit(aux);
-    }
+// --- Manejadores de botones ---
+
+void UsersViewStack::OnAddKeyButtonClicked() {
+    int id = GetSelectionId();
+    if (id)
+        user_link.emit(
+            std::make_shared<kdb::Person>(litesql::select<kdb::Person>(*db, kdb::Person::Id == id).one()));
+}
+
+void UsersViewStack::OnRemoveKeyButtonClicked() {
+    int id = GetSelectionId();
+    if (id)
+        user_unlink.emit(
+            std::make_shared<kdb::Person>(litesql::select<kdb::Person>(*db, kdb::Person::Id == id).one()));
+}
+
+void UsersViewStack::OnViewKeysButtonClicked() {
+    int id = GetSelectionId();
+    if (id)
+        keys_view.emit(
+            litesql::select<kdb::Person>(*db, kdb::Person::Id == id).one().keys().get().all());
+}
+
+void UsersViewStack::OnEditButtonClicked() {
+    auto person = GetSelectedPerson();
+    if (person)
+        user_edit.emit(person);
+}
+
+void UsersViewStack::OnSelectUserButtonClicked() {
+    auto person = GetSelectedPerson();
+    if (person)
+        user_selected.emit(person);
 }
