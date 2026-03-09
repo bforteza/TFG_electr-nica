@@ -147,7 +147,7 @@ void KeyViewStack::Refresh() {
         row[columns_.NameCol]        = (Glib::ustring)key.name;
         row[columns_.UbiCol]         = key.ubi;
         row[columns_.CommentaryCol]  = key.commentary;
-        row[columns_.PosCol]         = to_string(key.pos);
+        row[columns_.PosCol]         = PosToString(key.pos);
         row[columns_.ActiveCol]      = key.active;
         try {
             row[columns_.KeeperCol] = (Glib::ustring)key.keeper().get().one().name;

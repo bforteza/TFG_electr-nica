@@ -107,7 +107,7 @@ void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> key) {
     key_name_entry_->set_text((std::string)key->name);
     ubi_entry_->set_text((std::string)key->ubi);
     commentary_entry_->set_text((std::string)key->commentary);
-    position_entry_->set_text(to_string(key->pos));
+    position_entry_->set_text(PosToString(key->pos));
     uid_text_view_->get_buffer()->set_text((std::string)key->uid);
     edit_mode_ = true;
     RefreshLabels();
@@ -139,12 +139,12 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         }
         // Validar posición.
         std::string pos_str = position_entry_->get_text();
-        if (to_position(pos_str)) {
-            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == to_position(pos_str)).count()) {
+        if (PosFromString(pos_str)) {
+            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == PosFromString(pos_str)).count()) {
                 std::string msg = Tr().key_create.error_position_unavailable;
                 for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0)
                                     .orderBy(kdb::Key::Pos).all())
-                    msg += " " + to_string((int)k.pos);
+                    msg += " " + PosToString((int)k.pos);
                 position_error_label_->set_text(msg);
                 valid = false;
             }
@@ -159,7 +159,7 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             new_key.ubi         = (std::string)ubi_entry_->get_text();
             new_key.commentary  = (std::string)commentary_entry_->get_text();
             new_key.uid         = (std::string)uid_text_view_->get_buffer()->get_text();
-            new_key.pos         = (int)to_position(position_entry_->get_text());
+            new_key.pos         = (int)PosFromString(position_entry_->get_text());
             new_key.update();
             // Entra en modo edición con la llave recién creada.
             KeyEdit(std::make_shared<kdb::Key>(new_key));
@@ -187,13 +187,13 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         }
         // Validar posición (excluyendo la posición actual de la misma llave).
         std::string pos_str = position_entry_->get_text();
-        if (to_position(pos_str)) {
-            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == to_position(pos_str)
+        if (PosFromString(pos_str)) {
+            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == PosFromString(pos_str)
                                               && kdb::Key::Id != edited_key_->id).count()) {
                 std::string msg = Tr().key_create.error_position_unavailable;
                 for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0)
                                     .orderBy(kdb::Key::Pos).all())
-                    msg += " " + to_string((int)k.pos);
+                    msg += " " + PosToString((int)k.pos);
                 position_error_label_->set_text(msg);
                 valid = false;
             }
@@ -207,7 +207,7 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             edited_key_->ubi        = (std::string)ubi_entry_->get_text();
             edited_key_->commentary = (std::string)commentary_entry_->get_text();
             edited_key_->uid        = (std::string)uid_text_view_->get_buffer()->get_text();
-            edited_key_->pos        = (int)to_position(position_entry_->get_text());
+            edited_key_->pos        = (int)PosFromString(position_entry_->get_text());
             edited_key_->update();
         }
     }
