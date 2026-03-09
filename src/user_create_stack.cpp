@@ -4,227 +4,238 @@
 #include "globals.h"
 #include <string>
 
-UserCreateStack::UserCreateStack(const Glib::RefPtr<Gtk::Builder>& builder)
-{
-    //Entry
-    builder->get_widget("UserNameEntry", UserNameEntry);
-    if (!UserNameEntry) {
-        throw std::runtime_error("No \"UserNameEntry\" object in INI.glade" );
-    }
+UserCreateStack::UserCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
+    builder->get_widget("UserNameEntry", username_entry_);
+    if (!username_entry_)
+        throw std::runtime_error("No \"UserNameEntry\" object in MainWindow.glade");
 
-    builder->get_widget("PasswordEntry", PasswordEntry);
-    if (!PasswordEntry) {
-        throw std::runtime_error("No \"PasswordEntry\" object in INI.glade" );
-    }
+    builder->get_widget("PasswordEntry", password_entry_);
+    if (!password_entry_)
+        throw std::runtime_error("No \"PasswordEntry\" object in MainWindow.glade");
 
-    builder->get_widget("RPasswordEntry", RPasswordEntry);
-    if (!RPasswordEntry) {
-        throw std::runtime_error("No \"RPasswordEntry\" object in INI.glade" );
-    }
-    //Buttons
+    builder->get_widget("RPasswordEntry", repeat_password_entry_);
+    if (!repeat_password_entry_)
+        throw std::runtime_error("No \"RPasswordEntry\" object in MainWindow.glade");
 
-    builder->get_widget("UserGenerateButton", UserGenerateButton);
-    if (!UserGenerateButton) {
-        throw std::runtime_error("No \"UserGenerateButton\" object in INI.glade" );
-    }
-    UserGenerateButton->signal_clicked().connect(sigc::mem_fun(*this, &UserCreateStack::on_UserGenerateButton_clicked));
+    builder->get_widget("UserGenerateButton", generate_button_);
+    if (!generate_button_)
+        throw std::runtime_error("No \"UserGenerateButton\" object in MainWindow.glade");
+    generate_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UserCreateStack::OnGenerateButtonClicked));
 
-    builder->get_widget("AddUidUserButton", AddUidUserButton);
-    if (!AddUidUserButton) {
-        throw std::runtime_error("No \"AddUidUserButton\" object in INI.glade" );
-    }
-    AddUidUserButton->signal_clicked().connect(sigc::mem_fun(*this, &UserCreateStack::on_AddUidUserButton_clicked));
+    builder->get_widget("AddUidUserButton", add_uid_button_);
+    if (!add_uid_button_)
+        throw std::runtime_error("No \"AddUidUserButton\" object in MainWindow.glade");
+    add_uid_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UserCreateStack::OnAddUidButtonClicked));
 
-    builder->get_widget("AddKeyButton", AddKeyButton);
-    if (!AddKeyButton) {
-        throw std::runtime_error("No \"AddKeyButton\" object in INI.glade" );
-    }
-    //RadioButtons
-     builder->get_widget("A0RadioButton", A0RadioButton);
-    if (!A0RadioButton) {
-        throw std::runtime_error("No \"A0RadioButton\" object in INI.glade" );
-    }
-    builder->get_widget("A1RadioButton", A1RadioButton);
-    if (!A1RadioButton) {
-        throw std::runtime_error("No \"A1RadioButton\" object in INI.glade" );
-    }
-     builder->get_widget("A2RadioButton", A2RadioButton);
-    if (!A2RadioButton) {
-        throw std::runtime_error("No \"A2RadioButton\" object in INI.glade" );
-    }
-    Agroup = A0RadioButton->get_group();
-    A1RadioButton->set_group(Agroup);
-    A2RadioButton->set_group(Agroup);
-    //labels
-    builder->get_widget("UserNameErrorLabel", UserNameErrorLabel);
-    if (!UserNameErrorLabel) {
-        throw std::runtime_error("No \"UserNameErrorLabel\" object in INI.glade" );
-    }
+    builder->get_widget("AddKeyButton", add_key_button_);
+    if (!add_key_button_)
+        throw std::runtime_error("No \"AddKeyButton\" object in MainWindow.glade");
+    // TODO: conectar AddKeyButton cuando el flujo de vinculación desde creación esté implementado.
 
-    builder->get_widget("PasswordErrorLabel", PasswordErrorLabel);
-    if (!PasswordErrorLabel) {
-        throw std::runtime_error("No \"PasswordErrorLabel\" object in INI.glade" );
-    }
+    builder->get_widget("A0RadioButton", radio_level0_);
+    if (!radio_level0_)
+        throw std::runtime_error("No \"A0RadioButton\" object in MainWindow.glade");
 
-    builder->get_widget("RPasswordErrorLabel", RPasswordErrorLabel);
-    if (!RPasswordErrorLabel) {
-        throw std::runtime_error("No \"RPasswordErrorLabel\" object in INI.glade" );
-    }
-    builder->get_widget("NfcErrorLabel", NfcErrorLabel);
-    if (!NfcErrorLabel) {
-        throw std::runtime_error("No \"NfcErrorLabel\" object in INI.glade" );
-    }
-    //Text
-    builder->get_widget("UserUidText", UserUidText);
-    if (!UserUidText) {
-        throw std::runtime_error("No \"UserUidText\" object in INI.glade" );
-    }
+    builder->get_widget("A1RadioButton", radio_level1_);
+    if (!radio_level1_)
+        throw std::runtime_error("No \"A1RadioButton\" object in MainWindow.glade");
 
+    builder->get_widget("A2RadioButton", radio_admin_);
+    if (!radio_admin_)
+        throw std::runtime_error("No \"A2RadioButton\" object in MainWindow.glade");
 
+    radio_group_ = radio_level0_->get_group();
+    radio_level1_->set_group(radio_group_);
+    radio_admin_->set_group(radio_group_);
+
+    builder->get_widget("UserCreateUsernameLabel", username_label_);
+    if (!username_label_)
+        throw std::runtime_error("No \"UserCreateUsernameLabel\" object in MainWindow.glade");
+
+    builder->get_widget("UserCreatePasswordLabel", password_label_);
+    if (!password_label_)
+        throw std::runtime_error("No \"UserCreatePasswordLabel\" object in MainWindow.glade");
+
+    builder->get_widget("UserCreateRPasswordLabel", repeat_password_label_);
+    if (!repeat_password_label_)
+        throw std::runtime_error("No \"UserCreateRPasswordLabel\" object in MainWindow.glade");
+
+    builder->get_widget("UserCreateAccessLabel", access_level_label_);
+    if (!access_level_label_)
+        throw std::runtime_error("No \"UserCreateAccessLabel\" object in MainWindow.glade");
+
+    builder->get_widget("UserNameErrorLabel", username_error_label_);
+    if (!username_error_label_)
+        throw std::runtime_error("No \"UserNameErrorLabel\" object in MainWindow.glade");
+
+    builder->get_widget("PasswordErrorLabel", password_error_label_);
+    if (!password_error_label_)
+        throw std::runtime_error("No \"PasswordErrorLabel\" object in MainWindow.glade");
+
+    builder->get_widget("RPasswordErrorLabel", repeat_password_error_label_);
+    if (!repeat_password_error_label_)
+        throw std::runtime_error("No \"RPasswordErrorLabel\" object in MainWindow.glade");
+
+    builder->get_widget("NfcErrorLabel", nfc_error_label_);
+    if (!nfc_error_label_)
+        throw std::runtime_error("No \"NfcErrorLabel\" object in MainWindow.glade");
+
+    builder->get_widget("UserUidText", uid_text_view_);
+    if (!uid_text_view_)
+        throw std::runtime_error("No \"UserUidText\" object in MainWindow.glade");
+
+    // Suscribe RefreshLabels al cambio de idioma global.
+    language_changed.connect(sigc::mem_fun(*this, &UserCreateStack::RefreshLabels));
+    RefreshLabels();
 }
 
-// Button methods
-void UserCreateStack::on_UserGenerateButton_clicked(){
-    UserNameErrorLabel->set_text("");
-    PasswordErrorLabel->set_text("");
-    RPasswordErrorLabel->set_text("");
-    bool ValidCreation = 1;
-    if (CreateUserMode){
+void UserCreateStack::RefreshLabels() {
+    // Etiquetas de campo del formulario.
+    username_label_->set_label(Tr().user_create.lbl_username);
+    password_label_->set_label(Tr().user_create.lbl_password);
+    repeat_password_label_->set_label(Tr().user_create.lbl_repeat_password);
+    access_level_label_->set_label(Tr().user_create.lbl_access_level);
 
+    // Radio buttons de nivel de acceso.
+    radio_level0_->set_label(Tr().user_create.radio_level_0);
+    radio_level1_->set_label(Tr().user_create.radio_level_1);
+    radio_admin_->set_label(Tr().user_create.radio_admin);
 
-        //Test Name repetition
-        if(litesql::select<kdb::Person>(*db, kdb::Person::Name == UserNameEntry->get_text()).count() ){
-            UserNameErrorLabel->set_text("Atenció: nom de usuari existent");
-            ValidCreation *= 0;
-        }
-        //Test repete password
-        if( RPasswordEntry->get_text() != PasswordEntry->get_text() ){
-            RPasswordErrorLabel->set_text("Atenció: contrasenya de no coincideix");
-            ValidCreation *= 0;
-        }
-        //Test Password repettion
-        if(litesql::select<kdb::Person>(*db, kdb::Person::Password == PasswordEntry->get_text()).count() ){
-            PasswordErrorLabel->set_text("Atenció: contrasenya de usuari repetit");
-            ValidCreation *= 0;
-        }
-        //Test Name lenght
-        if(UserNameEntry->get_text_length()< 2){
-            UserNameErrorLabel->set_text("Atenció: nom de usuari massa curt");
-            ValidCreation *= 0;
-        }
-        //Test Password lenght
-        if(PasswordEntry->get_text_length()< 2){
-            PasswordErrorLabel->set_text("Atenció: contrasenya de usuari massa curt");
-            ValidCreation *= 0;
-        }
-        //Test Uid repettition
-        if(litesql::select<kdb::Person>(*db, kdb::Person::Uid == UserUidText->get_buffer()->get_text()).count() +
-            litesql::select<kdb::Key>(*db, kdb::Key::Uid == UserUidText->get_buffer()->get_text()).count()){
-            NfcErrorLabel->set_text("Atenció: tarjeta en us");
-            ValidCreation *= 0;
-        }
-
-        if( ValidCreation){
-            kdb::Person AddedPerson(*db);
-            AddedPerson.uid = (std::string) UserUidText->get_buffer()->get_text();
-            AddedPerson.name = (std::string) UserNameEntry->get_text();
-            AddedPerson.password = (std::string) PasswordEntry->get_text();
-            AddedPerson.a1 = A1RadioButton->get_active();
-            AddedPerson.a2 = A2RadioButton->get_active();
-            AddedPerson.update();
-            reset();
-            UserEdit(std::make_shared<kdb::Person>(AddedPerson));
-        }
-
-    } else if (UserEditMode){
-        //Test Name repetition
-        if(litesql::select<kdb::Person>(*db, kdb::Person::Name == UserNameEntry->get_text()
-                                         && kdb::Person::Id != EditedUser->id).count() ){
-            UserNameErrorLabel->set_text("Atenció: nom de usuari existent");
-            ValidCreation *= 0;
-        }
-        //Test repete password
-        if( RPasswordEntry->get_text() != PasswordEntry->get_text() ){
-            RPasswordErrorLabel->set_text("Atenció: contrasenya de no coincideix");
-            ValidCreation *= 0;
-        }
-        //Test Password repettion
-        if(litesql::select<kdb::Person>(*db, kdb::Person::Password == PasswordEntry->get_text()
-                                        && kdb::Person::Id != EditedUser->id).count() ){
-            PasswordErrorLabel->set_text("Atenció: contrasenya de usuari repetit");
-            ValidCreation *= 0;
-        }
-        //Test Name lenght
-        if(UserNameEntry->get_text_length()< 2){
-            UserNameErrorLabel->set_text("Atenció: nom de usuari massa curt");
-            ValidCreation *= 0;
-        }
-        //Test Password lenght
-        if(PasswordEntry->get_text_length()< 2){
-            PasswordErrorLabel->set_text("Atenció: contrasenya de usuari massa curt");
-            ValidCreation *= 0;
-        }
-        //Test Uid repettition
-        if(litesql::select<kdb::Person>(*db, kdb::Person::Uid == UserUidText->get_buffer()->get_text()
-                                        && kdb::Person::Id != EditedUser->id).count() +
-            litesql::select<kdb::Key>(*db, kdb::Key::Uid == UserUidText->get_buffer()->get_text()).count()){
-            NfcErrorLabel->set_text("Atenció: tarjeta en us");
-            ValidCreation *= 0;
-        }
-
-        if( ValidCreation){
-
-            EditedUser->uid = (std::string) UserUidText->get_buffer()->get_text();
-            EditedUser->name = (std::string) UserNameEntry->get_text();
-            EditedUser->password = (std::string) PasswordEntry->get_text();
-            EditedUser->a1 = A1RadioButton->get_active();
-            EditedUser->a2 = A2RadioButton->get_active();
-            EditedUser->update();
-            UserEdit(EditedUser);
-        }
-    }
-
+    // Botones de acción.
+    add_key_button_->set_label(Tr().user_create.btn_add_key);
+    add_uid_button_->set_label(Tr().user_create.btn_add_nfc);
+    // El botón de confirmar tiene etiqueta distinta según el modo activo.
+    if (create_mode_)
+        generate_button_->set_label(Tr().user_create.btn_create);
+    else if (edit_mode_)
+        generate_button_->set_label(Tr().user_create.btn_edit);
 }
 
+// --- Iniciadores públicos ---
 
-void UserCreateStack::on_AddUidUserButton_clicked(){
+void UserCreateStack::CreateUser() {
+    Reset();
+    create_mode_ = true;
+    RefreshLabels();
+}
+
+void UserCreateStack::UserEdit(std::shared_ptr<kdb::Person> person) {
+    Reset();
+    edited_user_ = person;
+    username_entry_->set_text((std::string)person->name);
+    password_entry_->set_text((std::string)person->password);
+    repeat_password_entry_->set_text((std::string)person->password);
+    uid_text_view_->get_buffer()->set_text((std::string)person->uid);
+    edit_mode_ = true;
+    RefreshLabels();
+}
+
+// --- Manejadores de botones ---
+
+void UserCreateStack::OnGenerateButtonClicked() {
+    username_error_label_->set_text("");
+    password_error_label_->set_text("");
+    repeat_password_error_label_->set_text("");
+    bool valid = true;
+
+    auto username = username_entry_->get_text();
+    auto password = password_entry_->get_text();
+    std::string uid = uid_text_view_->get_buffer()->get_text();
+
+    // Validaciones comunes a ambos modos.
+    if (username_entry_->get_text_length() < 2) {
+        username_error_label_->set_text(Tr().user_create.error_username_too_short);
+        valid = false;
+    }
+    if (password_entry_->get_text_length() < 2) {
+        password_error_label_->set_text(Tr().user_create.error_password_too_short);
+        valid = false;
+    }
+    if (repeat_password_entry_->get_text() != password) {
+        repeat_password_error_label_->set_text(Tr().user_create.error_password_mismatch);
+        valid = false;
+    }
+
+    if (create_mode_) {
+        if (litesql::select<kdb::Person>(*db, kdb::Person::Name == username).count()) {
+            username_error_label_->set_text(Tr().user_create.error_username_exists);
+            valid = false;
+        }
+        if (litesql::select<kdb::Person>(*db, kdb::Person::Password == password).count()) {
+            password_error_label_->set_text(Tr().user_create.error_password_exists);
+            valid = false;
+        }
+        if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).count() +
+            litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid).count()) {
+            nfc_error_label_->set_text(Tr().user_create.error_card_in_use);
+            valid = false;
+        }
+
+        if (valid) {
+            kdb::Person new_person(*db);
+            new_person.uid      = uid;
+            new_person.name     = (std::string)username;
+            new_person.password = (std::string)password;
+            new_person.a1       = radio_level1_->get_active();
+            new_person.a2       = radio_admin_->get_active();
+            new_person.update();
+            UserEdit(std::make_shared<kdb::Person>(new_person));
+        }
+
+    } else if (edit_mode_) {
+        if (litesql::select<kdb::Person>(*db, kdb::Person::Name == username
+                                             && kdb::Person::Id != edited_user_->id).count()) {
+            username_error_label_->set_text(Tr().user_create.error_username_exists);
+            valid = false;
+        }
+        if (litesql::select<kdb::Person>(*db, kdb::Person::Password == password
+                                             && kdb::Person::Id != edited_user_->id).count()) {
+            password_error_label_->set_text(Tr().user_create.error_password_exists);
+            valid = false;
+        }
+        if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid
+                                             && kdb::Person::Id != edited_user_->id).count() +
+            litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid).count()) {
+            nfc_error_label_->set_text(Tr().user_create.error_card_in_use);
+            valid = false;
+        }
+
+        if (valid) {
+            edited_user_->uid      = uid;
+            edited_user_->name     = (std::string)username;
+            edited_user_->password = (std::string)password;
+            edited_user_->a1       = radio_level1_->get_active();
+            edited_user_->a2       = radio_admin_->get_active();
+            edited_user_->update();
+            UserEdit(edited_user_);
+        }
+    }
+}
+
+void UserCreateStack::OnAddUidButtonClicked() {
     std::string uid = nfcman->NfcDetect(1);
-    if(!uid.empty()){
-        UserUidText->get_buffer()->set_text(uid);
-    } else {
-       UserUidText->get_buffer()->set_text("Introdueix la tarjeta desitjada");
-    }
+    if (!uid.empty())
+        uid_text_view_->get_buffer()->set_text(uid);
+    else
+        uid_text_view_->get_buffer()->set_text(Tr().user_create.prompt_scan_card);
 }
 
-void UserCreateStack::UserEdit(std::shared_ptr<kdb::Person> InPerson){
-    reset();
-    UserEditMode = 1;
-    UserGenerateButton->set_label("Editar usuari");
-    UserNameEntry->set_text((std::string)InPerson->name);
-    PasswordEntry->set_text((std::string)InPerson->password);
-    RPasswordEntry->set_text((std::string)InPerson->password);
-    UserUidText->get_buffer()->set_text((std::string) InPerson->uid);
-    EditedUser = InPerson;
-}
+// --- Auxiliares privados ---
 
-void UserCreateStack::reset(){
+void UserCreateStack::Reset() {
+    username_error_label_->set_text("");
+    password_error_label_->set_text("");
+    repeat_password_error_label_->set_text("");
+    nfc_error_label_->set_text("");
 
-   UserNameErrorLabel->set_text("");
-   PasswordErrorLabel->set_text("");
-   RPasswordErrorLabel->set_text("");
-   NfcErrorLabel->set_text("");
-   CreateUserMode = 0;
-   UserEditMode = 0;
+    username_entry_->set_text("");
+    password_entry_->set_text("");
+    repeat_password_entry_->set_text("");
+    uid_text_view_->get_buffer()->set_text("");
 
-    UserNameEntry->set_text("");
-    PasswordEntry->set_text("");
-    RPasswordEntry->set_text("");
-    UserUidText->get_buffer()->set_text("");
-    EditedUser= nullptr;
-}
-
-void UserCreateStack::CreateUser(){
-    reset();
-    CreateUserMode = 1;
-    UserGenerateButton->set_label("Crear usuari");
+    create_mode_ = false;
+    edit_mode_   = false;
+    edited_user_ = nullptr;
 }
