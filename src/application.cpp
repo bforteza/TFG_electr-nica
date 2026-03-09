@@ -1,81 +1,52 @@
 #include "application.h"
 #include <iostream>
-void Application::set_KeySelectWindow(){
-//    get_active_window().hide()
 
+Application::Application()
+    : Gtk::Application("main.application")
+{}
 
-}
-Application::Application():
-    Gtk::Application("main.application")
-{
-    //ctor
-}
+Application::~Application() {}
 
-Application::~Application()
-{
-    //dtor
-}
 Glib::RefPtr<Application> Application::create() {
     return Glib::RefPtr<Application>(new Application());
 }
 
-Window *Application::createWindow() {
+Window* Application::CreateWindow() {
     auto window = Window::create();
     add_window(*window);
-    window->signal_hide().connect(sigc::bind(sigc::mem_fun(*this, &Application::on_hide_window), window));
+    window->signal_hide().connect(
+        sigc::bind(sigc::mem_fun(*this, &Application::OnHideWindow), window));
     return window;
 }
 
 void Application::on_activate() {
     try {
-         auto window = Window::create();
-        add_window(*window);
-        window->signal_hide().connect(sigc::bind(sigc::mem_fun(*this, &Application::on_hide_window), window));
+        auto window = CreateWindow();
         window->present();
-    } catch (const Glib::Error &ex) {
+    } catch (const Glib::Error& ex) {
         std::cerr << "Application::on_activate(): " << ex.what() << std::endl;
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         std::cerr << "Application::on_activate(): " << ex.what() << std::endl;
     }
-
 }
 
 void Application::on_startup() {
     Gtk::Application::on_startup();
-
-    //añadir acciones
-/*
-    auto builder = Gtk::Builder::create();
-    try {
-        builder->add_from_resource("ui/menu.glade");
-    } catch (const Glib::Error &ex) {
-        std::cerr << "Application::on_startup(): " << ex.what() << std::endl;
-        return;
-    }
-
-   */
+    // TODO: registrar acciones globales (Gio::Action) y mover aquí
+    // la inicialización de BD y NFC desde main.cpp para poder mostrar
+    // errores fatales con un diálogo GTK en lugar de cerr + return -1.
 }
 
-void Application::on_hide_window(Gtk::Window *window) {
+void Application::OnHideWindow(Gtk::Window* window) {
     delete window;
 }
-/*
-void Application::on_action_preferences() {
-    try {
-        auto prefsDialog = Preferences::create(*get_active_window());
-        prefsDialog->present();
-        prefsDialog->signal_hide().connect(sigc::bind(sigc::mem_fun(*this, &Application::on_hide_window), prefsDialog));
-    } catch (const Glib::Error &ex) {
-        std::cerr << "Application::on_action_preferences(): " << ex.what() << std::endl;
-    } catch (const std::exception &ex) {
-        std::cerr << "Application::on_action_preferences(): " << ex.what() << std::endl;
-    }
-}
-*/
-void Application::on_action_quit() {
-    auto windows = get_windows();
-    for (auto window : windows) {
+
+void Application::OnActionQuit() {
+    for (auto window : get_windows())
         window->hide();
-    }
     quit();
+}
+
+void Application::SetKeySelectWindow() {
+    // TODO: navegar a la pantalla de selección/devolución de llave.
 }

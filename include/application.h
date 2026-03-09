@@ -1,29 +1,40 @@
-#ifndef APLICATION_H
-#define APLICATION_H
+#ifndef APPLICATION_H
+#define APPLICATION_H
 
 #include <gtkmm/application.h>
 #include "window.h"
 
-class Application : public Gtk::Application
-{
-    public:
+// Punto de entrada de la aplicación GTK.
+// Gestiona el ciclo de vida: arranque, creación de ventana y cierre limpio.
+class Application : public Gtk::Application {
+public:
     virtual ~Application() override;
 
+    // Crea la instancia singleton de la aplicación.
     static Glib::RefPtr<Application> create();
 
-    private:
+private:
     Application();
 
-    Window* createWindow();
+    // Crea y registra una ventana principal en la aplicación.
+    Window* CreateWindow();
 
+    // Llamado por GTK al activar la aplicación (primera ejecución).
+    // Crea la ventana principal y la muestra.
     void on_activate() override;
+
+    // Llamado por GTK antes de on_activate(). Punto de inicialización
+    // de recursos globales (acciones, menús, etc.).
     void on_startup() override;
-    void on_hide_window(Gtk::Window* window);
 
-    void on_action_quit();
+    // Libera la ventana cuando se cierra (recibe señal hide).
+    void OnHideWindow(Gtk::Window* window);
 
-    void set_KeySelectWindow();
+    // Oculta todas las ventanas y termina el bucle principal.
+    void OnActionQuit();
+
+    // TODO: navegar a la pantalla de selección de llave (pendiente de implementar).
+    void SetKeySelectWindow();
 };
 
-
-#endif // APLICATION_H
+#endif // APPLICATION_H
