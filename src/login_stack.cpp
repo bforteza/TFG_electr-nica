@@ -50,15 +50,15 @@ LoginStack::LoginStack(const Glib::RefPtr<Gtk::Builder>& builder)
 
     // Conecta el dispatcher del NfcManager para recibir notificaciones
     // en el hilo principal de GTK cuando se detecta un dispositivo.
-    nfcman->aviso.connect([&]() {
-        this->OnNfcDetected(nfcman->Uid);
+    nfcman->dispatcher.connect([&]() {
+        this->OnNfcDetected(nfcman->uid);
     });
 }
 
 void LoginStack::Start()
 {
     error_label_->set_text("");
-    nfcman->startPolling();
+    nfcman->StartPolling();
 }
 
 void LoginStack::RefreshLabels()
@@ -99,11 +99,11 @@ void LoginStack::OnNfcDetected(const std::string& uid)
         // Dos dispositivos con el mismo UID indica un error de configuración en la BD.
         error_label_->set_text(Tr().login.error_duplicate_uid);
     } else if (person_count) {
-        nfcman->stopPolling();
+        nfcman->StopPolling();
         user_logged.emit(std::make_shared<kdb::Person>(
             litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).one()));
     } else {
-        nfcman->stopPolling();
+        nfcman->StopPolling();
         key_logged.emit(std::make_shared<kdb::Key>(
             litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid
                                           && kdb::Key::Active == 1).one()));
