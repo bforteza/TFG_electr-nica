@@ -41,10 +41,10 @@ UsersViewStack::UsersViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     users_tree_view_->set_model(tree_model_);
 
     // Las cadenas de cabecera se establecen en RefreshLabels(); aquí solo se añaden las columnas.
-    users_tree_view_->append_column("Id",  columns_.IdCol);
-    users_tree_view_->append_column("",    columns_.m_col_name);
-    users_tree_view_->append_column("",    columns_.m_col_password);
-    users_tree_view_->append_column("",    columns_.UidCol);
+    users_tree_view_->append_column("Id",  columns_.id_col);
+    users_tree_view_->append_column("",    columns_.name_col);
+    users_tree_view_->append_column("",    columns_.password_col);
+    users_tree_view_->append_column("",    columns_.uid_col);
 
     id_column_       = users_tree_view_->get_column(0);
     name_column_     = users_tree_view_->get_column(1);
@@ -99,7 +99,7 @@ void UsersViewStack::select(std::vector<kdb::Person> users) {
 int UsersViewStack::GetSelectionId() {
     auto sel = users_tree_view_->get_selection();
     if (auto iter = sel->get_selected())
-        return (*iter)[columns_.IdCol];
+        return (*iter)[columns_.id_col];
     return 0;
 }
 
@@ -107,7 +107,7 @@ std::shared_ptr<kdb::Person> UsersViewStack::GetSelectedPerson() {
     auto sel = users_tree_view_->get_selection();
     if (auto iter = sel->get_selected())
         return std::make_shared<kdb::Person>(
-            litesql::select<kdb::Person>(*db, kdb::Person::Id == (*iter)[columns_.IdCol]).one());
+            litesql::select<kdb::Person>(*db, kdb::Person::Id == (*iter)[columns_.id_col]).one());
     return nullptr;
 }
 
@@ -115,10 +115,10 @@ void UsersViewStack::Refresh() {
     tree_model_->clear();
     for (auto& person : current_users_) {
         Gtk::TreeModel::Row row = *(tree_model_->append());
-        row[columns_.IdCol]        = (int)person.id;
-        row[columns_.m_col_name]   = person.name;
-        row[columns_.m_col_password] = person.password;
-        row[columns_.UidCol]       = person.uid;
+        row[columns_.id_col]        = (int)person.id;
+        row[columns_.name_col]   = person.name;
+        row[columns_.password_col] = person.password;
+        row[columns_.uid_col]       = person.uid;
     }
 }
 

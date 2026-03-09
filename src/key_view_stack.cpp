@@ -52,13 +52,13 @@ KeyViewStack::KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     keys_tree_view_->set_model(tree_model_);
 
     // Las cadenas de cabecera se establecen en RefreshLabels(); aquí solo se añaden las columnas.
-    keys_tree_view_->append_column("Id",          columns_.IdCol);
-    keys_tree_view_->append_column("",            columns_.NameCol);
-    keys_tree_view_->append_column("",            columns_.UbiCol);
-    keys_tree_view_->append_column("",            columns_.CommentaryCol);
-    keys_tree_view_->append_column("",            columns_.PosCol);
-    keys_tree_view_->append_column("",            columns_.ActiveCol);
-    keys_tree_view_->append_column("",            columns_.KeeperCol);
+    keys_tree_view_->append_column("Id",          columns_.id_col);
+    keys_tree_view_->append_column("",            columns_.name_col);
+    keys_tree_view_->append_column("",            columns_.ubi_col);
+    keys_tree_view_->append_column("",            columns_.commentary_col);
+    keys_tree_view_->append_column("",            columns_.pos_col);
+    keys_tree_view_->append_column("",            columns_.active_col);
+    keys_tree_view_->append_column("",            columns_.keeper_col);
 
     id_column_          = keys_tree_view_->get_column(0);
     name_column_        = keys_tree_view_->get_column(1);
@@ -69,7 +69,7 @@ KeyViewStack::KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     keeper_column_      = keys_tree_view_->get_column(6);
 
     keys_tree_view_->set_enable_search(true);
-    keys_tree_view_->set_search_column(columns_.NameCol);
+    keys_tree_view_->set_search_column(columns_.name_col);
 
     // Suscribe RefreshLabels al cambio de idioma global.
     language_changed.connect(sigc::mem_fun(*this, &KeyViewStack::RefreshLabels));
@@ -127,7 +127,7 @@ void KeyViewStack::select(std::vector<kdb::Key> keys) {
 int KeyViewStack::GetSelectionId() {
     auto sel = keys_tree_view_->get_selection();
     if (auto iter = sel->get_selected())
-        return (*iter)[columns_.IdCol];
+        return (*iter)[columns_.id_col];
     return 0;
 }
 
@@ -135,7 +135,7 @@ std::shared_ptr<kdb::Key> KeyViewStack::GetSelectedKey() {
     auto sel = keys_tree_view_->get_selection();
     if (auto iter = sel->get_selected())
         return std::make_shared<kdb::Key>(
-            litesql::select<kdb::Key>(*db, kdb::Key::Id == (*iter)[columns_.IdCol]).one());
+            litesql::select<kdb::Key>(*db, kdb::Key::Id == (*iter)[columns_.id_col]).one());
     return nullptr;
 }
 
@@ -143,14 +143,14 @@ void KeyViewStack::Refresh() {
     tree_model_->clear();
     for (auto& key : current_keys_) {
         Gtk::TreeModel::Row row = *(tree_model_->append());
-        row[columns_.IdCol]          = key.id;
-        row[columns_.NameCol]        = (Glib::ustring)key.name;
-        row[columns_.UbiCol]         = key.ubi;
-        row[columns_.CommentaryCol]  = key.commentary;
-        row[columns_.PosCol]         = PosToString(key.pos);
-        row[columns_.ActiveCol]      = key.active;
+        row[columns_.id_col]          = key.id;
+        row[columns_.name_col]        = (Glib::ustring)key.name;
+        row[columns_.ubi_col]         = key.ubi;
+        row[columns_.commentary_col]  = key.commentary;
+        row[columns_.pos_col]         = PosToString(key.pos);
+        row[columns_.active_col]      = key.active;
         try {
-            row[columns_.KeeperCol] = (Glib::ustring)key.keeper().get().one().name;
+            row[columns_.keeper_col] = (Glib::ustring)key.keeper().get().one().name;
         } catch (...) {}
     }
 }
