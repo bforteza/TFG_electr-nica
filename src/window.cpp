@@ -43,7 +43,7 @@ void Window::OnBackButtonClicked() {
 // Navega al panel de administración y lo inicializa con el usuario identificado.
 void Window::OnUserLogged(std::shared_ptr<kdb::Person> person) {
     main_stack_->set_visible_child("AdminView");
-    home_stack_.PersonLogg(person);
+    home_stack_.PersonLogged(person);
 }
 
 // TODO: implementar devolución de llave por NFC (navegar a SolenoidPanel).

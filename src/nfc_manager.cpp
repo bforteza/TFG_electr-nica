@@ -66,7 +66,7 @@ void NfcManager::PollLoop() {
 }
 
 void NfcManager::StartPolling() {
-    if (polling_ || worker_.joinable()) return;
+    if (!device_ || polling_ || worker_.joinable()) return;
     polling_ = true;
     worker_ = std::thread(&NfcManager::PollLoop, this);
 }

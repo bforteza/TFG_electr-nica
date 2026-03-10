@@ -1,6 +1,10 @@
 # Binarios compilados
 bin/
 obj/
+*.o
+
+# Makefile de desarrollo local (solo para PC, no para Raspberry Pi)
+Makefile
 
 # Base de datos local
 *.db
