@@ -6,6 +6,7 @@
 #include <gtkmm/stack.h>
 #include "home_stack.h"
 #include "login_stack.h"
+#include "solenoid_panel.h"
 
 // Ventana principal de la aplicación.
 // Gestiona la navegación entre las pantallas principales:
@@ -28,15 +29,19 @@ private:
     // Stack raíz que contiene LoginStack y HomeStack.
     Gtk::Stack* main_stack_;
 
-    LoginStack login_stack_;
-    HomeStack  home_stack_;
+    LoginStack    login_stack_;
+    HomeStack     home_stack_;
+    SolenoidPanel solenoid_panel_;
 
     // Llamado cuando LoginStack identifica un usuario válido.
     void OnUserLogged(std::shared_ptr<kdb::Person> person);
 
-    // Llamado cuando LoginStack identifica una llave válida (devolución).
-    // TODO: navegar a KeyLoginStack cuando esté implementado.
+    // Llamado cuando LoginStack identifica una llave válida.
+    // Desvincula al portador actual y navega al SolenoidPanel en modo RETURN.
     void OnKeyLogged(std::shared_ptr<kdb::Key> key);
+
+    // Llamado por HomeStack para abrir el SolenoidPanel.
+    void OnOpenSolenoid(std::shared_ptr<kdb::Key> key, SolenoidPanel::Mode mode);
 };
 
 #endif // WINDOW_H

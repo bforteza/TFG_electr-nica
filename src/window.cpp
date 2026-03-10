@@ -7,8 +7,9 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
                const Glib::RefPtr<Gtk::Builder>& builder)
     : Gtk::ApplicationWindow(cobject),
       builder_(builder),
+      login_stack_(builder),
       home_stack_(builder, this),
-      login_stack_(builder)
+      solenoid_panel_(builder, this)
 {
     builder->get_widget("PantallasStack", main_stack_);
     if (!main_stack_) {
@@ -18,6 +19,17 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
     // Conecta las señales del login con los manejadores de esta ventana.
     login_stack_.user_logged.connect(sigc::mem_fun(*this, &Window::OnUserLogged));
     login_stack_.key_logged.connect(sigc::mem_fun(*this, &Window::OnKeyLogged));
+
+    // Conecta la señal de HomeStack para abrir el SolenoidPanel.
+    home_stack_.key_view_stack_.signal_open_solenoid.connect(
+       sigc::mem_fun(*this, &Window::OnOpenSolenoid));
+
+    // Conecta las señales del SolenoidPanel para la navegación de retorno.
+    solenoid_panel_.signal_go_home.connect([this]() {
+        main_stack_->set_visible_child("AdminView");
+    });
+    solenoid_panel_.signal_logout.connect(
+        sigc::mem_fun(*this, &Window::OnBackButtonClicked));
 
     login_stack_.Start();
 }
@@ -46,7 +58,16 @@ void Window::OnUserLogged(std::shared_ptr<kdb::Person> person) {
     home_stack_.PersonLogged(person);
 }
 
-// TODO: implementar devolución de llave por NFC (navegar a SolenoidPanel).
+// Desvincula al portador actual de la llave y navega al SolenoidPanel (RETURN).
 void Window::OnKeyLogged(std::shared_ptr<kdb::Key> key) {
-    (void)key;
+    // Desvincula al portador actual antes de abrir el solenoide de retorno.
+    for (auto& keeper : key->keeper().get().all())
+        key->keeper().unlink(keeper);
+
+    OnOpenSolenoid(key, SolenoidPanel::Mode::RETURN);
+}
+
+void Window::OnOpenSolenoid(std::shared_ptr<kdb::Key> key, SolenoidPanel::Mode mode) {
+    solenoid_panel_.Setup(key, mode);
+    main_stack_->set_visible_child("KeySelect");
 }

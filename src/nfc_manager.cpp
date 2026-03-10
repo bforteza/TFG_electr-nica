@@ -31,6 +31,7 @@ NfcManager::~NfcManager() {
 }
 
 std::string NfcManager::NfcDetect(int timeout_ms) {
+    if (!device_) return "";
     auto start_time = std::chrono::steady_clock::now();
     nfc_target target;
     nfc_modulation mod[] = {{.nmt = NMT_ISO14443A, .nbr = NBR_106}};

@@ -9,6 +9,7 @@
 #include "user_create_stack.h"
 #include "key_create_stack.h"
 #include "key_view_stack.h"
+#include "solenoid_panel.h"
 #include "db_schema.hpp"
 #include "translations.h"
 
@@ -33,6 +34,9 @@ public:
     // Navega atrás: si estamos en AdminMainStack vuelve al login;
     // si no, retorna al panel anterior guardado en back_widget_.
     void OnBackButtonClicked();
+
+    //TODO: temporalmente publico hasta que conecte las señales
+    KeyViewStack key_view_stack_;
 
 private:
     // Ventana principal; se usa para volver al login desde el panel raíz.
@@ -62,6 +66,9 @@ private:
     // Botón para ir al historial de acciones (pendiente de implementar).
     Gtk::Button* history_button_;
 
+    // Botón para acceder al panel de control de solenoides (solo admin).
+    Gtk::Button* solenoid_panel_button_;
+
     // Etiqueta que muestra el nombre del usuario identificado.
     Gtk::Label* name_label_;
 
@@ -69,7 +76,7 @@ private:
     UsersViewStack  users_view_stack_;
     UserCreateStack user_create_stack_;
     KeyCreateStack  key_create_stack_;
-    KeyViewStack    key_view_stack_;
+   
 
     // Usuario actualmente identificado en el sistema.
     std::shared_ptr<kdb::Person> logged_person_;

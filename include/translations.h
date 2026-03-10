@@ -22,7 +22,7 @@ struct Translations {
 
     // --- HomeStack ---
     struct Home {
-        const char* btn_key_select;   // Ir al panel de apertura de llaves
+        const char* btn_solenoid_panel; // Abrir panel de control de solenoides
         const char* btn_create_key;
         const char* btn_create_user;
         const char* btn_view_keys;
@@ -82,6 +82,15 @@ struct Translations {
         const char* error_card_in_use;
     } key_create;
 
+    // --- SolenoidPanel ---
+    struct Solenoid {
+        const char* btn_repeat;        // Reactivar solenoide
+        const char* btn_take_another;  // Volver a KeyView para coger otra llave
+        const char* lbl_return;        // Prefijo "Devuelve en: "
+        const char* lbl_activated;     // Prefijo "Activado: " (modo admin)
+        const char* lbl_admin_title;   // Título panel admin
+    } solenoid;
+
     // --- KeyViewStack ---
     struct KeyView {
         const char* btn_take;         // Registrar recogida/devolución de llave
@@ -115,7 +124,7 @@ inline const Translations kTranslations[] = {
         },
         // home
         {
-            "Selecció de clau",
+            "Controlar clauers",
             "Crear clau",
             "Crear usuari",
             "Veure claus",
@@ -167,6 +176,14 @@ inline const Translations kTranslations[] = {
             "Atenció: posició no vàlida",
             "Atenció: tarjeta en us",
         },
+        // solenoid
+        {
+            "Repetir",
+            "Agafar una altra clau",
+            "Retorna a: ",
+            "Activat: ",
+            "Panel de control",
+        },
         // key_view
         {
             "Agafar clau",
@@ -193,7 +210,7 @@ inline const Translations kTranslations[] = {
         },
         // home
         {
-            "Selección de llave",
+            "Controlar cerraduras",
             "Crear llave",
             "Crear usuario",
             "Ver llaves",
@@ -245,6 +262,14 @@ inline const Translations kTranslations[] = {
             "Atención: posición no válida",
             "Atención: tarjeta en uso",
         },
+        // solenoid
+        {
+            "Repetir",
+            "Coger otra llave",
+            "Devuelve en: ",
+            "Activado: ",
+            "Panel de control",
+        },
         // key_view
         {
             "Coger llave",
@@ -271,7 +296,7 @@ inline const Translations kTranslations[] = {
         },
         // home
         {
-            "Key selection",
+            "Control panel",
             "Create key",
             "Create user",
             "View keys",
@@ -322,6 +347,14 @@ inline const Translations kTranslations[] = {
             "Unavailable positions:",
             "Warning: invalid position",
             "Warning: card already in use",
+        },
+        // solenoid
+        {
+            "Repeat",
+            "Take another key",
+            "Return to: ",
+            "Activated: ",
+            "Control panel",
         },
         // key_view
         {

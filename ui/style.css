@@ -96,3 +96,28 @@ treeview header button label {
     /* [AJUSTAR] Descripción/instrucciones del login */
     font-size: 16px;
 }
+
+
+/* --- SolenoidPanel (grid de posiciones) ------------------------- */
+
+/* Posición objetivo: verde — solenoide a abrir */
+button.slot-target {
+    background-image: none;
+    background-color: #1a9e1a;
+    color: white;
+    font-weight: bold;
+}
+
+/* Posición ocupada: rojo — tiene una llave asignada */
+button.slot-occupied {
+    background-image: none;
+    background-color: #bb2222;
+    color: white;
+}
+
+/* Posición libre: gris — sin llave asignada */
+button.slot-free {
+    background-image: none;
+    background-color: #707070;
+    color: white;
+}
