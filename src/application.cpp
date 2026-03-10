@@ -1,5 +1,8 @@
 #include "application.h"
 #include <iostream>
+#include <gtkmm/cssprovider.h>
+#include <gtkmm/stylecontext.h>
+#include <gdkmm/screen.h>
 
 Application::Application()
     : Gtk::Application("main.application")
@@ -32,6 +35,22 @@ void Application::on_activate() {
 
 void Application::on_startup() {
     Gtk::Application::on_startup();
+
+    // Carga la hoja de estilos global (fuentes, tamaños para pantalla táctil).
+    // Para ajustar tamaños edita ui/style.css — ver comentarios en ese archivo.
+    auto css = Gtk::CssProvider::create();
+    try {
+        css->load_from_path("./ui/style.css");
+    } catch (const Gtk::CssProviderError& ex) {
+        std::cerr << "CSS error: " << ex.what() << std::endl;
+    } catch (const Glib::Error& ex) {
+        std::cerr << "CSS load error: " << ex.what() << std::endl;
+    }
+    Gtk::StyleContext::add_provider_for_screen(
+        Gdk::Screen::get_default(),
+        css,
+        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
     // TODO: registrar acciones globales (Gio::Action) y mover aquí
     // la inicialización de BD y NFC desde main.cpp para poder mostrar
     // errores fatales con un diálogo GTK en lugar de cerr + return -1.

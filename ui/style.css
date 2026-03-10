@@ -1,0 +1,98 @@
+/* =============================================================
+ * Estilos globales — Armario de Llaves
+ * =============================================================
+ *
+ * AJUSTE DE TAMAÑOS:
+ *   Modifica las variables de la sección "Configuración" para
+ *   adaptar la UI a la resolución de la pantalla táctil.
+ *
+ *   Pantallas de referencia:
+ *     7" 800×480  → base: 14px, tabla: 12px, título: 18px
+ *     7" 1024×600 → base: 15px, tabla: 13px, título: 20px
+ *     5" 800×480  → base: 13px, tabla: 11px, título: 16px
+ * ============================================================= */
+
+
+/* --- Configuración (cambiar aquí) -------------------------- */
+
+/* Tamaño base: labels, botones, entradas */
+@define-color font_base       #000000;  /* color; los tamaños van abajo */
+
+/* Para cambiar tamaños globalmente, edita los bloques siguientes.
+ * No hay variables de tamaño en GTK3 CSS, así que los valores
+ * están agrupados por comentario para encontrarlos fácilmente. */
+
+
+/* --- Base general ------------------------------------------ */
+
+* {
+    /* [AJUSTAR] Tamaño base para todo lo no especificado abajo */
+    font-size: 18px;
+}
+
+
+/* --- Botones ----------------------------------------------- */
+
+/* Botones genéricos: formularios, acciones en listas, back... */
+button > label {
+    /* [AJUSTAR] */
+    font-size: 20px;
+    font-weight: 500;
+}
+
+/* Botones del menú principal: 6 botones que ocupan toda la pantalla */
+.menu-btn > label {
+    /* [AJUSTAR] */
+    font-size: 40px;
+    font-weight: bold;
+}
+
+/* Botones de idioma: pequeños, solo texto corto */
+#LangCaButton > label,
+#LangEsButton > label,
+#LangEnButton > label {
+    /* [AJUSTAR] */
+    font-size: 11px;
+}
+
+
+/* --- Entradas de texto ------------------------------------- */
+
+entry {
+    /* [AJUSTAR] Campos de texto y contraseña */
+    font-size: 18px;
+}
+
+
+/* --- Listas (TreeView) ------------------------------------- */
+
+treeview {
+    /* [AJUSTAR] Celdas de datos — más pequeño para caber más filas */
+    font-size: 25px;
+}
+
+treeview header button label {
+    /* [AJUSTAR] Cabeceras de columna */
+    font-size: 25px;
+    font-weight: bold;
+}
+
+
+/* --- Labels especiales ------------------------------------- */
+
+#NameLabel {
+    /* [AJUSTAR] Nombre del usuario identificado en HomeStack */
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#LoginTitleLabel {
+    /* [AJUSTAR] Título de la pantalla de login */
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#LoginDescLabel {
+    /* [AJUSTAR] Descripción/instrucciones del login */
+    font-size: 16px;
+}
