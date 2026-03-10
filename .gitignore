@@ -16,6 +16,7 @@ Makefile
 
 # Archivos temporales de Glade
 ui/#*#
+ui/*~
 
 # Archivos de sistema
 .DS_Store
