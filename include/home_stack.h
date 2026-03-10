@@ -5,6 +5,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/stack.h>
 #include <gtkmm/label.h>
+#include <sigc++/signal.h>
 #include "users_view_stack.h"
 #include "user_create_stack.h"
 #include "key_create_stack.h"
@@ -37,6 +38,9 @@ public:
 
     //TODO: temporalmente publico hasta que conecte las señales
     KeyViewStack key_view_stack_;
+
+    // Señal para abrir el SolenoidPanel (PICKUP al recoger llave, ADMIN desde botón).
+    sigc::signal<void, std::shared_ptr<kdb::Key>, SolenoidPanel::Mode> signal_open_solenoid;
 
 private:
     // Ventana principal; se usa para volver al login desde el panel raíz.
@@ -120,6 +124,9 @@ private:
 
     // Registra que el usuario identificado ha recogido la llave dada.
     void OnKeyKept(std::shared_ptr<kdb::Key> key);
+
+    // Abre el SolenoidPanel en modo ADMIN al pulsar el botón de solenoides.
+    void OnSolenoidPanelButtonClicked();
 };
 
 #endif // HOME_STACK_H

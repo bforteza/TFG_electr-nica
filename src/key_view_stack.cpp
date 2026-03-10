@@ -153,6 +153,7 @@ void KeyViewStack::Refresh() {
             row[columns_.keeper_col] = (Glib::ustring)key.keeper().get().one().name;
         } catch (...) {}
     }
+    ;
 }
 
 void KeyViewStack::Configure() {
