@@ -1,6 +1,7 @@
 #include "login_stack.h"
 #include "globals.h"
 #include "translations.h"
+#include "sound_manager.h"
 #include <sigc++/adaptors/bind.h>
 
 LoginStack::LoginStack(const Glib::RefPtr<Gtk::Builder>& builder)
@@ -80,8 +81,10 @@ void LoginStack::OnPasswordEntered()
         user_logged.emit(std::make_shared<kdb::Person>(
             litesql::select<kdb::Person>(*db, kdb::Person::Password == password).one()));
         error_label_->set_text("");
+        SoundManager::Play(SoundEvent::kLoginOk);
     } catch (...) {
         error_label_->set_text(Tr().login.error_invalid_credentials);
+        SoundManager::Play(SoundEvent::kLoginError);
     }
 }
 
@@ -95,15 +98,19 @@ void LoginStack::OnNfcDetected(const std::string& uid)
 
     if (person_count + key_count == 0) {
         error_label_->set_text(Tr().login.error_device_not_found);
+        SoundManager::Play(SoundEvent::kLoginError);
     } else if (person_count + key_count > 1) {
         // Dos dispositivos con el mismo UID indica un error de configuración en la BD.
         error_label_->set_text(Tr().login.error_duplicate_uid);
+        SoundManager::Play(SoundEvent::kLoginError);
     } else if (person_count) {
         nfcman->StopPolling();
+        SoundManager::Play(SoundEvent::kLoginOk);
         user_logged.emit(std::make_shared<kdb::Person>(
             litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).one()));
     } else {
         nfcman->StopPolling();
+        SoundManager::Play(SoundEvent::kKeyReturn);
         key_logged.emit(std::make_shared<kdb::Key>(
             litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid
                                           && kdb::Key::Active == 1).one()));

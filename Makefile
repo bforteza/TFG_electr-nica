@@ -3,12 +3,12 @@
 
 CXX      := g++
 CXXFLAGS := -Wall -fexceptions -g -std=c++17 \
-            $(shell pkg-config gtkmm-3.0 --cflags) \
+            $(shell pkg-config gtkmm-3.0 libcanberra-gtk3 --cflags) \
             -Iinclude \
             -I/usr/include \
             -I/usr/include/mariadb
 
-LDFLAGS  := $(shell pkg-config gtkmm-3.0 --libs) \
+LDFLAGS  := $(shell pkg-config gtkmm-3.0 libcanberra-gtk3 --libs) \
             /usr/local/lib/static/liblitesql.a \
             /usr/local/lib/static/liblitesql-util.a \
             -L/usr/lib/x86_64-linux-gnu \
@@ -18,6 +18,7 @@ LDFLAGS  := $(shell pkg-config gtkmm-3.0 --libs) \
 
 SRCS := main.cpp \
         src/application.cpp \
+        src/sound_manager.cpp \
         src/db_schema.cpp \
         src/globals.cpp \
         src/home_stack.cpp \

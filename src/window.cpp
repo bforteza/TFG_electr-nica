@@ -1,4 +1,5 @@
 #include "window.h"
+#include "sound_manager.h"
 
 // Ruta al archivo de interfaz gráfica, relativa al directorio de trabajo.
 static constexpr const char* kGladePath = "./ui/MainWindow.glade";
@@ -32,6 +33,10 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
         sigc::mem_fun(*this, &Window::OnBackButtonClicked));
 
     login_stack_.Start();
+
+    // Inicializa el sistema de audio y conecta sonido de click a todos los botones.
+    SoundManager::Init();
+    SoundManager::ConnectToAllButtons(this);
 }
 
 Window::~Window() {}

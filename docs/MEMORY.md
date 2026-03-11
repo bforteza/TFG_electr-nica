@@ -100,9 +100,26 @@ Probar en **VirtualBox + Raspberry Pi OS Desktop (64-bit, imagen .iso para PC)**
 - RF-01: Identificación NFC/password ✓ implementado
 - RF-02: Verificación de permisos ✓ implementado
 - RF-03: Control hardware (solenoides) ✗ pendiente
-- RF-04: Historial de acciones ✗ pendiente
+- RF-04: Historial de acciones ✗ pendiente (en progreso, ver plan abajo)
 - RF-05: Interfaz de gestión remota ✗ pendiente
 - RF-06: Múltiples idiomas ✗ pendiente (UI actualmente en catalán)
+
+## Plan de Implementación Activo
+
+### Sonido (libcanberra-gtk3)
+- Clase estática `SoundManager` en `include/sound_manager.h` + `src/sound_manager.cpp`
+- Archivos WAV en `assets/sounds/`
+- Eventos: LOGIN_OK, LOGIN_ERROR, SOLENOID_OPEN, KEY_RETURN, ERROR_TIMEOUT
+- Dep: libcanberra-gtk3-dev → añadir a Makefile con pkg-config
+
+### Historial (RF-04)
+- **BD**: tabla `History` creada via SQL directo (no LiteSQL regenerado)
+  - Columnas: id, timestamp, person_id (nullable), key_id (nullable), action (string), details (string)
+  - Acciones: LOGIN, LOGOUT, KEY_PICKUP, KEY_RETURN, USER_CREATE/EDIT/DELETE, KEY_CREATE/EDIT/DELETE, KEY_LINK/UNLINK
+- **UI**: nueva `HistoryViewStack` — Gtk::TreeView + filtros
+  - El botón `history_button_` en HomeStack ya existe, hay que conectarlo
+  - Añadir sub-vista "HistoryView" al inner_stack_ de HomeStack
+- **Registro**: añadir llamadas a `History::Add(...)` en LoginStack, SolenoidPanel, HomeStack (CRUD) y KeyViewStack
 
 ## Base de Datos
 - Backend: MariaDB corriendo en la Raspberry Pi, accesible por red local
