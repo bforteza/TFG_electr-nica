@@ -228,7 +228,10 @@ void HomeStack::OnKeyUnlinkUser(std::shared_ptr<kdb::Key> key) {
 }
 
 void HomeStack::OnKeyKept(std::shared_ptr<kdb::Key> key) {
-    // Registra en BD que el usuario tiene la llave, luego abre el solenoide.
+    // Si la llave ya tiene portador no se puede recoger.
+    if (key->keeper().get().count() > 0)
+        return;
+
     logged_person_->keepkeys().link(*key);
     signal_open_solenoid.emit(key, SolenoidPanel::Mode::PICKUP);
 }
