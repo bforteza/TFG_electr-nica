@@ -14,7 +14,6 @@ void SoundManager::Init() {
         "message",
         "complete",
         "dialog-error",
-        "dialog-warning",
     };
     for (const char* id : kAllEvents) {
         ca_context_cache(context_,
@@ -34,7 +33,6 @@ void SoundManager::Play(SoundEvent event) {
         case SoundEvent::kLoginOk:    event_id = "complete";       break;
         case SoundEvent::kLoginError: event_id = "dialog-error";   break;
         case SoundEvent::kKeyReturn:  event_id = "complete";       break;
-        case SoundEvent::kTimeout:    event_id = "dialog-warning"; break;
         default: return;
     }
 

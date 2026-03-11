@@ -9,7 +9,6 @@ enum class SoundEvent {
     kLoginOk,     // Identificación correcta
     kLoginError,  // Identificación incorrecta
     kKeyReturn,   // Devolución de llave
-    kTimeout,     // Tiempo de espera agotado
 };
 
 // Gestión de audio mediante libcanberra-gtk3.
