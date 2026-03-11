@@ -212,5 +212,5 @@ void KeyViewStack::OnDeleteKeyButtonClicked() {
 void KeyViewStack::OnKeepKeyButtonClicked() {
     auto key = GetSelectedKey();
     if (key)
-        signal_open_solenoid.emit(key, SolenoidPanel::Mode::PICKUP);
+        key_kept.emit(key);
 }

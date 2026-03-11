@@ -3,7 +3,11 @@
         {
             "cwd": "/home/tomeu/Desktop/Proyecto/TFG_electr-nica",
             "binaryPath": "/home/tomeu/Desktop/Proyecto/TFG_electr-nica/bin/Debug/Pruebas2",
-            "binaryArgs": []
+            "binaryArgs": [],
+            "env": {
+                "DISPLAY": ":0"
+            }
         }
-    ]
+    ],
+    "makefile.buildBeforeLaunch": true
 }

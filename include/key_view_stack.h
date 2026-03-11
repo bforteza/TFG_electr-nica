@@ -6,7 +6,6 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
-#include "solenoid_panel.h"
 #include "models.h"
 #include "db_schema.hpp"
 #include "translations.h"
@@ -36,8 +35,6 @@ public:
     // Señal para registrar que el usuario identificado ha recogido la llave.
     sigc::signal<void, std::shared_ptr<kdb::Key>> key_kept;
 
-    //Señal para abrir el SolenoidPanel en modo PICKUP
-    sigc::signal<void, std::shared_ptr<kdb::Key>, SolenoidPanel::Mode> signal_open_solenoid;
     // Muestra la lista de llaves para el usuario dado según su nivel de acceso.
     // access < 2: solo sus llaves asignadas. access >= 2: todas las llaves.
     void view(std::shared_ptr<kdb::Person> person);

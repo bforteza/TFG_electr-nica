@@ -36,9 +36,6 @@ public:
     // si no, retorna al panel anterior guardado en back_widget_.
     void OnBackButtonClicked();
 
-    //TODO: temporalmente publico hasta que conecte las señales
-    KeyViewStack key_view_stack_;
-
     // Señal para abrir el SolenoidPanel (PICKUP al recoger llave, ADMIN desde botón).
     sigc::signal<void, std::shared_ptr<kdb::Key>, SolenoidPanel::Mode> signal_open_solenoid;
 
@@ -80,7 +77,7 @@ private:
     UsersViewStack  users_view_stack_;
     UserCreateStack user_create_stack_;
     KeyCreateStack  key_create_stack_;
-   
+    KeyViewStack    key_view_stack_;
 
     // Usuario actualmente identificado en el sistema.
     std::shared_ptr<kdb::Person> logged_person_;

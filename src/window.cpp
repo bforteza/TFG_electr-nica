@@ -23,8 +23,6 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
     // Conecta las señales de HomeStack para abrir el SolenoidPanel.
     home_stack_.signal_open_solenoid.connect(
         sigc::mem_fun(*this, &Window::OnOpenSolenoid));
-    home_stack_.key_view_stack_.signal_open_solenoid.connect(
-        sigc::mem_fun(*this, &Window::OnOpenSolenoid));
 
     // Conecta las señales del SolenoidPanel para la navegación de retorno.
     solenoid_panel_.signal_go_home.connect([this]() {
