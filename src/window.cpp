@@ -1,5 +1,6 @@
 #include "window.h"
 #include "sound_manager.h"
+#include <gdk/gdkkeysyms.h>
 
 // Ruta al archivo de interfaz gráfica, relativa al directorio de trabajo.
 static constexpr const char* kGladePath = "./ui/MainWindow.glade";
@@ -37,6 +38,9 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
     // Inicializa el sistema de audio y conecta sonido de click a todos los botones.
     SoundManager::Init();
     SoundManager::ConnectToAllButtons(this);
+
+    if (getenv("KIOSK"))
+        fullscreen();
 }
 
 Window::~Window() {}
@@ -50,6 +54,14 @@ Window* Window::create() {
         throw std::runtime_error("No \"MainWindow\" object in MainWindow.glade");
     }
     return window;
+}
+
+bool Window::on_key_press_event(GdkEventKey* event) {
+    if (event->keyval == GDK_KEY_Escape) {
+        get_application()->quit();
+        return true;
+    }
+    return Gtk::ApplicationWindow::on_key_press_event(event);
 }
 
 void Window::OnBackButtonClicked() {
