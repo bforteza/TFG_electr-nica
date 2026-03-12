@@ -81,8 +81,9 @@ void SolenoidPanel::BuildWidgets() {
 
 void SolenoidPanel::Setup(std::shared_ptr<kdb::Key> key, Mode mode) {
     StopTimer();
-    current_key_  = key;
-    current_mode_ = mode;
+    current_key_       = key;
+    current_mode_      = mode;
+    active_admin_slot_ = -1;
 
     for (int i = 0; i < kRows * kCols; i++)
         slot_buttons_[i]->set_sensitive(mode == Mode::ADMIN);
@@ -204,12 +205,34 @@ void SolenoidPanel::OnActionButtonClicked() {
 }
 
 void SolenoidPanel::OnSlotButtonClicked(int idx) {
-    // Solo activo en modo ADMIN.
-    // TODO: llamar a I2cController::Activate(idx + 1)
-    for (int i = 0; i < kRows * kCols; i++) {
-        auto ctx = slot_buttons_[i]->get_style_context();
+    // Determina si un slot tiene llave asignada en la BD, para restaurar su clase CSS.
+    auto all_keys = litesql::select<kdb::Key>(*db).all();
+    auto IsOccupied = [&](int i) {
+        for (auto& k : all_keys)
+            if ((int)k.pos - 1 == i) return true;
+        return false;
+    };
+
+    // Desactiva siempre el slot actual si hay alguno activo.
+    if (active_admin_slot_ >= 0) {
+        // TODO: I2cController::Deactivate(active_admin_slot_ + 1)
+        auto ctx = slot_buttons_[active_admin_slot_]->get_style_context();
         ctx->remove_class("slot-target");
+        ctx->add_class(IsOccupied(active_admin_slot_) ? "slot-occupied" : "slot-free");
     }
-    slot_buttons_[idx]->get_style_context()->add_class("slot-target");
-    key_info_label_->set_text(Tr().solenoid.lbl_activated + PosToString(idx + 1));
+
+    if (active_admin_slot_ == idx) {
+        // Mismo slot: toggle off, no activar nada nuevo.
+        active_admin_slot_ = -1;
+        key_info_label_->set_text(Tr().solenoid.lbl_admin_title);
+    } else {
+        // Slot diferente: activa el nuevo.
+        // TODO: I2cController::Activate(idx + 1)
+        auto ctx = slot_buttons_[idx]->get_style_context();
+        ctx->remove_class("slot-occupied");
+        ctx->remove_class("slot-free");
+        ctx->add_class("slot-target");
+        active_admin_slot_ = idx;
+        key_info_label_->set_text(Tr().solenoid.lbl_activated + PosToString(idx + 1));
+    }
 }

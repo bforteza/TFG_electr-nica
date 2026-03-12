@@ -59,6 +59,7 @@ private:
     std::array<Gtk::Button*, kRows * kCols> slot_buttons_;
 
     int             countdown_;
+    int             active_admin_slot_ = -1;   // -1 = ninguno activo
     sigc::connection timer_conn_;
 
     // Crea el grid y la barra inferior y los añade a panel_box_.
