@@ -43,6 +43,9 @@ private:
     // Llamado por HomeStack para abrir el SolenoidPanel.
     void OnOpenSolenoid(std::shared_ptr<kdb::Key> key, SolenoidPanel::Mode mode);
 
+    // Recibe la posición seleccionada en modo SELECT y la reenvía a HomeStack.
+    void OnPositionSelected(int pos);
+
     // Cierra la aplicación al pulsar Escape.
     bool on_key_press_event(GdkEventKey* event) override;
 };

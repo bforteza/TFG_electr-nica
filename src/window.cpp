@@ -32,6 +32,8 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
     });
     solenoid_panel_.signal_logout.connect(
         sigc::mem_fun(*this, &Window::OnBackButtonClicked));
+    solenoid_panel_.signal_position_selected.connect(
+        sigc::mem_fun(*this, &Window::OnPositionSelected));
 
     login_stack_.Start();
 
@@ -82,6 +84,10 @@ void Window::OnKeyLogged(std::shared_ptr<kdb::Key> key) {
         key->keeper().unlink(keeper);
 
     OnOpenSolenoid(key, SolenoidPanel::Mode::RETURN);
+}
+
+void Window::OnPositionSelected(int pos) {
+    home_stack_.OnPositionSelected(pos);
 }
 
 void Window::OnOpenSolenoid(std::shared_ptr<kdb::Key> key, SolenoidPanel::Mode mode) {

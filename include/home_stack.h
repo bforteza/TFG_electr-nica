@@ -39,6 +39,9 @@ public:
     // Señal para abrir el SolenoidPanel (PICKUP al recoger llave, ADMIN desde botón).
     sigc::signal<void, std::shared_ptr<kdb::Key>, SolenoidPanel::Mode> signal_open_solenoid;
 
+    // Recibe la posición elegida en SELECT, rellena el formulario y vuelve a KeyCreate.
+    void OnPositionSelected(int pos);
+
 private:
     // Ventana principal; se usa para volver al login desde el panel raíz.
     Window* window_;
@@ -124,6 +127,10 @@ private:
 
     // Abre el SolenoidPanel en modo ADMIN al pulsar el botón de solenoides.
     void OnSolenoidPanelButtonClicked();
+
+    // Abre el SolenoidPanel en modo SELECT para elegir posición de una llave nueva.
+    void OnPositionSelectRequested();
+
 };
 
 #endif // HOME_STACK_H

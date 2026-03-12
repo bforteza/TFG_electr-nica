@@ -39,6 +39,12 @@ KeyCreateStack::KeyCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     add_uid_button_->signal_clicked().connect(
         sigc::mem_fun(*this, &KeyCreateStack::OnAddUidButtonClicked));
 
+    builder->get_widget("PositionPickerButton", position_picker_button_);
+    if (!position_picker_button_)
+        throw std::runtime_error("No \"PositionPickerButton\" object in MainWindow.glade");
+    position_picker_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyCreateStack::OnPositionPickerButtonClicked));
+
     builder->get_widget("KeyCreateNameLabel", name_label_);
     if (!name_label_)
         throw std::runtime_error("No \"KeyCreateNameLabel\" object in MainWindow.glade");
@@ -86,6 +92,7 @@ void KeyCreateStack::RefreshLabels() {
     // Botones de acción.
     add_user_button_->set_label(Tr().key_create.btn_add_users);
     add_uid_button_->set_label(Tr().key_create.btn_add_nfc);
+    position_picker_button_->set_label(Tr().key_create.btn_pick_position);
     // El botón de confirmar tiene etiqueta distinta según el modo activo.
     if (create_mode_)
         generate_button_->set_label(Tr().key_create.btn_create);
@@ -229,6 +236,14 @@ void KeyCreateStack::OnAddUidButtonClicked() {
         uid_text_view_->get_buffer()->set_text(uid);
     else
         uid_text_view_->get_buffer()->set_text(Tr().key_create.prompt_scan_card);
+}
+
+void KeyCreateStack::OnPositionPickerButtonClicked() {
+    position_select_requested.emit();
+}
+
+void KeyCreateStack::SetPosition(int pos) {
+    position_entry_->set_text(PosToString(pos));
 }
 
 // --- Auxiliares privados ---

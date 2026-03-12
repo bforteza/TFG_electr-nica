@@ -85,8 +85,12 @@ void SolenoidPanel::Setup(std::shared_ptr<kdb::Key> key, Mode mode) {
     current_mode_      = mode;
     active_admin_slot_ = -1;
 
-    for (int i = 0; i < kRows * kCols; i++)
-        slot_buttons_[i]->set_sensitive(mode == Mode::ADMIN);
+    // En SELECT la sensibilidad se asigna slot a slot en UpdateGrid (libre=sí, ocupado=no).
+    // En ADMIN todos son sensibles; en PICKUP/RETURN ninguno.
+    if (mode != Mode::SELECT) {
+        for (int i = 0; i < kRows * kCols; i++)
+            slot_buttons_[i]->set_sensitive(mode == Mode::ADMIN);
+    }
 
     UpdateGrid();
 
@@ -123,6 +127,12 @@ void SolenoidPanel::Setup(std::shared_ptr<kdb::Key> key, Mode mode) {
             action_button_->hide();
             countdown_label_->set_text("");
             break;
+        case Mode::SELECT:
+            key_info_label_->set_text(Tr().solenoid.lbl_select_title);
+            repeat_button_->hide();
+            action_button_->hide();
+            countdown_label_->set_text("");
+            break;
     }
 }
 
@@ -155,6 +165,10 @@ void SolenoidPanel::UpdateGrid() {
             ctx->add_class("slot-occupied");
         else
             ctx->add_class("slot-free");
+
+        // En SELECT: los slots libres son pulsables, los ocupados no.
+        if (current_mode_ == Mode::SELECT)
+            slot_buttons_[i]->set_sensitive(!occupied.count(i));
     }
 }
 
@@ -205,6 +219,14 @@ void SolenoidPanel::OnActionButtonClicked() {
 }
 
 void SolenoidPanel::OnSlotButtonClicked(int idx) {
+    // En modo SELECT: emite la posición elegida (1-based) y vuelve al HomeStack.
+    // Los slots ocupados ya son insensibles, así que idx siempre es una posición libre.
+    if (current_mode_ == Mode::SELECT) {
+        signal_position_selected.emit(idx + 1);
+        signal_go_home.emit();
+        return;
+    }
+
     // Determina si un slot tiene llave asignada en la BD, para restaurar su clase CSS.
     auto all_keys = litesql::select<kdb::Key>(*db).all();
     auto IsOccupied = [&](int i) {

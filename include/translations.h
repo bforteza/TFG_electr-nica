@@ -80,6 +80,7 @@ struct Translations {
         const char* error_position_unavailable; // Prefijo; se añaden posiciones tomadas
         const char* error_position_invalid;
         const char* error_card_in_use;
+        const char* btn_pick_position; // Botón para abrir el selector de posición
     } key_create;
 
     // --- SolenoidPanel ---
@@ -89,6 +90,7 @@ struct Translations {
         const char* lbl_return;        // Prefijo "Devuelve en: "
         const char* lbl_activated;     // Prefijo "Activado: " (modo admin)
         const char* lbl_admin_title;   // Título panel admin
+        const char* lbl_select_title;  // Título modo selección de posición
     } solenoid;
 
     // --- KeyViewStack ---
@@ -176,6 +178,7 @@ inline const Translations kTranslations[] = {
             "Posicions no disponibles:",
             "Atenció: posició no vàlida",
             "Atenció: tarjeta en us",
+            "Triar posició",
         },
         // solenoid
         {
@@ -184,6 +187,7 @@ inline const Translations kTranslations[] = {
             "Retorna a: ",
             "Activat: ",
             "Panel de control",
+            "Tria una posició lliure",
         },
         // key_view
         {
@@ -263,6 +267,7 @@ inline const Translations kTranslations[] = {
             "Posiciones no disponibles:",
             "Atención: posición no válida",
             "Atención: tarjeta en uso",
+            "Elegir posición",
         },
         // solenoid
         {
@@ -271,6 +276,7 @@ inline const Translations kTranslations[] = {
             "Devuelve en: ",
             "Activado: ",
             "Panel de control",
+            "Elige una posición libre",
         },
         // key_view
         {
@@ -350,6 +356,7 @@ inline const Translations kTranslations[] = {
             "Unavailable positions:",
             "Warning: invalid position",
             "Warning: card already in use",
+            "Pick position",
         },
         // solenoid
         {
@@ -358,6 +365,7 @@ inline const Translations kTranslations[] = {
             "Return to: ",
             "Activated: ",
             "Control panel",
+            "Choose a free position",
         },
         // key_view
         {

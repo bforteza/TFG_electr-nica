@@ -69,6 +69,9 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     key_view_stack_.key_unlink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
     key_view_stack_.users_view.connect(sigc::mem_fun(*this, &HomeStack::ShowUsersView));
     key_view_stack_.key_edit.connect(sigc::mem_fun(*this, &HomeStack::OnKeyEdit));
+
+    key_create_stack_.position_select_requested.connect(
+        sigc::mem_fun(*this, &HomeStack::OnPositionSelectRequested));
     key_view_stack_.key_kept.connect(sigc::mem_fun(*this, &HomeStack::OnKeyKept));
 
     // Suscribe RefreshLabels al cambio de idioma global.
@@ -255,6 +258,15 @@ void HomeStack::OnKeyKept(std::shared_ptr<kdb::Key> key) {
 
 void HomeStack::OnSolenoidPanelButtonClicked() {
     signal_open_solenoid.emit(nullptr, SolenoidPanel::Mode::ADMIN);
+}
+
+void HomeStack::OnPositionSelectRequested() {
+    signal_open_solenoid.emit(nullptr, SolenoidPanel::Mode::SELECT);
+}
+
+void HomeStack::OnPositionSelected(int pos) {
+    key_create_stack_.SetPosition(pos);
+    inner_stack_->set_visible_child("KeyCreateStack");
 }
 
 void HomeStack::HideButtons() {

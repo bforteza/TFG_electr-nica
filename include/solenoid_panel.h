@@ -21,7 +21,7 @@ public:
     // PICKUP: usuario recoge una llave asignada.
     // RETURN: usuario devuelve una llave (sin autenticación, por NFC de la llave).
     // ADMIN : administrador activa solenoides manualmente.
-    enum class Mode { PICKUP, RETURN, ADMIN };
+    enum class Mode { PICKUP, RETURN, ADMIN, SELECT };
 
     SolenoidPanel(const Glib::RefPtr<Gtk::Builder>& builder, Window* window);
 
@@ -33,6 +33,9 @@ public:
 
     // Emitida cuando el panel solicita cerrar sesión (RETURN o timeout de PICKUP).
     sigc::signal<void> signal_logout;
+
+    // Emitida en modo SELECT cuando el usuario elige una posición libre (1-based).
+    sigc::signal<void, int> signal_position_selected;
 
 private:
     static constexpr int kRows           = 4;

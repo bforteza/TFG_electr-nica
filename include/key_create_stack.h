@@ -6,6 +6,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/label.h>
 #include <gtkmm/textview.h>
+#include <sigc++/signal.h>
 #include <string>
 #include "db_schema.hpp"
 #include "translations.h"
@@ -24,8 +25,14 @@ public:
     // Inicializa el formulario en modo edición con los datos de la llave dada.
     void KeyEdit(std::shared_ptr<kdb::Key> key);
 
+    // Rellena el campo de posición con la posición seleccionada en el picker (1-based).
+    void SetPosition(int pos);
+
     // Actualiza los textos de botones al idioma activo.
     void RefreshLabels();
+
+    // Emitida cuando el usuario pulsa el botón de selección de posición.
+    sigc::signal<void> position_select_requested;
 
 private:
     // Campos de entrada del formulario.
@@ -42,6 +49,9 @@ private:
 
     // Botón para capturar el UID NFC de la llave.
     Gtk::Button* add_uid_button_;
+
+    // Botón para abrir el selector visual de posición.
+    Gtk::Button* position_picker_button_;
 
     // Etiquetas descriptivas de cada campo del formulario.
     Gtk::Label* name_label_;
@@ -78,6 +88,9 @@ private:
 
     // Lanza una lectura NFC puntual y vuelca el UID en uid_text_view_.
     void OnAddUidButtonClicked();
+
+    // Emite position_select_requested para abrir el selector de posición.
+    void OnPositionPickerButtonClicked();
 };
 
 #endif // KEY_CREATE_STACK_H
