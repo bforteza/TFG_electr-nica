@@ -2,6 +2,7 @@
 #include "window.h"
 #include "globals.h"
 #include <gtkmm/messagedialog.h>
+#include <set>
 
 HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     : window_(window),
@@ -150,7 +151,25 @@ void HomeStack::OnKeyCreateButtonClicked() {
 // --- Auxiliares internos ---
 
 void HomeStack::ShowKeysView(std::vector<kdb::Key> keys) {
-    key_view_stack_.view(keys);
+    int access = (int)logged_person_->a1 + 2 * (int)logged_person_->a2;
+
+    std::vector<kdb::Key> filtered;
+    if (access >= 2) {
+        for (auto& k : keys)
+            if ((bool)k.active)
+                filtered.push_back(k);
+    } else {
+        // A1: solo sus propias llaves activas (intersección con las del usuario visto).
+        auto my_keys = logged_person_->keys().get().all();
+        std::set<int> my_ids;
+        for (auto& k : my_keys)
+            my_ids.insert((int)k.id);
+        for (auto& k : keys)
+            if ((bool)k.active && my_ids.count((int)k.id))
+                filtered.push_back(k);
+    }
+
+    key_view_stack_.view(filtered);
     back_widget_ = inner_stack_->get_visible_child();
     inner_stack_->set_visible_child("ViewKeyStack");
 }

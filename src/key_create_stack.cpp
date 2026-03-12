@@ -148,9 +148,11 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         // Validar posición.
         std::string pos_str = position_entry_->get_text();
         if (PosFromString(pos_str)) {
-            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == PosFromString(pos_str)).count()) {
+            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == PosFromString(pos_str)
+                                              && kdb::Key::Active == true).count()) {
                 std::string msg = Tr().key_create.error_position_unavailable;
-                for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0)
+                for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0
+                                                              && kdb::Key::Active == true)
                                     .orderBy(kdb::Key::Pos).all())
                     msg += " " + PosToString((int)k.pos);
                 position_error_label_->set_text(msg);
@@ -168,6 +170,7 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             new_key.commentary  = (std::string)commentary_entry_->get_text();
             new_key.uid         = (std::string)uid_text_view_->get_buffer()->get_text();
             new_key.pos         = (int)PosFromString(position_entry_->get_text());
+            new_key.active      = true;
             new_key.update();
             auto key_ptr = std::make_shared<kdb::Key>(new_key);
             if (creator_) {
@@ -202,9 +205,11 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         std::string pos_str = position_entry_->get_text();
         if (PosFromString(pos_str)) {
             if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == PosFromString(pos_str)
-                                              && kdb::Key::Id != edited_key_->id).count()) {
+                                              && kdb::Key::Id != edited_key_->id
+                                              && kdb::Key::Active == true).count()) {
                 std::string msg = Tr().key_create.error_position_unavailable;
-                for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0)
+                for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0
+                                                              && kdb::Key::Active == true)
                                     .orderBy(kdb::Key::Pos).all())
                     msg += " " + PosToString((int)k.pos);
                 position_error_label_->set_text(msg);

@@ -142,7 +142,7 @@ void SolenoidPanel::UpdateGrid() {
     // Posiciones que tienen alguna llave asignada en la BD.
     std::set<int> occupied;
     try {
-        for (auto& k : litesql::select<kdb::Key>(*db).all()) {
+        for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Active == true).all()) {
             int p = (int)k.pos;
             if (p >= 1 && p <= 32)
                 occupied.insert(p - 1);   // índice 0-based
@@ -228,7 +228,7 @@ void SolenoidPanel::OnSlotButtonClicked(int idx) {
     }
 
     // Determina si un slot tiene llave asignada en la BD, para restaurar su clase CSS.
-    auto all_keys = litesql::select<kdb::Key>(*db).all();
+    auto all_keys = litesql::select<kdb::Key>(*db, kdb::Key::Active == true).all();
     auto IsOccupied = [&](int i) {
         for (auto& k : all_keys)
             if ((int)k.pos - 1 == i) return true;
