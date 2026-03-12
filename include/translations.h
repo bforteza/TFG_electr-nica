@@ -106,6 +106,7 @@ struct Translations {
         const char* col_position;
         const char* col_active;
         const char* col_keeper;
+        const char* err_key_in_use;
     } key_view;
 };
 
@@ -194,6 +195,7 @@ inline const Translations kTranslations[] = {
             "Seleccionar",
             "Eliminar",
             "Nom", "Ubicació", "Comentaris", "Posició", "Activa", "Agafada",
+            "Atenció: la clau ja està en ús",
         },
     },
     // ---- kSpanish ----
@@ -280,6 +282,7 @@ inline const Translations kTranslations[] = {
             "Seleccionar",
             "Eliminar",
             "Nombre", "Ubicación", "Comentarios", "Posición", "Activa", "En posesión de",
+            "Atención: la llave ya está en uso",
         },
     },
     // ---- kEnglish ----
@@ -366,6 +369,7 @@ inline const Translations kTranslations[] = {
             "Select",
             "Delete",
             "Name", "Location", "Comments", "Position", "Active", "Held by",
+            "Warning: key already in use",
         },
     },
 };

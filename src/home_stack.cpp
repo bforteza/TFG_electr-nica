@@ -1,6 +1,7 @@
 #include "home_stack.h"
 #include "window.h"
 #include "globals.h"
+#include <gtkmm/messagedialog.h>
 
 HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     : window_(window),
@@ -228,9 +229,24 @@ void HomeStack::OnKeyUnlinkUser(std::shared_ptr<kdb::Key> key) {
 }
 
 void HomeStack::OnKeyKept(std::shared_ptr<kdb::Key> key) {
-    // Si la llave ya tiene portador no se puede recoger.
-    if (key->keeper().get().count() > 0)
+    // Si la llave ya tiene portador, muestra aviso y cancela.
+    if (key->keeper().get().count() > 0) {
+        auto* dlg = new Gtk::MessageDialog(
+            *window_, Tr().key_view.err_key_in_use,
+            false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+        auto closed = std::make_shared<bool>(false);
+        dlg->signal_response().connect([dlg, closed](int) {
+            *closed = true;
+            dlg->hide();
+            delete dlg;
+        });
+        Glib::signal_timeout().connect_once([dlg, closed]() {
+            if (!*closed)
+                dlg->response(Gtk::RESPONSE_OK);
+        }, 2000);
+        dlg->show();
         return;
+    }
 
     logged_person_->keepkeys().link(*key);
     signal_open_solenoid.emit(key, SolenoidPanel::Mode::PICKUP);
