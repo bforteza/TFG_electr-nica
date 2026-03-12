@@ -139,6 +139,7 @@ void HomeStack::OnViewKeysButtonClicked() {
 }
 
 void HomeStack::OnKeyCreateButtonClicked() {
+    key_create_stack_.CreateKey(logged_person_);
     inner_stack_->set_visible_child("KeyCreateStack");
 }
 

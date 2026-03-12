@@ -18,7 +18,8 @@ public:
     KeyCreateStack(const Glib::RefPtr<Gtk::Builder>& builder);
 
     // Inicializa el formulario en modo creación (campos en blanco).
-    void CreateKey();
+    // El creador queda vinculado automáticamente a la llave (acceso + portador).
+    void CreateKey(std::shared_ptr<kdb::Person> creator);
 
     // Inicializa el formulario en modo edición con los datos de la llave dada.
     void KeyEdit(std::shared_ptr<kdb::Key> key);
@@ -62,6 +63,9 @@ private:
 
     // Llave que se está editando actualmente (nullptr en modo creación).
     std::shared_ptr<kdb::Key> edited_key_;
+
+    // Usuario que inició la creación; se vincula a la llave al crearla.
+    std::shared_ptr<kdb::Person> creator_;
 
     // Limpia el formulario y reinicia los modos.
     void Reset();

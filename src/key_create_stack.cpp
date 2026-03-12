@@ -95,8 +95,9 @@ void KeyCreateStack::RefreshLabels() {
 
 // --- Iniciadores públicos ---
 
-void KeyCreateStack::CreateKey() {
+void KeyCreateStack::CreateKey(std::shared_ptr<kdb::Person> creator) {
     Reset();
+    creator_     = creator;
     create_mode_ = true;
     RefreshLabels();
 }
@@ -161,8 +162,13 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             new_key.uid         = (std::string)uid_text_view_->get_buffer()->get_text();
             new_key.pos         = (int)PosFromString(position_entry_->get_text());
             new_key.update();
+            auto key_ptr = std::make_shared<kdb::Key>(new_key);
+            if (creator_) {
+                creator_->keys().link(*key_ptr);
+                creator_->keepkeys().link(*key_ptr);
+            }
             // Entra en modo edición con la llave recién creada.
-            KeyEdit(std::make_shared<kdb::Key>(new_key));
+            KeyEdit(key_ptr);
         }
 
     } else if (edit_mode_) {
@@ -241,4 +247,5 @@ void KeyCreateStack::Reset() {
     edit_mode_   = false;
     create_mode_ = false;
     edited_key_  = nullptr;
+    creator_     = nullptr;
 }
