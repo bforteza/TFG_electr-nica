@@ -69,10 +69,11 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     key_view_stack_.key_unlink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
     key_view_stack_.users_view.connect(sigc::mem_fun(*this, &HomeStack::ShowUsersView));
     key_view_stack_.key_edit.connect(sigc::mem_fun(*this, &HomeStack::OnKeyEdit));
+    key_view_stack_.key_kept.connect(sigc::mem_fun(*this, &HomeStack::OnKeyKept));
+    key_view_stack_.key_delete.connect(sigc::mem_fun(*this, &HomeStack::OnKeyDelete));
 
     key_create_stack_.position_select_requested.connect(
         sigc::mem_fun(*this, &HomeStack::OnPositionSelectRequested));
-    key_view_stack_.key_kept.connect(sigc::mem_fun(*this, &HomeStack::OnKeyKept));
 
     // Suscribe RefreshLabels al cambio de idioma global.
     language_changed.connect(sigc::mem_fun(*this, &HomeStack::RefreshLabels));
@@ -225,6 +226,8 @@ void HomeStack::OnKeyUnlinkUser(std::shared_ptr<kdb::Key> key) {
     if (aux_person_ == nullptr) {
         users_view_stack_.select(key->owners().get().all());
         back_widget_ = inner_stack_->get_visible_child();
+        user_selected_connection_ = users_view_stack_.user_selected.connect(
+            sigc::mem_fun(*this, &HomeStack::OnUserUnlinkKey));
         inner_stack_->set_visible_child("ViewUsersStack");
     } else {
         aux_person_->keys().unlink(*aux_key_);
@@ -254,6 +257,26 @@ void HomeStack::OnKeyKept(std::shared_ptr<kdb::Key> key) {
 
     logged_person_->keepkeys().link(*key);
     signal_open_solenoid.emit(key, SolenoidPanel::Mode::PICKUP);
+}
+
+void HomeStack::OnKeyDelete(std::shared_ptr<kdb::Key> key) {
+    if (key->keeper().get().count() == 0) {
+        auto* dlg = new Gtk::MessageDialog(
+            *window_, Tr().key_view.err_key_in_cabinet,
+            false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+        auto closed = std::make_shared<bool>(false);
+        dlg->signal_response().connect([dlg, closed](int) {
+            *closed = true; dlg->hide(); delete dlg;
+        });
+        Glib::signal_timeout().connect_once([dlg, closed]() {
+            if (!*closed) dlg->response(Gtk::RESPONSE_OK);
+        }, 2000);
+        dlg->show();
+        return;
+    }
+    key->active = false;
+    key->update();
+    key_view_stack_.view(logged_person_);
 }
 
 void HomeStack::OnSolenoidPanelButtonClicked() {

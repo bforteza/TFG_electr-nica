@@ -109,6 +109,7 @@ struct Translations {
         const char* col_active;
         const char* col_keeper;
         const char* err_key_in_use;
+        const char* err_key_in_cabinet; // No se puede desactivar: la llave está en el armario
     } key_view;
 };
 
@@ -200,6 +201,7 @@ inline const Translations kTranslations[] = {
             "Eliminar",
             "Nom", "Ubicació", "Comentaris", "Posició", "Activa", "Agafada",
             "Atenció: la clau ja està en ús",
+            "Atenció: la clau és a l'armari, no es pot desactivar",
         },
     },
     // ---- kSpanish ----
@@ -289,6 +291,7 @@ inline const Translations kTranslations[] = {
             "Eliminar",
             "Nombre", "Ubicación", "Comentarios", "Posición", "Activa", "En posesión de",
             "Atención: la llave ya está en uso",
+            "Atención: la llave está en el armario, no se puede desactivar",
         },
     },
     // ---- kEnglish ----
@@ -378,6 +381,7 @@ inline const Translations kTranslations[] = {
             "Delete",
             "Name", "Location", "Comments", "Position", "Active", "Held by",
             "Warning: key already in use",
+            "Warning: key is in the cabinet, cannot be deactivated",
         },
     },
 };

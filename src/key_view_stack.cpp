@@ -99,10 +99,15 @@ void KeyViewStack::view(std::shared_ptr<kdb::Person> person) {
     select_key_button_->hide();
     access_ = (int)person->a1 + 2 * (int)person->a2;
     Configure();
-    if (access_ >= 2)
-        current_keys_ = litesql::select<kdb::Key>(*db).all();
-    else
-        current_keys_ = person->keys().get().all();
+    if (access_ >= 2) {
+        current_keys_ = litesql::select<kdb::Key>(*db, kdb::Key::Active == true).all();
+    } else {
+        auto all = person->keys().get().all();
+        current_keys_.clear();
+        for (auto& k : all)
+            if ((bool)k.active)
+                current_keys_.push_back(k);
+    }
     Refresh();
 }
 
@@ -114,10 +119,13 @@ void KeyViewStack::view(std::vector<kdb::Key> keys) {
 }
 
 void KeyViewStack::select(std::vector<kdb::Key> keys) {
-    select_key_button_->show();
+    keep_key_button_->hide();
     add_user_button_->hide();
     remove_user_button_->hide();
     edit_key_button_->hide();
+    delete_key_button_->hide();
+    view_users_button_->hide();
+    select_key_button_->show();
     current_keys_ = keys;
     Refresh();
 }
@@ -157,11 +165,19 @@ void KeyViewStack::Refresh() {
 }
 
 void KeyViewStack::Configure() {
-    if (access_ >= 0) {
+    // Ocultar todos primero para no arrastrar estado de llamadas anteriores.
+    keep_key_button_->hide();
+    add_user_button_->hide();
+    remove_user_button_->hide();
+    edit_key_button_->hide();
+    delete_key_button_->hide();
+    view_users_button_->hide();
+
+    id_column_->set_visible(false);
+    active_column_->set_visible(false);
+
+    if (access_ >= 0)
         keep_key_button_->show();
-        id_column_->set_visible(false);
-        active_column_->set_visible(false);
-    }
     if (access_ >= 1) {
         add_user_button_->show();
         remove_user_button_->show();
@@ -206,7 +222,9 @@ void KeyViewStack::OnViewUsersButtonClicked() {
 }
 
 void KeyViewStack::OnDeleteKeyButtonClicked() {
-    // TODO: implementar eliminación de llave.
+    auto key = GetSelectedKey();
+    if (key)
+        key_delete.emit(key);
 }
 
 void KeyViewStack::OnKeepKeyButtonClicked() {

@@ -125,6 +125,9 @@ private:
     // Registra que el usuario identificado ha recogido la llave dada.
     void OnKeyKept(std::shared_ptr<kdb::Key> key);
 
+    // Desactiva la llave si tiene portador; muestra error si está en el armario.
+    void OnKeyDelete(std::shared_ptr<kdb::Key> key);
+
     // Abre el SolenoidPanel en modo ADMIN al pulsar el botón de solenoides.
     void OnSolenoidPanelButtonClicked();
 

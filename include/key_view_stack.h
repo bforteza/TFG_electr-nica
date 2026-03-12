@@ -32,6 +32,9 @@ public:
     // Señal para editar la llave seleccionada.
     sigc::signal<void, std::shared_ptr<kdb::Key>> key_edit;
 
+    // Señal para desactivar la llave seleccionada (HomeStack comprueba permisos y keeper).
+    sigc::signal<void, std::shared_ptr<kdb::Key>> key_delete;
+
     // Señal para registrar que el usuario identificado ha recogido la llave.
     sigc::signal<void, std::shared_ptr<kdb::Key>> key_kept;
 
