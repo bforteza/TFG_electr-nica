@@ -33,8 +33,9 @@ public:
     // Señal para mostrar las llaves asignadas al usuario seleccionado.
     sigc::signal<void, std::vector<kdb::Key>> keys_view;
 
-    // Muestra la lista de usuarios en modo normal (con botones de edición).
-    void view(std::vector<kdb::Person> users);
+    // Muestra la lista de usuarios en modo normal.
+    // access: nivel del usuario logueado; oculta botones de admin si access < 2.
+    void view(std::vector<kdb::Person> users, int access = 2);
 
     // Muestra la lista de usuarios en modo selección:
     // oculta botones de edición y muestra el botón "Seleccionar".
@@ -73,6 +74,9 @@ private:
 
     // Definición de columnas del modelo.
     ModelColumns columns_;
+
+    // Nivel de acceso del usuario logueado (para mostrar/ocultar botones de admin).
+    int access_ = 2;
 
     // Lista de usuarios actualmente mostrada en el TreeView.
     std::vector<kdb::Person> current_users_;

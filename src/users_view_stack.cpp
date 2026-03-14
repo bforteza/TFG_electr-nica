@@ -72,12 +72,18 @@ void UsersViewStack::RefreshLabels() {
 
 // --- Iniciadores públicos ---
 
-void UsersViewStack::view(std::vector<kdb::Person> users) {
+void UsersViewStack::view(std::vector<kdb::Person> users, int access) {
+    access_ = access;
     add_key_button_->show();
     remove_key_button_->show();
-    edit_button_->show();
     view_keys_button_->show();
     select_user_button_->hide();
+
+    // Editar usuario es solo para administradores.
+    if (access_ >= 2)
+        edit_button_->show();
+    else
+        edit_button_->hide();
 
     current_users_ = users;
     Refresh();

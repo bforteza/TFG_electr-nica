@@ -175,7 +175,8 @@ void HomeStack::ShowKeysView(std::vector<kdb::Key> keys) {
 }
 
 void HomeStack::ShowUsersView(std::vector<kdb::Person> users) {
-    users_view_stack_.view(users);
+    int access = (int)logged_person_->a1 + 2 * (int)logged_person_->a2;
+    users_view_stack_.view(users, access);
     back_widget_ = inner_stack_->get_visible_child();
     inner_stack_->set_visible_child("ViewUsersStack");
 }
@@ -196,8 +197,25 @@ void HomeStack::OnUserLinkKey(std::shared_ptr<kdb::Person> person) {
     aux_person_ = person;
 
     if (aux_key_ == nullptr) {
-        key_view_stack_.select(
-            (litesql::except(litesql::select<kdb::Key>(*db), aux_person_->keys().get())).all());
+        int access = (int)logged_person_->a1 + 2 * (int)logged_person_->a2;
+        std::vector<kdb::Key> available;
+        if (access >= 2) {
+            // Admin: todas las llaves activas no vinculadas aún al usuario.
+            available = litesql::except(
+                litesql::select<kdb::Key>(*db, kdb::Key::Active == true),
+                aux_person_->keys().get()
+            ).all();
+        } else {
+            // A1: solo sus propias llaves activas no vinculadas aún al usuario.
+            auto my_keys = logged_person_->keys().get().all();
+            auto already  = aux_person_->keys().get().all();
+            std::set<int> already_ids;
+            for (auto& k : already) already_ids.insert((int)k.id);
+            for (auto& k : my_keys)
+                if ((bool)k.active && !already_ids.count((int)k.id))
+                    available.push_back(k);
+        }
+        key_view_stack_.select(available);
         back_widget_ = inner_stack_->get_visible_child();
         key_selected_connection_ = key_view_stack_.key_selected.connect(
             sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
@@ -212,8 +230,12 @@ void HomeStack::OnKeyLinkUser(std::shared_ptr<kdb::Key> key) {
     aux_key_ = key;
 
     if (aux_person_ == nullptr) {
+        // Excluir admins (a2=true): no necesitan vinculación, acceden a todas las llaves.
         users_view_stack_.select(
-            (litesql::except(litesql::select<kdb::Person>(*db), aux_key_->owners().get())).all());
+            litesql::except(
+                litesql::select<kdb::Person>(*db, kdb::Person::A2 == false),
+                aux_key_->owners().get()
+            ).all());
         back_widget_ = inner_stack_->get_visible_child();
         user_selected_connection_ = users_view_stack_.user_selected.connect(
             sigc::mem_fun(*this, &HomeStack::OnUserLinkKey));
@@ -228,7 +250,22 @@ void HomeStack::OnUserUnlinkKey(std::shared_ptr<kdb::Person> person) {
     aux_person_ = person;
 
     if (aux_key_ == nullptr) {
-        key_view_stack_.select(person->keys().get().all());
+        int access = (int)logged_person_->a1 + 2 * (int)logged_person_->a2;
+        std::vector<kdb::Key> removable;
+        if (access >= 2) {
+            // Admin: todas las llaves vinculadas al usuario.
+            removable = person->keys().get().all();
+        } else {
+            // A1: solo las llaves del usuario que también son suyas.
+            auto my_keys  = logged_person_->keys().get().all();
+            auto his_keys = person->keys().get().all();
+            std::set<int> my_ids;
+            for (auto& k : my_keys) my_ids.insert((int)k.id);
+            for (auto& k : his_keys)
+                if (my_ids.count((int)k.id))
+                    removable.push_back(k);
+        }
+        key_view_stack_.select(removable);
         back_widget_ = inner_stack_->get_visible_child();
         key_selected_connection_ = key_view_stack_.key_selected.connect(
             sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
