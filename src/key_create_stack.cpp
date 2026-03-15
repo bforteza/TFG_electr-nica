@@ -106,6 +106,7 @@ void KeyCreateStack::CreateKey(std::shared_ptr<kdb::Person> creator) {
     Reset();
     creator_     = creator;
     create_mode_ = true;
+    add_user_button_->hide();
     RefreshLabels();
 }
 
@@ -118,6 +119,7 @@ void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> key) {
     position_entry_->set_text(PosToString(key->pos));
     uid_text_view_->get_buffer()->set_text((std::string)key->uid);
     edit_mode_ = true;
+    add_user_button_->show();
     RefreshLabels();
 }
 
@@ -232,7 +234,8 @@ void KeyCreateStack::OnGenerateButtonClicked() {
 }
 
 void KeyCreateStack::OnAddUserButtonClicked() {
-    // TODO: abrir vista de selección de usuarios para vincularlos a la llave.
+    if (edited_key_)
+        key_link_user.emit(edited_key_);
 }
 
 void KeyCreateStack::OnAddUidButtonClicked() {

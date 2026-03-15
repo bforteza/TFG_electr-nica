@@ -75,6 +75,10 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
 
     key_create_stack_.position_select_requested.connect(
         sigc::mem_fun(*this, &HomeStack::OnPositionSelectRequested));
+    key_create_stack_.key_link_user.connect(
+        sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
+    user_create_stack_.user_link_key.connect(
+        sigc::mem_fun(*this, &HomeStack::OnUserLinkKey));
 
     // Suscribe RefreshLabels al cambio de idioma global.
     language_changed.connect(sigc::mem_fun(*this, &HomeStack::RefreshLabels));

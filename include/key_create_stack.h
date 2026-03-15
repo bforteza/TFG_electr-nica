@@ -34,6 +34,9 @@ public:
     // Emitida cuando el usuario pulsa el botón de selección de posición.
     sigc::signal<void> position_select_requested;
 
+    // Emitida cuando el usuario pulsa "Añadir usuario" en modo edición.
+    sigc::signal<void, std::shared_ptr<kdb::Key>> key_link_user;
+
 private:
     // Campos de entrada del formulario.
     Gtk::Entry* key_name_entry_;

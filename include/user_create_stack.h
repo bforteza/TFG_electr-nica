@@ -23,6 +23,9 @@ public:
     // Inicializa el formulario en modo creación (campos en blanco).
     void CreateUser();
 
+    // Emitida cuando el usuario pulsa "Añadir llave" en modo edición.
+    sigc::signal<void, std::shared_ptr<kdb::Person>> user_link_key;
+
     // Actualiza los textos de etiquetas y botones al idioma activo.
     void RefreshLabels();
 
@@ -77,6 +80,9 @@ private:
 
     // Lanza una lectura NFC puntual y vuelca el UID en uid_text_view_.
     void OnAddUidButtonClicked();
+
+    // Emite user_link_key con el usuario en edición.
+    void OnAddKeyButtonClicked();
 };
 
 #endif // USER_CREATE_STACK_H

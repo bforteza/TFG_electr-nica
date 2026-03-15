@@ -32,7 +32,8 @@ UserCreateStack::UserCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     builder->get_widget("AddKeyButton", add_key_button_);
     if (!add_key_button_)
         throw std::runtime_error("No \"AddKeyButton\" object in MainWindow.glade");
-    // TODO: conectar AddKeyButton cuando el flujo de vinculación desde creación esté implementado.
+    add_key_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UserCreateStack::OnAddKeyButtonClicked));
 
     builder->get_widget("A0RadioButton", radio_level0_);
     if (!radio_level0_)
@@ -118,6 +119,7 @@ void UserCreateStack::RefreshLabels() {
 void UserCreateStack::CreateUser() {
     Reset();
     create_mode_ = true;
+    add_key_button_->hide();
     RefreshLabels();
 }
 
@@ -129,6 +131,7 @@ void UserCreateStack::UserEdit(std::shared_ptr<kdb::Person> person) {
     repeat_password_entry_->set_text((std::string)person->password);
     uid_text_view_->get_buffer()->set_text((std::string)person->uid);
     edit_mode_ = true;
+    add_key_button_->show();
     RefreshLabels();
 }
 
@@ -220,6 +223,11 @@ void UserCreateStack::OnAddUidButtonClicked() {
         uid_text_view_->get_buffer()->set_text(uid);
     else
         uid_text_view_->get_buffer()->set_text(Tr().user_create.prompt_scan_card);
+}
+
+void UserCreateStack::OnAddKeyButtonClicked() {
+    if (edited_user_)
+        user_link_key.emit(edited_user_);
 }
 
 // --- Auxiliares privados ---
