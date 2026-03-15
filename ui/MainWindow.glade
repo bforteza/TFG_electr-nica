@@ -1093,8 +1093,6 @@
                                     <property name="can-focus">True</property>
                                     <property name="hexpand">True</property>
                                     <property name="vexpand">True</property>
-                                    <property name="editable">False</property>
-                                    <property name="cursor-visible">False</property>
                                     <property name="accepts-tab">False</property>
                                   </object>
                                   <packing>

@@ -136,8 +136,10 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             valid = false;
         }
         // Posición seleccionada mediante el picker.
-        if (position_ == 0)
+        if (position_ == 0) {
+            position_picker_button_->set_label(Tr().key_create.error_position_invalid);
             valid = false;
+        }
 
         if (valid) {
             kdb::Key new_key(*db);
@@ -208,6 +210,7 @@ void KeyCreateStack::OnPositionPickerButtonClicked() {
 
 void KeyCreateStack::SetPosition(int pos) {
     position_ = pos;
+    position_picker_button_->set_label(Tr().key_create.btn_pick_position);
 }
 
 // --- Auxiliares privados ---

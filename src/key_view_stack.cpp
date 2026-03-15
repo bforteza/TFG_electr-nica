@@ -175,9 +175,12 @@ void KeyViewStack::Configure() {
 
     id_column_->set_visible(false);
     active_column_->set_visible(false);
+    pos_column_->set_visible(false);
 
     if (access_ >= 0)
         keep_key_button_->show();
+    if (access_ >= 2)
+        pos_column_->set_visible(true);
     if (access_ >= 1) {
         add_user_button_->show();
         remove_user_button_->show();
