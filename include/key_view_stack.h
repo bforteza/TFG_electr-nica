@@ -7,7 +7,7 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include "models.h"
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 #include "translations.h"
 
 // Sub-vista de lista de llaves dentro de HomeInnerStack.
@@ -37,6 +37,9 @@ public:
 
     // Señal para registrar que el usuario identificado ha recogido la llave.
     sigc::signal<void, std::shared_ptr<kdb::Key>> key_kept;
+
+    // Señal para ver el historial de la llave seleccionada.
+    sigc::signal<void, std::shared_ptr<kdb::Key>> key_history;
 
     // Muestra la lista de llaves para el usuario dado según su nivel de acceso.
     // access < 2: solo sus llaves asignadas. access >= 2: todas las llaves.
@@ -76,6 +79,9 @@ private:
 
     // Botón para eliminar la llave seleccionada (pendiente de implementar).
     Gtk::Button* delete_key_button_;
+
+    // Botón para ver el historial de la llave seleccionada.
+    Gtk::Button* history_key_button_;
 
     // Widget de lista para mostrar las llaves.
     Gtk::TreeView* keys_tree_view_;
@@ -118,6 +124,7 @@ private:
     void OnKeepKeyButtonClicked();
     void OnViewUsersButtonClicked();
     void OnDeleteKeyButtonClicked();
+    void OnHistoryKeyButtonClicked();
 };
 
 #endif // KEY_VIEW_STACK_H

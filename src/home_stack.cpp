@@ -1,6 +1,7 @@
 #include "home_stack.h"
 #include "window.h"
 #include "globals.h"
+#include "history_logger.h"
 #include <gtkmm/messagedialog.h>
 #include <set>
 
@@ -9,7 +10,8 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
       users_view_stack_(builder),
       user_create_stack_(builder),
       key_create_stack_(builder),
-      key_view_stack_(builder)
+      key_view_stack_(builder),
+      history_view_stack_(builder)
 {
     builder->get_widget("BackButtonAdmin", back_button_admin_);
     if (!back_button_admin_)
@@ -44,7 +46,8 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     builder->get_widget("HistoryButton", history_button_);
     if (!history_button_)
         throw std::runtime_error("No \"HistoryButton\" object in MainWindow.glade");
-    // TODO: conectar HistoryButton cuando el historial esté implementado.
+    history_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &HomeStack::OnHistoryButtonClicked));
 
     builder->get_widget("SolenoidPanelButton", solenoid_panel_button_);
     if (!solenoid_panel_button_)
@@ -65,6 +68,7 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     users_view_stack_.user_unlink.connect(sigc::mem_fun(*this, &HomeStack::OnUserUnlinkKey));
     users_view_stack_.keys_view.connect(sigc::mem_fun(*this, &HomeStack::ShowKeysView));
     users_view_stack_.user_edit.connect(sigc::mem_fun(*this, &HomeStack::OnUserEdit));
+    users_view_stack_.person_history.connect(sigc::mem_fun(*this, &HomeStack::OnPersonHistoryRequested));
 
     key_view_stack_.key_link.connect(sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
     key_view_stack_.key_unlink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
@@ -72,6 +76,7 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     key_view_stack_.key_edit.connect(sigc::mem_fun(*this, &HomeStack::OnKeyEdit));
     key_view_stack_.key_kept.connect(sigc::mem_fun(*this, &HomeStack::OnKeyKept));
     key_view_stack_.key_delete.connect(sigc::mem_fun(*this, &HomeStack::OnKeyDelete));
+    key_view_stack_.key_history.connect(sigc::mem_fun(*this, &HomeStack::OnKeyHistoryRequested));
 
     key_create_stack_.position_select_requested.connect(
         sigc::mem_fun(*this, &HomeStack::OnPositionSelectRequested));
@@ -109,6 +114,7 @@ void HomeStack::PersonLogged(std::shared_ptr<kdb::Person> person) {
         view_users_button_->show();
         user_create_button_->show();
         solenoid_panel_button_->show();
+        history_button_->show();
     }
 
     logged_person_ = person;
@@ -316,6 +322,7 @@ void HomeStack::OnKeyKept(std::shared_ptr<kdb::Key> key) {
     }
 
     logged_person_->keepkeys().link(*key);
+    history::LogPickup(logged_person_, key);
     signal_open_solenoid.emit(key, SolenoidPanel::Mode::PICKUP);
 }
 
@@ -336,6 +343,7 @@ void HomeStack::OnKeyDelete(std::shared_ptr<kdb::Key> key) {
     }
     key->active = false;
     key->update();
+    history::LogKeyDeactivated(logged_person_, key);
     key_view_stack_.view(logged_person_);
 }
 
@@ -359,4 +367,26 @@ void HomeStack::HideButtons() {
     view_keys_button_->hide();
     view_users_button_->hide();
     history_button_->hide();
+}
+
+void HomeStack::OnHistoryButtonClicked() {
+    history_view_stack_.view();
+    back_widget_ = inner_stack_->get_visible_child();
+    inner_stack_->set_visible_child("HistoryViewStack");
+}
+
+void HomeStack::OnKeyHistoryRequested(std::shared_ptr<kdb::Key> key) {
+    history_view_stack_.view(key);
+    back_widget_ = inner_stack_->get_visible_child();
+    inner_stack_->set_visible_child("HistoryViewStack");
+}
+
+void HomeStack::OnPersonHistoryRequested(std::shared_ptr<kdb::Person> person) {
+    history_view_stack_.view(person);
+    back_widget_ = inner_stack_->get_visible_child();
+    inner_stack_->set_visible_child("HistoryViewStack");
+}
+
+void HomeStack::OnSlotActivated(int pos, std::shared_ptr<kdb::Key> key) {
+    history::LogAdminOpen(logged_person_, key, pos);
 }

@@ -44,6 +44,12 @@ KeyViewStack::KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     delete_key_button_->signal_clicked().connect(
         sigc::mem_fun(*this, &KeyViewStack::OnDeleteKeyButtonClicked));
 
+    builder->get_widget("HistoryKeyButton", history_key_button_);
+    if (!history_key_button_)
+        throw std::runtime_error("No \"HistoryKeyButton\" object in MainWindow.glade");
+    history_key_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyViewStack::OnHistoryKeyButtonClicked));
+
     builder->get_widget("ViewKeysTree", keys_tree_view_);
     if (!keys_tree_view_)
         throw std::runtime_error("No \"ViewKeysTree\" object in MainWindow.glade");
@@ -84,6 +90,7 @@ void KeyViewStack::RefreshLabels() {
     keep_key_button_->set_label(Tr().key_view.btn_take);
     view_users_button_->set_label(Tr().key_view.btn_view_users);
     delete_key_button_->set_label(Tr().key_view.btn_delete);
+    history_key_button_->set_label(Tr().history_view.btn_history_key);
 
     name_column_->set_title(Tr().key_view.col_name);
     ubi_column_->set_title(Tr().key_view.col_location);
@@ -172,6 +179,7 @@ void KeyViewStack::Configure() {
     edit_key_button_->hide();
     delete_key_button_->hide();
     view_users_button_->hide();
+    history_key_button_->hide();
 
     id_column_->set_visible(false);
     active_column_->set_visible(false);
@@ -188,6 +196,8 @@ void KeyViewStack::Configure() {
         delete_key_button_->show();
         view_users_button_->show();
     }
+    if (access_ >= 2)
+        history_key_button_->show();
     keys_tree_view_->columns_autosize();
 }
 
@@ -234,4 +244,10 @@ void KeyViewStack::OnKeepKeyButtonClicked() {
     auto key = GetSelectedKey();
     if (key)
         key_kept.emit(key);
+}
+
+void KeyViewStack::OnHistoryKeyButtonClicked() {
+    auto key = GetSelectedKey();
+    if (key)
+        key_history.emit(key);
 }

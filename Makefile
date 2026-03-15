@@ -19,8 +19,10 @@ LDFLAGS  := $(shell pkg-config gtkmm-3.0 libcanberra-gtk3 --libs) \
 SRCS := main.cpp \
         src/application.cpp \
         src/sound_manager.cpp \
-        src/db_schema.cpp \
+        src/dbmanager.cpp \
         src/globals.cpp \
+        src/history_logger.cpp \
+        src/history_view_stack.cpp \
         src/home_stack.cpp \
         src/key_create_stack.cpp \
         src/key_view_stack.cpp \

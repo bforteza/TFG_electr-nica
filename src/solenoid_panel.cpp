@@ -256,5 +256,14 @@ void SolenoidPanel::OnSlotButtonClicked(int idx) {
         ctx->add_class("slot-target");
         active_admin_slot_ = idx;
         key_info_label_->set_text(Tr().solenoid.lbl_activated + PosToString(idx + 1));
+
+        // Buscar si hay una llave asignada a esta posición para el log.
+        std::shared_ptr<kdb::Key> slot_key;
+        for (auto& k : all_keys)
+            if ((int)k.pos - 1 == idx) {
+                slot_key = std::make_shared<kdb::Key>(k);
+                break;
+            }
+        signal_slot_activated.emit(idx + 1, slot_key);
     }
 }

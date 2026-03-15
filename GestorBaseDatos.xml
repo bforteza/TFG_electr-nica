@@ -2,7 +2,7 @@
 <!DOCTYPE database SYSTEM "lite sql.dtd"> 
 
 
-<database name="datos" namespace="kdb">
+<database name="DbManager" namespace="kdb">
     <object name="Person">
         <field name="name" type="string"/>
         <field name="password" type="string"/>
@@ -26,5 +26,14 @@
         <relate object="Person" handle="keepkeys" limit="one"/>
         <relate object="Key"    handle="keeper" limit="many"/>
     </relation>
+    <object name="HistoryEvent">
+        <field name="etype"      type="integer" default="0"/>
+        <field name="timestamp"  type="string"  default=""/>
+        <field name="keyid"      type="integer" default="0"/>
+        <field name="keyname"    type="string"  default=""/>
+        <field name="personid"   type="integer" default="0"/>
+        <field name="personname" type="string"  default=""/>
+        <field name="pos"        type="integer" default="0"/>
+    </object>
 </database>    
 

@@ -33,6 +33,12 @@ UsersViewStack::UsersViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     view_keys_button_->signal_clicked().connect(
         sigc::mem_fun(*this, &UsersViewStack::OnViewKeysButtonClicked));
 
+    builder->get_widget("HistoryPersonButton", history_person_button_);
+    if (!history_person_button_)
+        throw std::runtime_error("No \"HistoryPersonButton\" object in MainWindow.glade");
+    history_person_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UsersViewStack::OnHistoryPersonButtonClicked));
+
     builder->get_widget("ViewUsersTree", users_tree_view_);
     if (!users_tree_view_)
         throw std::runtime_error("No \"ViewUsersTree\" object in MainWindow.glade");
@@ -64,6 +70,7 @@ void UsersViewStack::RefreshLabels() {
     select_user_button_->set_label(Tr().users_view.btn_select);
     edit_button_->set_label(Tr().users_view.btn_edit);
     view_keys_button_->set_label(Tr().users_view.btn_view_keys);
+    history_person_button_->set_label(Tr().history_view.btn_history_person);
 
     name_column_->set_title(Tr().users_view.col_name);
     password_column_->set_title(Tr().users_view.col_password);
@@ -79,11 +86,14 @@ void UsersViewStack::view(std::vector<kdb::Person> users, int access) {
     view_keys_button_->show();
     select_user_button_->hide();
 
-    // Editar usuario es solo para administradores.
-    if (access_ >= 2)
+    // Editar usuario e historial son solo para administradores.
+    if (access_ >= 2) {
         edit_button_->show();
-    else
+        history_person_button_->show();
+    } else {
         edit_button_->hide();
+        history_person_button_->hide();
+    }
 
     current_users_ = users;
     Refresh();
@@ -95,6 +105,7 @@ void UsersViewStack::select(std::vector<kdb::Person> users) {
     remove_key_button_->hide();
     edit_button_->hide();
     view_keys_button_->hide();
+    history_person_button_->hide();
 
     current_users_ = users;
     Refresh();
@@ -161,4 +172,10 @@ void UsersViewStack::OnSelectUserButtonClicked() {
     auto person = GetSelectedPerson();
     if (person)
         user_selected.emit(person);
+}
+
+void UsersViewStack::OnHistoryPersonButtonClicked() {
+    auto person = GetSelectedPerson();
+    if (person)
+        person_history.emit(person);
 }

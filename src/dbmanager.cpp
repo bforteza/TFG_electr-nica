@@ -1,4 +1,4 @@
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 namespace kdb {
 using namespace litesql;
 KeyPersonRelationAcces::Row::Row(const litesql::Database& db, const litesql::Record& rec)
@@ -274,7 +274,7 @@ void Person::update() {
     Updates updates;
     addUpdates(updates);
     if (id != oldKey) {
-        if (!typeIsCorrect())
+        if (!typeIsCorrect()) 
             upcastCopy()->addIDUpdates(updates);
     }
     litesql::Persistent::update(updates);
@@ -282,7 +282,7 @@ void Person::update() {
 }
 void Person::del() {
     if (!typeIsCorrect()) {
-        std::auto_ptr<Person> p(upcastCopy());
+        std::unique_ptr<Person> p(upcastCopy());
         p->delRelations();
         p->onDelete();
         p->delRecord();
@@ -296,10 +296,10 @@ void Person::del() {
 bool Person::typeIsCorrect() const {
     return type == type__;
 }
-std::auto_ptr<Person> Person::upcast() const {
-    return auto_ptr<Person>(new Person(*this));
+std::unique_ptr<Person> Person::upcast() const {
+    return unique_ptr<Person>(new Person(*this));
 }
-std::auto_ptr<Person> Person::upcastCopy() const {
+std::unique_ptr<Person> Person::upcastCopy() const {
     Person* np = new Person(*this);
     np->id = id;
     np->type = type;
@@ -309,7 +309,7 @@ std::auto_ptr<Person> Person::upcastCopy() const {
     np->a1 = a1;
     np->a2 = a2;
     np->inDatabase = inDatabase;
-    return auto_ptr<Person>(np);
+    return unique_ptr<Person>(np);
 }
 std::ostream & operator<<(std::ostream& os, Person o) {
     os << "-------------------------------------" << std::endl;
@@ -507,7 +507,7 @@ void Key::update() {
     Updates updates;
     addUpdates(updates);
     if (id != oldKey) {
-        if (!typeIsCorrect())
+        if (!typeIsCorrect()) 
             upcastCopy()->addIDUpdates(updates);
     }
     litesql::Persistent::update(updates);
@@ -515,7 +515,7 @@ void Key::update() {
 }
 void Key::del() {
     if (!typeIsCorrect()) {
-        std::auto_ptr<Key> p(upcastCopy());
+        std::unique_ptr<Key> p(upcastCopy());
         p->delRelations();
         p->onDelete();
         p->delRecord();
@@ -529,10 +529,10 @@ void Key::del() {
 bool Key::typeIsCorrect() const {
     return type == type__;
 }
-std::auto_ptr<Key> Key::upcast() const {
-    return auto_ptr<Key>(new Key(*this));
+std::unique_ptr<Key> Key::upcast() const {
+    return unique_ptr<Key>(new Key(*this));
 }
-std::auto_ptr<Key> Key::upcastCopy() const {
+std::unique_ptr<Key> Key::upcastCopy() const {
     Key* np = new Key(*this);
     np->id = id;
     np->type = type;
@@ -543,7 +543,7 @@ std::auto_ptr<Key> Key::upcastCopy() const {
     np->active = active;
     np->uid = uid;
     np->inDatabase = inDatabase;
-    return auto_ptr<Key>(np);
+    return unique_ptr<Key>(np);
 }
 std::ostream & operator<<(std::ostream& os, Key o) {
     os << "-------------------------------------" << std::endl;
@@ -558,11 +558,215 @@ std::ostream & operator<<(std::ostream& os, Key o) {
     os << "-------------------------------------" << std::endl;
     return os;
 }
-DbSchema::DbSchema(std::string backendType, std::string connInfo)
+const litesql::FieldType HistoryEvent::Own::Id("id_",A_field_type_integer,"HistoryEvent_");
+const std::string HistoryEvent::type__("HistoryEvent");
+const std::string HistoryEvent::table__("HistoryEvent_");
+const std::string HistoryEvent::sequence__("HistoryEvent_seq");
+const litesql::FieldType HistoryEvent::Id("id_",A_field_type_integer,table__);
+const litesql::FieldType HistoryEvent::Type("type_",A_field_type_string,table__);
+const litesql::FieldType HistoryEvent::Etype("etype_",A_field_type_integer,table__);
+const litesql::FieldType HistoryEvent::Timestamp("timestamp_",A_field_type_string,table__);
+const litesql::FieldType HistoryEvent::Keyid("keyid_",A_field_type_integer,table__);
+const litesql::FieldType HistoryEvent::Keyname("keyname_",A_field_type_string,table__);
+const litesql::FieldType HistoryEvent::Personid("personid_",A_field_type_integer,table__);
+const litesql::FieldType HistoryEvent::Personname("personname_",A_field_type_string,table__);
+const litesql::FieldType HistoryEvent::Pos("pos_",A_field_type_integer,table__);
+void HistoryEvent::initValues() {
+}
+void HistoryEvent::defaults() {
+    id = 0;
+    etype = 0;
+    keyid = 0;
+    personid = 0;
+    pos = 0;
+}
+HistoryEvent::HistoryEvent(const litesql::Database& db)
+     : litesql::Persistent(db), id(Id), type(Type), etype(Etype), timestamp(Timestamp), keyid(Keyid), keyname(Keyname), personid(Personid), personname(Personname), pos(Pos) {
+    defaults();
+}
+HistoryEvent::HistoryEvent(const litesql::Database& db, const litesql::Record& rec)
+     : litesql::Persistent(db, rec), id(Id), type(Type), etype(Etype), timestamp(Timestamp), keyid(Keyid), keyname(Keyname), personid(Personid), personname(Personname), pos(Pos) {
+    defaults();
+    size_t size = (rec.size() > 9) ? 9 : rec.size();
+    switch(size) {
+    case 9: pos = convert<const std::string&, int>(rec[8]);
+        pos.setModified(false);
+    case 8: personname = convert<const std::string&, std::string>(rec[7]);
+        personname.setModified(false);
+    case 7: personid = convert<const std::string&, int>(rec[6]);
+        personid.setModified(false);
+    case 6: keyname = convert<const std::string&, std::string>(rec[5]);
+        keyname.setModified(false);
+    case 5: keyid = convert<const std::string&, int>(rec[4]);
+        keyid.setModified(false);
+    case 4: timestamp = convert<const std::string&, std::string>(rec[3]);
+        timestamp.setModified(false);
+    case 3: etype = convert<const std::string&, int>(rec[2]);
+        etype.setModified(false);
+    case 2: type = convert<const std::string&, std::string>(rec[1]);
+        type.setModified(false);
+    case 1: id = convert<const std::string&, int>(rec[0]);
+        id.setModified(false);
+    }
+}
+HistoryEvent::HistoryEvent(const HistoryEvent& obj)
+     : litesql::Persistent(obj), id(obj.id), type(obj.type), etype(obj.etype), timestamp(obj.timestamp), keyid(obj.keyid), keyname(obj.keyname), personid(obj.personid), personname(obj.personname), pos(obj.pos) {
+}
+const HistoryEvent& HistoryEvent::operator=(const HistoryEvent& obj) {
+    if (this != &obj) {
+        id = obj.id;
+        type = obj.type;
+        etype = obj.etype;
+        timestamp = obj.timestamp;
+        keyid = obj.keyid;
+        keyname = obj.keyname;
+        personid = obj.personid;
+        personname = obj.personname;
+        pos = obj.pos;
+    }
+    litesql::Persistent::operator=(obj);
+    return *this;
+}
+std::string HistoryEvent::insert(litesql::Record& tables, litesql::Records& fieldRecs, litesql::Records& valueRecs) {
+    tables.push_back(table__);
+    litesql::Record fields;
+    litesql::Record values;
+    fields.push_back(id.name());
+    values.push_back(id);
+    id.setModified(false);
+    fields.push_back(type.name());
+    values.push_back(type);
+    type.setModified(false);
+    fields.push_back(etype.name());
+    values.push_back(etype);
+    etype.setModified(false);
+    fields.push_back(timestamp.name());
+    values.push_back(timestamp);
+    timestamp.setModified(false);
+    fields.push_back(keyid.name());
+    values.push_back(keyid);
+    keyid.setModified(false);
+    fields.push_back(keyname.name());
+    values.push_back(keyname);
+    keyname.setModified(false);
+    fields.push_back(personid.name());
+    values.push_back(personid);
+    personid.setModified(false);
+    fields.push_back(personname.name());
+    values.push_back(personname);
+    personname.setModified(false);
+    fields.push_back(pos.name());
+    values.push_back(pos);
+    pos.setModified(false);
+    fieldRecs.push_back(fields);
+    valueRecs.push_back(values);
+    return litesql::Persistent::insert(tables, fieldRecs, valueRecs, sequence__);
+}
+void HistoryEvent::create() {
+    litesql::Record tables;
+    litesql::Records fieldRecs;
+    litesql::Records valueRecs;
+    type = type__;
+    std::string newID = insert(tables, fieldRecs, valueRecs);
+    if (id == 0)
+        id = newID;
+}
+void HistoryEvent::addUpdates(Updates& updates) {
+    prepareUpdate(updates, table__);
+    updateField(updates, table__, id);
+    updateField(updates, table__, type);
+    updateField(updates, table__, etype);
+    updateField(updates, table__, timestamp);
+    updateField(updates, table__, keyid);
+    updateField(updates, table__, keyname);
+    updateField(updates, table__, personid);
+    updateField(updates, table__, personname);
+    updateField(updates, table__, pos);
+}
+void HistoryEvent::addIDUpdates(Updates& updates) {
+}
+void HistoryEvent::getFieldTypes(std::vector<litesql::FieldType>& ftypes) {
+    ftypes.push_back(Id);
+    ftypes.push_back(Type);
+    ftypes.push_back(Etype);
+    ftypes.push_back(Timestamp);
+    ftypes.push_back(Keyid);
+    ftypes.push_back(Keyname);
+    ftypes.push_back(Personid);
+    ftypes.push_back(Personname);
+    ftypes.push_back(Pos);
+}
+void HistoryEvent::delRecord() {
+    deleteFromTable(table__, id);
+}
+void HistoryEvent::delRelations() {
+}
+void HistoryEvent::update() {
+    if (!inDatabase) {
+        create();
+        return;
+    }
+    Updates updates;
+    addUpdates(updates);
+    if (id != oldKey) {
+        if (!typeIsCorrect()) 
+            upcastCopy()->addIDUpdates(updates);
+    }
+    litesql::Persistent::update(updates);
+    oldKey = id;
+}
+void HistoryEvent::del() {
+    if (!typeIsCorrect()) {
+        std::unique_ptr<HistoryEvent> p(upcastCopy());
+        p->delRelations();
+        p->onDelete();
+        p->delRecord();
+    } else {
+        delRelations();
+        onDelete();
+        delRecord();
+    }
+    inDatabase = false;
+}
+bool HistoryEvent::typeIsCorrect() const {
+    return type == type__;
+}
+std::unique_ptr<HistoryEvent> HistoryEvent::upcast() const {
+    return unique_ptr<HistoryEvent>(new HistoryEvent(*this));
+}
+std::unique_ptr<HistoryEvent> HistoryEvent::upcastCopy() const {
+    HistoryEvent* np = new HistoryEvent(*this);
+    np->id = id;
+    np->type = type;
+    np->etype = etype;
+    np->timestamp = timestamp;
+    np->keyid = keyid;
+    np->keyname = keyname;
+    np->personid = personid;
+    np->personname = personname;
+    np->pos = pos;
+    np->inDatabase = inDatabase;
+    return unique_ptr<HistoryEvent>(np);
+}
+std::ostream & operator<<(std::ostream& os, HistoryEvent o) {
+    os << "-------------------------------------" << std::endl;
+    os << o.id.name() << " = " << o.id << std::endl;
+    os << o.type.name() << " = " << o.type << std::endl;
+    os << o.etype.name() << " = " << o.etype << std::endl;
+    os << o.timestamp.name() << " = " << o.timestamp << std::endl;
+    os << o.keyid.name() << " = " << o.keyid << std::endl;
+    os << o.keyname.name() << " = " << o.keyname << std::endl;
+    os << o.personid.name() << " = " << o.personid << std::endl;
+    os << o.personname.name() << " = " << o.personname << std::endl;
+    os << o.pos.name() << " = " << o.pos << std::endl;
+    os << "-------------------------------------" << std::endl;
+    return os;
+}
+DbManager::DbManager(std::string backendType, std::string connInfo)
      : litesql::Database(backendType, connInfo) {
     initialize();
 }
-std::vector<litesql::Database::SchemaItem> DbSchema::getSchema() const {
+std::vector<litesql::Database::SchemaItem> DbManager::getSchema() const {
     vector<Database::SchemaItem> res;
     string TEXT = backend->getSQLType(A_field_type_string);
     string rowIdType = backend->getRowIDType();
@@ -570,13 +774,16 @@ std::vector<litesql::Database::SchemaItem> DbSchema::getSchema() const {
     if (backend->supportsSequences()) {
         res.push_back(Database::SchemaItem("Person_seq","sequence",backend->getCreateSequenceSQL("Person_seq")));
         res.push_back(Database::SchemaItem("Key_seq","sequence",backend->getCreateSequenceSQL("Key_seq")));
+        res.push_back(Database::SchemaItem("HistoryEvent_seq","sequence",backend->getCreateSequenceSQL("HistoryEvent_seq")));
     }
     res.push_back(Database::SchemaItem("Person_","table","CREATE TABLE Person_ (id_ " + rowIdType + ",type_ " + backend->getSQLType(A_field_type_string,"") + "" +",name_ " + backend->getSQLType(A_field_type_string,"") + "" +",password_ " + backend->getSQLType(A_field_type_string,"") + "" +",uid_ " + backend->getSQLType(A_field_type_string,"") + "" +",a1_ " + backend->getSQLType(A_field_type_boolean,"") + "" +",a2_ " + backend->getSQLType(A_field_type_boolean,"") + "" +")"));
     res.push_back(Database::SchemaItem("Key_","table","CREATE TABLE Key_ (id_ " + rowIdType + ",type_ " + backend->getSQLType(A_field_type_string,"") + "" +",name_ " + backend->getSQLType(A_field_type_string,"") + "" +",ubi_ " + backend->getSQLType(A_field_type_string,"") + "" +",commentary_ " + backend->getSQLType(A_field_type_string,"") + "" +",pos_ " + backend->getSQLType(A_field_type_integer,"") + "" +",active_ " + backend->getSQLType(A_field_type_boolean,"") + "" +",uid_ " + backend->getSQLType(A_field_type_string,"") + "" +")"));
+    res.push_back(Database::SchemaItem("HistoryEvent_","table","CREATE TABLE HistoryEvent_ (id_ " + rowIdType + ",type_ " + backend->getSQLType(A_field_type_string,"") + "" +",etype_ " + backend->getSQLType(A_field_type_integer,"") + "" +",timestamp_ " + backend->getSQLType(A_field_type_string,"") + "" +",keyid_ " + backend->getSQLType(A_field_type_integer,"") + "" +",keyname_ " + backend->getSQLType(A_field_type_string,"") + "" +",personid_ " + backend->getSQLType(A_field_type_integer,"") + "" +",personname_ " + backend->getSQLType(A_field_type_string,"") + "" +",pos_ " + backend->getSQLType(A_field_type_integer,"") + "" +")"));
     res.push_back(Database::SchemaItem("Key_Person_Acces","table","CREATE TABLE Key_Person_Acces (Key1_ " + backend->getSQLType(A_field_type_integer,"") + "" +",Person2_ " + backend->getSQLType(A_field_type_integer,"") + "" +")"));
     res.push_back(Database::SchemaItem("Key_Person_Keep","table","CREATE TABLE Key_Person_Keep (Key1_ " + backend->getSQLType(A_field_type_integer,"") + " UNIQUE" +",Person2_ " + backend->getSQLType(A_field_type_integer,"") + "" +")"));
     res.push_back(Database::SchemaItem("Person_id_idx","index","CREATE INDEX Person_id_idx ON Person_ (id_)"));
     res.push_back(Database::SchemaItem("Key_id_idx","index","CREATE INDEX Key_id_idx ON Key_ (id_)"));
+    res.push_back(Database::SchemaItem("HistoryEvent_id_idx","index","CREATE INDEX HistoryEvent_id_idx ON HistoryEvent_ (id_)"));
     res.push_back(Database::SchemaItem("Key_Person_AccesKey1_idx","index","CREATE INDEX Key_Person_AccesKey1_idx ON Key_Person_Acces (Key1_)"));
     res.push_back(Database::SchemaItem("Key_Person_AccesPerson2_idx","index","CREATE INDEX Key_Person_AccesPerson2_idx ON Key_Person_Acces (Person2_)"));
     res.push_back(Database::SchemaItem("Key_Person_Acces_all_idx","index","CREATE INDEX Key_Person_Acces_all_idx ON Key_Person_Acces (Key1_,Person2_)"));
@@ -585,7 +792,7 @@ std::vector<litesql::Database::SchemaItem> DbSchema::getSchema() const {
     res.push_back(Database::SchemaItem("Key_Person_Keep_all_idx","index","CREATE INDEX Key_Person_Keep_all_idx ON Key_Person_Keep (Key1_,Person2_)"));
     return res;
 }
-void DbSchema::initialize() {
+void DbManager::initialize() {
     static bool initialized = false;
     if (initialized)
         return;

@@ -1,9 +1,10 @@
-#ifndef DB_SCHEMA_HPP
-#define DB_SCHEMA_HPP
+#ifndef dbmanager_hpp
+#define dbmanager_hpp
 #include "litesql.hpp"
 namespace kdb {
 class Person;
 class Key;
+class HistoryEvent;
 class KeyPersonRelationAcces {
 public:
     class Row {
@@ -107,8 +108,8 @@ public:
     virtual void update();
     virtual void del();
     virtual bool typeIsCorrect() const;
-    std::auto_ptr<Person> upcast() const;
-    std::auto_ptr<Person> upcastCopy() const;
+    std::unique_ptr<Person> upcast() const;
+    std::unique_ptr<Person> upcastCopy() const;
 };
 std::ostream & operator<<(std::ostream& os, Person o);
 class Key : public litesql::Persistent {
@@ -178,16 +179,69 @@ public:
     virtual void update();
     virtual void del();
     virtual bool typeIsCorrect() const;
-    std::auto_ptr<Key> upcast() const;
-    std::auto_ptr<Key> upcastCopy() const;
+    std::unique_ptr<Key> upcast() const;
+    std::unique_ptr<Key> upcastCopy() const;
 };
 std::ostream & operator<<(std::ostream& os, Key o);
-class DbSchema : public litesql::Database {
+class HistoryEvent : public litesql::Persistent {
 public:
-    DbSchema(std::string backendType, std::string connInfo);
+    class Own {
+    public:
+        static const litesql::FieldType Id;
+    };
+    static const std::string type__;
+    static const std::string table__;
+    static const std::string sequence__;
+    static const litesql::FieldType Id;
+    litesql::Field<int> id;
+    static const litesql::FieldType Type;
+    litesql::Field<std::string> type;
+    static const litesql::FieldType Etype;
+    litesql::Field<int> etype;
+    static const litesql::FieldType Timestamp;
+    litesql::Field<std::string> timestamp;
+    static const litesql::FieldType Keyid;
+    litesql::Field<int> keyid;
+    static const litesql::FieldType Keyname;
+    litesql::Field<std::string> keyname;
+    static const litesql::FieldType Personid;
+    litesql::Field<int> personid;
+    static const litesql::FieldType Personname;
+    litesql::Field<std::string> personname;
+    static const litesql::FieldType Pos;
+    litesql::Field<int> pos;
+    static void initValues();
+protected:
+    void defaults();
+public:
+    HistoryEvent(const litesql::Database& db);
+    HistoryEvent(const litesql::Database& db, const litesql::Record& rec);
+    HistoryEvent(const HistoryEvent& obj);
+    const HistoryEvent& operator=(const HistoryEvent& obj);
+protected:
+    std::string insert(litesql::Record& tables, litesql::Records& fieldRecs, litesql::Records& valueRecs);
+    void create();
+    virtual void addUpdates(Updates& updates);
+    virtual void addIDUpdates(Updates& updates);
+public:
+    static void getFieldTypes(std::vector<litesql::FieldType>& ftypes);
+protected:
+    virtual void delRecord();
+    virtual void delRelations();
+public:
+    virtual void update();
+    virtual void del();
+    virtual bool typeIsCorrect() const;
+    std::unique_ptr<HistoryEvent> upcast() const;
+    std::unique_ptr<HistoryEvent> upcastCopy() const;
+};
+std::ostream & operator<<(std::ostream& os, HistoryEvent o);
+class DbManager : public litesql::Database {
+public:
+    DbManager(std::string backendType, std::string connInfo);
 protected:
     virtual std::vector<litesql::Database::SchemaItem> getSchema() const;
     static void initialize();
 };
 }
-#endif // DB_SCHEMA_HPP
+#endif

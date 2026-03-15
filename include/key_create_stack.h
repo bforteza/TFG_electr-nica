@@ -8,7 +8,7 @@
 #include <gtkmm/textview.h>
 #include <sigc++/signal.h>
 #include <string>
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 #include "translations.h"
 
 // Sub-vista de creación y edición de llaves dentro de HomeInnerStack.

@@ -1,7 +1,7 @@
 #include <glibmm.h>
 #include <iostream>
 
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 #include "litesql.hpp"
 #include "nfc_manager.h"
 #include "application.h"
@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
     try {
         // Conecta con MariaDB en la Raspberry Pi.
         // TODO: mover credenciales a un fichero de configuración externo.
-        static kdb::DbSchema dbt("mysql", "user=usuario;password=CAMBIAR;database=miBaseDeDatos");
+        static kdb::DbManager dbt("mysql", "user=usuario;password=CAMBIAR;database=miBaseDeDatos");
         db = &dbt;
 
         if (db->needsUpgrade())

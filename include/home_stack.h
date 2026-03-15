@@ -10,8 +10,9 @@
 #include "user_create_stack.h"
 #include "key_create_stack.h"
 #include "key_view_stack.h"
+#include "history_view_stack.h"
 #include "solenoid_panel.h"
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 #include "translations.h"
 
 class Window;
@@ -41,6 +42,9 @@ public:
 
     // Recibe la posición elegida en SELECT, rellena el formulario y vuelve a KeyCreate.
     void OnPositionSelected(int pos);
+
+    // Recibe la activación de un slot en modo ADMIN desde Window para registrar el log.
+    void OnSlotActivated(int pos, std::shared_ptr<kdb::Key> key);
 
 private:
     // Ventana principal; se usa para volver al login desde el panel raíz.
@@ -77,10 +81,11 @@ private:
     Gtk::Label* name_label_;
 
     // Sub-vistas embebidas dentro de inner_stack_.
-    UsersViewStack  users_view_stack_;
-    UserCreateStack user_create_stack_;
-    KeyCreateStack  key_create_stack_;
-    KeyViewStack    key_view_stack_;
+    UsersViewStack   users_view_stack_;
+    UserCreateStack  user_create_stack_;
+    KeyCreateStack   key_create_stack_;
+    KeyViewStack     key_view_stack_;
+    HistoryViewStack history_view_stack_;
 
     // Usuario actualmente identificado en el sistema.
     std::shared_ptr<kdb::Person> logged_person_;
@@ -134,6 +139,10 @@ private:
     // Abre el SolenoidPanel en modo SELECT para elegir posición de una llave nueva.
     void OnPositionSelectRequested();
 
+    // Navega al historial con el filtro adecuado.
+    void OnHistoryButtonClicked();
+    void OnKeyHistoryRequested(std::shared_ptr<kdb::Key> key);
+    void OnPersonHistoryRequested(std::shared_ptr<kdb::Person> person);
 };
 
 #endif // HOME_STACK_H

@@ -8,7 +8,7 @@
 #include <gtkmm/button.h>
 
 #include "models.h"
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 #include "translations.h"
 
 // Sub-vista de lista de usuarios dentro de HomeInnerStack.
@@ -32,6 +32,9 @@ public:
 
     // Señal para mostrar las llaves asignadas al usuario seleccionado.
     sigc::signal<void, std::vector<kdb::Key>> keys_view;
+
+    // Señal para ver el historial del usuario seleccionado.
+    sigc::signal<void, std::shared_ptr<kdb::Person>> person_history;
 
     // Muestra la lista de usuarios en modo normal.
     // access: nivel del usuario logueado; oculta botones de admin si access < 2.
@@ -59,6 +62,9 @@ private:
 
     // Botón para ver las llaves asignadas al usuario seleccionado.
     Gtk::Button* view_keys_button_;
+
+    // Botón para ver el historial del usuario seleccionado.
+    Gtk::Button* history_person_button_;
 
     // Widget de lista para mostrar los usuarios.
     Gtk::TreeView* users_tree_view_;
@@ -96,6 +102,7 @@ private:
     void OnViewKeysButtonClicked();
     void OnEditButtonClicked();
     void OnSelectUserButtonClicked();
+    void OnHistoryPersonButtonClicked();
 };
 
 #endif // USERS_VIEW_STACK_H

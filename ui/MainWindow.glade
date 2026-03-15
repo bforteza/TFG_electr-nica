@@ -385,6 +385,7 @@
               <object class="GtkStack" id="HomeInnerStack">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="homogeneous">False</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
@@ -528,71 +529,95 @@
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkHeaderBar">
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="spacing">7</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="vscrollbar-policy">never</property>
+                        <property name="propagate-natural-height">True</property>
                         <child>
-                          <object class="GtkButton" id="AddKeyToUserButton">
-                            <property name="label" translatable="yes">Afegir clau</property>
+                          <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">Add_image</property>
-                            <property name="always-show-image">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="spacing">7</property>
+                            <property name="margin-start">6</property>
+                            <property name="margin-end">6</property>
+                            <property name="margin-top">4</property>
+                            <property name="margin-bottom">4</property>
+                            <child>
+                              <object class="GtkButton" id="AddKeyToUserButton">
+                                <property name="label" translatable="yes">Afegir clau</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">Add_image</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="RemoveKeyToUserButton">
+                                <property name="label" translatable="yes">Llevar clau</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">image1</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="UserEditButton">
+                                <property name="label" translatable="yes">Editar usuari</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">Edit_image</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="ViewKeysOfUserButton">
+                                <property name="label" translatable="yes">Veure claus</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">image5</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="SelectUserButton">
+                                <property name="label" translatable="yes">Seleccionar</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">image2</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="HistoryPersonButton">
+                                <property name="label" translatable="yes">Veure historial</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">5</property>
+                              </packing>
+                            </child>
                           </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="RemoveKeyToUserButton">
-                            <property name="label" translatable="yes">Llevar clau</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">image1</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="UserEditButton">
-                            <property name="label" translatable="yes">Editar usuari</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">Edit_image</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="ViewKeysOfUserButton">
-                            <property name="label" translatable="yes">Veure claus</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">image5</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="SelectUserButton">
-                            <property name="label" translatable="yes">Seleccionar</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">image2</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">4</property>
-                          </packing>
                         </child>
                       </object>
                       <packing>
@@ -1192,96 +1217,121 @@
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkHeaderBar">
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="vscrollbar-policy">never</property>
+                        <property name="propagate-natural-height">True</property>
                         <child>
-                          <object class="GtkButton" id="KeepKeyButton">
-                            <property name="label" translatable="yes">Agafar clau</property>
+                          <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">image6</property>
-                            <property name="always-show-image">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="spacing">6</property>
+                            <property name="margin-start">6</property>
+                            <property name="margin-end">6</property>
+                            <property name="margin-top">4</property>
+                            <property name="margin-bottom">4</property>
+                            <child>
+                              <object class="GtkButton" id="KeepKeyButton">
+                                <property name="label" translatable="yes">Agafar clau</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">image6</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="AddUserToKeyButton">
+                                <property name="label" translatable="yes">Afegir usuari a clau</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">Add_image1</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="RemoveUserToKeyButton">
+                                <property name="label" translatable="yes">Llevar usuari</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">image3</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="ViewUsersOfKeyButton">
+                                <property name="label" translatable="yes">Veure usuaris</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">image7</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="EditKeyButton">
+                                <property name="label" translatable="yes">Editar clau</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">Edit_image1</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="SelectKeyButton">
+                                <property name="label" translatable="yes">Seleccionar</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">image4</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="DeleteKeyButton">
+                                <property name="label" translatable="yes">Eliminar</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">image8</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="HistoryKeyButton">
+                                <property name="label" translatable="yes">Veure historial</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">7</property>
+                              </packing>
+                            </child>
                           </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="AddUserToKeyButton">
-                            <property name="label" translatable="yes">Afegir usuari a clau</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">Add_image1</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="RemoveUserToKeyButton">
-                            <property name="label" translatable="yes">Llevar usuari</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">image3</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="ViewUsersOfKeyButton">
-                            <property name="label" translatable="yes">Veure usuaris</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">image7</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="EditKeyButton">
-                            <property name="label" translatable="yes">Editar clau</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">Edit_image1</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="SelectKeyButton">
-                            <property name="label" translatable="yes">Seleccionar</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">image4</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">5</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="DeleteKeyButton">
-                            <property name="label" translatable="yes">Eliminar</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="image">image8</property>
-                            <property name="always-show-image">True</property>
-                          </object>
-                          <packing>
-                            <property name="position">6</property>
-                          </packing>
                         </child>
                       </object>
                       <packing>
@@ -1324,6 +1374,62 @@
                     <property name="name">ViewKeyStack</property>
                     <property name="title" translatable="yes">page0</property>
                     <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="HistoryViewStack">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel" id="HistoryFilterLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="name">HistoryFilterLabel</property>
+                        <property name="margin-start">8</property>
+                        <property name="margin-top">4</property>
+                        <property name="xalign">0</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                        <property name="shadow-type">in</property>
+                        <child>
+                          <object class="GtkTreeView" id="HistoryTreeView">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="margin-start">6</property>
+                            <property name="margin-end">6</property>
+                            <property name="hexpand">True</property>
+                            <property name="vexpand">True</property>
+                            <property name="enable-grid-lines">horizontal</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection"/>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">HistoryViewStack</property>
+                    <property name="title" translatable="yes">page0</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
               </object>

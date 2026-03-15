@@ -7,7 +7,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/textview.h>
 #include <gtkmm/radiobutton.h>
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 #include "translations.h"
 
 // Sub-vista de creación y edición de usuarios dentro de HomeInnerStack.

@@ -9,7 +9,7 @@
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <glibmm/main.h>
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 
 class Window;
 
@@ -36,6 +36,10 @@ public:
 
     // Emitida en modo SELECT cuando el usuario elige una posición libre (1-based).
     sigc::signal<void, int> signal_position_selected;
+
+    // Emitida en modo ADMIN cuando el administrador activa un slot (1-based).
+    // Parámetros: posición (1-based), llave en ese slot o nullptr si está vacío.
+    sigc::signal<void, int, std::shared_ptr<kdb::Key>> signal_slot_activated;
 
 private:
     static constexpr int kRows           = 4;

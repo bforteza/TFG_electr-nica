@@ -1,7 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 #include "nfc_manager.h"
 #include <sigc++/signal.h>
 #include <string>
@@ -12,7 +12,7 @@ inline sigc::signal<void> language_changed;
 
 // Puntero a la base de datos activa. Se inicializa en main() y se usa en
 // todos los stacks para consultar y modificar registros.
-extern kdb::DbSchema* db;
+extern kdb::DbManager* db;
 
 // Gestor NFC. Se inicializa en main() y se usa desde LoginStack y UserCreateStack
 // para detectar tarjetas NFC en segundo plano.

@@ -1,7 +1,8 @@
 #include "key_create_stack.h"
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 #include <litesql/selectquery.hpp>
 #include "globals.h"
+#include "history_logger.h"
 #include <string>
 
 KeyCreateStack::KeyCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
@@ -151,6 +152,7 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             new_key.active      = true;
             new_key.update();
             auto key_ptr = std::make_shared<kdb::Key>(new_key);
+            history::LogKeyCreated(creator_, key_ptr);
             if (creator_) {
                 creator_->keys().link(*key_ptr);
                 creator_->keepkeys().link(*key_ptr);

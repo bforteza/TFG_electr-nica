@@ -1,3 +1,3 @@
 #include "globals.h"
 
-kdb::DbSchema* db = nullptr;
+kdb::DbManager* db = nullptr;

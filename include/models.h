@@ -43,4 +43,24 @@ public:
     Gtk::TreeModelColumn<int>           id_col;
 };
 
+// Columnas del TreeView del historial (HistoryViewStack).
+class HistoryModelColumns : public Gtk::TreeModel::ColumnRecord {
+public:
+    HistoryModelColumns() {
+        add(timestamp_col);
+        add(event_col);
+        add(person_col);
+        add(key_col);
+        add(pos_col);
+        add(id_col);
+    }
+
+    Gtk::TreeModelColumn<std::string> timestamp_col;
+    Gtk::TreeModelColumn<std::string> event_col;
+    Gtk::TreeModelColumn<std::string> person_col;
+    Gtk::TreeModelColumn<std::string> key_col;
+    Gtk::TreeModelColumn<std::string> pos_col;
+    Gtk::TreeModelColumn<int>         id_col;
+};
+
 #endif // MODELS_H

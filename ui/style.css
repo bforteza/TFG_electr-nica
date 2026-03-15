@@ -97,6 +97,12 @@ treeview header button label {
     font-size: 16px;
 }
 
+#HistoryFilterLabel {
+    /* [AJUSTAR] Título de filtro en la vista de historial */
+    font-size: 22px;
+    font-weight: bold;
+}
+
 
 /* --- SolenoidPanel (grid de posiciones) ------------------------- */
 

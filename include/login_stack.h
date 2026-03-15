@@ -6,7 +6,7 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 #include <string>
-#include "db_schema.hpp"
+#include "dbmanager.hpp"
 #include "translations.h"
 
 // Gestiona la pantalla de inicio de sesión.

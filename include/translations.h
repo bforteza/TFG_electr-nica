@@ -93,6 +93,22 @@ struct Translations {
         const char* lbl_select_title;  // Título modo selección de posición
     } solenoid;
 
+    // --- HistoryViewStack ---
+    struct HistoryView {
+        const char* col_timestamp;
+        const char* col_event;
+        const char* col_person;
+        const char* col_key;
+        const char* col_position;
+        const char* evt_pickup;
+        const char* evt_return;
+        const char* evt_admin_open;
+        const char* evt_key_created;
+        const char* evt_key_deactivated;
+        const char* btn_history_key;    // "Ver historial" en KeyViewStack
+        const char* btn_history_person; // "Ver historial" en UsersViewStack
+    } history_view;
+
     // --- KeyViewStack ---
     struct KeyView {
         const char* btn_take;         // Registrar recogida/devolución de llave
@@ -190,6 +206,13 @@ inline const Translations kTranslations[] = {
             "Panel de control",
             "Tria una posició lliure",
         },
+        // history_view
+        {
+            "Data/Hora", "Esdeveniment", "Persona", "Clau", "Posició",
+            "Recollida", "Devolució", "Admin: slot obert",
+            "Clau creada", "Clau desactivada",
+            "Veure historial", "Veure historial",
+        },
         // key_view
         {
             "Agafar clau",
@@ -280,6 +303,13 @@ inline const Translations kTranslations[] = {
             "Panel de control",
             "Elige una posición libre",
         },
+        // history_view
+        {
+            "Fecha/Hora", "Evento", "Persona", "Llave", "Posición",
+            "Recogida", "Devolución", "Admin: slot abierto",
+            "Llave creada", "Llave desactivada",
+            "Ver historial", "Ver historial",
+        },
         // key_view
         {
             "Coger llave",
@@ -369,6 +399,13 @@ inline const Translations kTranslations[] = {
             "Activated: ",
             "Control panel",
             "Choose a free position",
+        },
+        // history_view
+        {
+            "Date/Time", "Event", "Person", "Key", "Position",
+            "Pickup", "Return", "Admin: slot opened",
+            "Key created", "Key deactivated",
+            "View history", "View history",
         },
         // key_view
         {
