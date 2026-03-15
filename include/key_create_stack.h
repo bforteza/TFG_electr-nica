@@ -42,12 +42,11 @@ private:
     Gtk::Entry* key_name_entry_;
     Gtk::Entry* ubi_entry_;
     Gtk::Entry* commentary_entry_;
-    Gtk::Entry* position_entry_;
 
     // Botón para confirmar la creación o edición de la llave.
     Gtk::Button* generate_button_;
 
-    // Botón para vincular usuarios a la llave (pendiente de implementar).
+    // Botón para vincular usuarios a la llave.
     Gtk::Button* add_user_button_;
 
     // Botón para capturar el UID NFC de la llave.
@@ -60,12 +59,13 @@ private:
     Gtk::Label* name_label_;
     Gtk::Label* ubi_label_;
     Gtk::Label* commentary_label_;
-    Gtk::Label* position_label_;
 
     // Etiquetas de error asociadas a cada campo.
     Gtk::Label* name_error_label_;
-    Gtk::Label* position_error_label_;
     Gtk::Label* uid_error_label_;
+
+    // Posición seleccionada mediante el picker (0 = sin seleccionar).
+    int position_ = 0;
 
     // Área de texto que muestra el UID NFC capturado.
     Gtk::TextView* uid_text_view_;

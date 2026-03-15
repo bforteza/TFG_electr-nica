@@ -17,10 +17,6 @@ KeyCreateStack::KeyCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     if (!commentary_entry_)
         throw std::runtime_error("No \"ComentaryEntry\" object in MainWindow.glade");
 
-    builder->get_widget("PositionEntry", position_entry_);
-    if (!position_entry_)
-        throw std::runtime_error("No \"PositionEntry\" object in MainWindow.glade");
-
     builder->get_widget("KeyGenerateButton", generate_button_);
     if (!generate_button_)
         throw std::runtime_error("No \"KeyGenerateButton\" object in MainWindow.glade");
@@ -57,17 +53,9 @@ KeyCreateStack::KeyCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     if (!commentary_label_)
         throw std::runtime_error("No \"KeyCreateCommentaryLabel\" object in MainWindow.glade");
 
-    builder->get_widget("KeyCreatePositionLabel", position_label_);
-    if (!position_label_)
-        throw std::runtime_error("No \"KeyCreatePositionLabel\" object in MainWindow.glade");
-
     builder->get_widget("KeyNameErrorLabel", name_error_label_);
     if (!name_error_label_)
         throw std::runtime_error("No \"KeyNameErrorLabel\" object in MainWindow.glade");
-
-    builder->get_widget("PositionErrorLabel", position_error_label_);
-    if (!position_error_label_)
-        throw std::runtime_error("No \"PositionErrorLabel\" object in MainWindow.glade");
 
     builder->get_widget("UidKeyErrorLabel", uid_error_label_);
     if (!uid_error_label_)
@@ -87,7 +75,6 @@ void KeyCreateStack::RefreshLabels() {
     name_label_->set_label(Tr().key_create.lbl_key_name);
     ubi_label_->set_label(Tr().key_create.lbl_location);
     commentary_label_->set_label(Tr().key_create.lbl_comments);
-    position_label_->set_label(Tr().key_create.lbl_position);
 
     // Botones de acción.
     add_user_button_->set_label(Tr().key_create.btn_add_users);
@@ -116,7 +103,7 @@ void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> key) {
     key_name_entry_->set_text((std::string)key->name);
     ubi_entry_->set_text((std::string)key->ubi);
     commentary_entry_->set_text((std::string)key->commentary);
-    position_entry_->set_text(PosToString(key->pos));
+    position_ = (int)key->pos;
     uid_text_view_->get_buffer()->set_text((std::string)key->uid);
     edit_mode_ = true;
     add_user_button_->show();
@@ -127,6 +114,7 @@ void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> key) {
 
 void KeyCreateStack::OnGenerateButtonClicked() {
     name_error_label_->set_text("");
+    uid_error_label_->set_text("");
     bool valid = true;
 
     if (create_mode_) {
@@ -147,23 +135,9 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             uid_error_label_->set_text(Tr().key_create.error_card_in_use);
             valid = false;
         }
-        // Validar posición.
-        std::string pos_str = position_entry_->get_text();
-        if (PosFromString(pos_str)) {
-            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == PosFromString(pos_str)
-                                              && kdb::Key::Active == true).count()) {
-                std::string msg = Tr().key_create.error_position_unavailable;
-                for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0
-                                                              && kdb::Key::Active == true)
-                                    .orderBy(kdb::Key::Pos).all())
-                    msg += " " + PosToString((int)k.pos);
-                position_error_label_->set_text(msg);
-                valid = false;
-            }
-        } else {
-            position_error_label_->set_text(Tr().key_create.error_position_invalid);
+        // Posición seleccionada mediante el picker.
+        if (position_ == 0)
             valid = false;
-        }
 
         if (valid) {
             kdb::Key new_key(*db);
@@ -171,7 +145,7 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             new_key.ubi         = (std::string)ubi_entry_->get_text();
             new_key.commentary  = (std::string)commentary_entry_->get_text();
             new_key.uid         = (std::string)uid_text_view_->get_buffer()->get_text();
-            new_key.pos         = (int)PosFromString(position_entry_->get_text());
+            new_key.pos         = position_;
             new_key.active      = true;
             new_key.update();
             auto key_ptr = std::make_shared<kdb::Key>(new_key);
@@ -203,31 +177,13 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             uid_error_label_->set_text(Tr().key_create.error_card_in_use);
             valid = false;
         }
-        // Validar posición (excluyendo la posición actual de la misma llave).
-        std::string pos_str = position_entry_->get_text();
-        if (PosFromString(pos_str)) {
-            if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == PosFromString(pos_str)
-                                              && kdb::Key::Id != edited_key_->id
-                                              && kdb::Key::Active == true).count()) {
-                std::string msg = Tr().key_create.error_position_unavailable;
-                for (auto& k : litesql::select<kdb::Key>(*db, kdb::Key::Pos > 0
-                                                              && kdb::Key::Active == true)
-                                    .orderBy(kdb::Key::Pos).all())
-                    msg += " " + PosToString((int)k.pos);
-                position_error_label_->set_text(msg);
-                valid = false;
-            }
-        } else {
-            position_error_label_->set_text(Tr().key_create.error_position_invalid);
-            valid = false;
-        }
 
         if (valid) {
             edited_key_->name       = (std::string)key_name_entry_->get_text();
             edited_key_->ubi        = (std::string)ubi_entry_->get_text();
             edited_key_->commentary = (std::string)commentary_entry_->get_text();
             edited_key_->uid        = (std::string)uid_text_view_->get_buffer()->get_text();
-            edited_key_->pos        = (int)PosFromString(position_entry_->get_text());
+            edited_key_->pos        = position_;
             edited_key_->update();
         }
     }
@@ -251,7 +207,7 @@ void KeyCreateStack::OnPositionPickerButtonClicked() {
 }
 
 void KeyCreateStack::SetPosition(int pos) {
-    position_entry_->set_text(PosToString(pos));
+    position_ = pos;
 }
 
 // --- Auxiliares privados ---
@@ -260,13 +216,12 @@ void KeyCreateStack::Reset() {
     key_name_entry_->set_text("");
     ubi_entry_->set_text("");
     commentary_entry_->set_text("");
-    position_entry_->set_text("");
     uid_text_view_->get_buffer()->set_text("");
 
     name_error_label_->set_text("");
-    position_error_label_->set_text("");
     uid_error_label_->set_text("");
 
+    position_    = 0;
     edit_mode_   = false;
     create_mode_ = false;
     edited_key_  = nullptr;
