@@ -55,6 +55,12 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     solenoid_panel_button_->signal_clicked().connect(
         sigc::mem_fun(*this, &HomeStack::OnSolenoidPanelButtonClicked));
 
+    builder->get_widget("QuitButton", quit_button_);
+    if (!quit_button_)
+        throw std::runtime_error("No \"QuitButton\" object in MainWindow.glade");
+    quit_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &HomeStack::OnQuitButtonClicked));
+
     builder->get_widget("HomeInnerStack", inner_stack_);
     if (!inner_stack_)
         throw std::runtime_error("No \"HomeInnerStack\" object in MainWindow.glade");
@@ -97,6 +103,7 @@ void HomeStack::RefreshLabels() {
     view_keys_button_->set_label(Tr().home.btn_view_keys);
     view_users_button_->set_label(Tr().home.btn_view_users);
     history_button_->set_label(Tr().home.btn_history);
+    quit_button_->set_label(Tr().home.btn_quit);
 }
 
 // --- Iniciador ---
@@ -345,6 +352,10 @@ void HomeStack::OnKeyDelete(std::shared_ptr<kdb::Key> key) {
     key->update();
     history::LogKeyDeactivated(logged_person_, key);
     key_view_stack_.view(logged_person_);
+}
+
+void HomeStack::OnQuitButtonClicked() {
+    window_->OnBackButtonClicked();
 }
 
 void HomeStack::OnSolenoidPanelButtonClicked() {

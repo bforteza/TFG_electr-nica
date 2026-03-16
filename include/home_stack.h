@@ -77,6 +77,9 @@ private:
     // Botón para acceder al panel de control de solenoides (solo admin).
     Gtk::Button* solenoid_panel_button_;
 
+    // Botón para cerrar sesión y volver a la pantalla de login.
+    Gtk::Button* quit_button_;
+
     // Etiqueta que muestra el nombre del usuario identificado.
     Gtk::Label* name_label_;
 
@@ -132,6 +135,9 @@ private:
 
     // Desactiva la llave si tiene portador; muestra error si está en el armario.
     void OnKeyDelete(std::shared_ptr<kdb::Key> key);
+
+    // Cierra sesión y vuelve al login.
+    void OnQuitButtonClicked();
 
     // Abre el SolenoidPanel en modo ADMIN al pulsar el botón de solenoides.
     void OnSolenoidPanelButtonClicked();

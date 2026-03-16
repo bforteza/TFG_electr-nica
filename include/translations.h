@@ -28,6 +28,7 @@ struct Translations {
         const char* btn_view_keys;
         const char* btn_view_users;
         const char* btn_history;
+        const char* btn_quit;           // Cerrar sesión
     } home;
 
     // --- UsersViewStack ---
@@ -150,6 +151,7 @@ inline const Translations kTranslations[] = {
             "Veure claus",
             "Veure usuaris",
             "Historial",
+            "Tancar sessió",
         },
         // users_view
         {
@@ -247,6 +249,7 @@ inline const Translations kTranslations[] = {
             "Ver llaves",
             "Ver usuarios",
             "Historial",
+            "Cerrar sesión",
         },
         // users_view
         {
@@ -344,6 +347,7 @@ inline const Translations kTranslations[] = {
             "View keys",
             "View users",
             "History",
+            "Log out",
         },
         // users_view
         {

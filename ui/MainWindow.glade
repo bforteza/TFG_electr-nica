@@ -37,6 +37,11 @@
     <property name="can-focus">False</property>
     <property name="pixbuf">../assets/flags/gb.png</property>
   </object>
+  <object class="GtkImage" id="image12">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="stock">gtk-quit</property>
+  </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -360,12 +365,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
-                    <property name="label">gtk-quit</property>
+                  <object class="GtkButton" id="QuitButton">
+                    <property name="label" translatable="yes">button</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="use-stock">True</property>
+                    <property name="image">image12</property>
                     <property name="always-show-image">True</property>
                   </object>
                   <packing>
