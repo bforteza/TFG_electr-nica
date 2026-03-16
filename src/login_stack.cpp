@@ -59,6 +59,7 @@ LoginStack::LoginStack(const Glib::RefPtr<Gtk::Builder>& builder)
 void LoginStack::Start()
 {
     error_label_->set_text("");
+    password_entry_->set_text("");
     nfcman->StartPolling();
 }
 

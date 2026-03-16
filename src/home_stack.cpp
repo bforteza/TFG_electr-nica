@@ -355,6 +355,12 @@ void HomeStack::OnKeyDelete(std::shared_ptr<kdb::Key> key) {
 }
 
 void HomeStack::OnQuitButtonClicked() {
+    key_selected_connection_.disconnect();
+    user_selected_connection_.disconnect();
+    aux_key_    = nullptr;
+    aux_person_ = nullptr;
+    back_widget_ = nullptr;
+    inner_stack_->set_visible_child("AdminMainStack");
     window_->OnBackButtonClicked();
 }
 

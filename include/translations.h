@@ -151,7 +151,7 @@ inline const Translations kTranslations[] = {
             "Veure claus",
             "Veure usuaris",
             "Historial",
-            "Tancar sessió",
+            "Sortir",
         },
         // users_view
         {
@@ -249,7 +249,7 @@ inline const Translations kTranslations[] = {
             "Ver llaves",
             "Ver usuarios",
             "Historial",
-            "Cerrar sesión",
+            "Salir",
         },
         // users_view
         {
@@ -347,7 +347,7 @@ inline const Translations kTranslations[] = {
             "View keys",
             "View users",
             "History",
-            "Log out",
+            "Exit",
         },
         // users_view
         {
