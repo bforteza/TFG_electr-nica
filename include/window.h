@@ -4,6 +4,8 @@
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/stack.h>
+#include <glibmm/main.h>
+#include <sigc++/connection.h>
 #include "home_stack.h"
 #include "login_stack.h"
 #include "solenoid_panel.h"
@@ -33,6 +35,16 @@ private:
     HomeStack     home_stack_;
     SolenoidPanel solenoid_panel_;
 
+    // Timer de inactividad: cierra sesión tras kInactivitySeconds sin interacción.
+    static constexpr int kInactivitySeconds = 30;
+    sigc::connection inactivity_timer_conn_;
+
+    // Reinicia el timer de inactividad (solo activo cuando main_stack_ muestra "HomeView").
+    void ResetInactivityTimer();
+
+    // Cancela el timer de inactividad sin cerrar sesión.
+    void StopInactivityTimer();
+
     // Llamado cuando LoginStack identifica un usuario válido.
     void OnUserLogged(std::shared_ptr<kdb::Person> person);
 
@@ -46,7 +58,7 @@ private:
     // Recibe la posición seleccionada en modo SELECT y la reenvía a HomeStack.
     void OnPositionSelected(int pos);
 
-    // Cierra la aplicación al pulsar Escape.
+    // Reinicia el timer en cada click/táctil y cierra la app con Escape.
     bool on_key_press_event(GdkEventKey* event) override;
 };
 

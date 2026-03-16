@@ -2,6 +2,7 @@
 #include "sound_manager.h"
 #include "history_logger.h"
 #include <gdk/gdkkeysyms.h>
+#include <iostream>
 
 // Ruta al archivo de interfaz gráfica, relativa al directorio de trabajo.
 static constexpr const char* kGladePath = "./ui/MainWindow.glade";
@@ -30,6 +31,7 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
     // Conecta las señales del SolenoidPanel para la navegación de retorno.
     solenoid_panel_.signal_go_home.connect([this]() {
         main_stack_->set_visible_child("HomeView");
+        ResetInactivityTimer();
     });
     solenoid_panel_.signal_logout.connect(
         sigc::mem_fun(*this, &Window::OnBackButtonClicked));
@@ -43,6 +45,15 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
     // Inicializa el sistema de audio y conecta sonido de click a todos los botones.
     SoundManager::Init();
     SoundManager::ConnectToAllButtons(this);
+
+    // Intercepta TODOS los eventos GDK antes de que se despachen a los widgets hijos.
+    // on_button_press_event no funciona para GtkButton (consume el evento antes de que
+    // suba al ApplicationWindow), así que usamos gdk_event_handler_set para capturarlo.
+    gdk_event_handler_set([](GdkEvent* ev, gpointer data) {
+        if (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_TOUCH_BEGIN)
+            static_cast<Window*>(data)->ResetInactivityTimer();
+        gtk_main_do_event(ev);
+    }, this, nullptr);
 
     if (getenv("KIOSK"))
         fullscreen();
@@ -61,7 +72,32 @@ Window* Window::create() {
     return window;
 }
 
+// --- Timer de inactividad ---
+
+void Window::ResetInactivityTimer() {
+    inactivity_timer_conn_.disconnect();
+    if (main_stack_->get_visible_child_name() != "HomeView") {
+        std::cout << "[InactivityTimer] Stop (no en HomeView: "
+                  << main_stack_->get_visible_child_name() << ")\n";
+        return;
+    }
+    std::cout << "[InactivityTimer] Reset (" << kInactivitySeconds << "s)\n";
+    inactivity_timer_conn_ = Glib::signal_timeout().connect_seconds([this]() {
+        std::cout << "[InactivityTimer] Disparado — cerrando sesión\n";
+        home_stack_.Logout();
+        return false; // no repetir
+    }, kInactivitySeconds);
+}
+
+void Window::StopInactivityTimer() {
+    std::cout << "[InactivityTimer] Detenido explícitamente\n";
+    inactivity_timer_conn_.disconnect();
+}
+
+// --- Eventos de usuario ---
+
 bool Window::on_key_press_event(GdkEventKey* event) {
+    ResetInactivityTimer();
     if (event->keyval == GDK_KEY_Escape) {
         get_application()->quit();
         return true;
@@ -70,6 +106,7 @@ bool Window::on_key_press_event(GdkEventKey* event) {
 }
 
 void Window::OnBackButtonClicked() {
+    StopInactivityTimer();
     main_stack_->set_visible_child("INI");
     login_stack_.Start();
 }
@@ -78,6 +115,7 @@ void Window::OnBackButtonClicked() {
 void Window::OnUserLogged(std::shared_ptr<kdb::Person> person) {
     main_stack_->set_visible_child("HomeView");
     home_stack_.PersonLogged(person);
+    ResetInactivityTimer();
 }
 
 // Desvincula al portador actual de la llave y navega al SolenoidPanel (RETURN).
@@ -95,6 +133,7 @@ void Window::OnPositionSelected(int pos) {
 }
 
 void Window::OnOpenSolenoid(std::shared_ptr<kdb::Key> key, SolenoidPanel::Mode mode) {
+    StopInactivityTimer();
     solenoid_panel_.Setup(key, mode);
     main_stack_->set_visible_child("KeySelect");
 }

@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
         if (db->needsUpgrade())
             db->upgrade();
 
-        db->verbose = true;
+        db->verbose = false;
 
     } catch (litesql::Except e) {
         std::cerr << e << std::endl;
