@@ -33,9 +33,14 @@ public:
     // Llamar tras cambiar current_language.
     void RefreshLabels();
 
-    // Navega atrás: si estamos en AdminMainStack vuelve al login;
+    // Navega atrás: si estamos en AdminMainStack cierra sesión;
     // si no, retorna al panel anterior guardado en back_widget_.
     void OnBackButtonClicked();
+
+    // Cierra sesión: limpia el estado de navegación y vuelve al login.
+    // Llamado por el botón "Salir", el botón atrás en la vista raíz
+    // y el auto-logout por inactividad.
+    void Logout();
 
     // Señal para abrir el SolenoidPanel (PICKUP al recoger llave, ADMIN desde botón).
     sigc::signal<void, std::shared_ptr<kdb::Key>, SolenoidPanel::Mode> signal_open_solenoid;

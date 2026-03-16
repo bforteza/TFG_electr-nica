@@ -129,15 +129,26 @@ void HomeStack::PersonLogged(std::shared_ptr<kdb::Person> person) {
 
 // --- Navegación ---
 
-void HomeStack::OnBackButtonClicked() {
+void HomeStack::Logout() {
     key_selected_connection_.disconnect();
     user_selected_connection_.disconnect();
     aux_key_    = nullptr;
     aux_person_ = nullptr;
+    back_widget_ = nullptr;
+    inner_stack_->set_visible_child("AdminMainStack");
+    window_->OnBackButtonClicked();
+}
 
+void HomeStack::OnBackButtonClicked() {
     if (inner_stack_->get_visible_child_name() == "AdminMainStack") {
-        window_->OnBackButtonClicked();
-    } else if (back_widget_ == nullptr) {
+        Logout();
+        return;
+    }
+    key_selected_connection_.disconnect();
+    user_selected_connection_.disconnect();
+    aux_key_    = nullptr;
+    aux_person_ = nullptr;
+    if (back_widget_ == nullptr) {
         inner_stack_->set_visible_child("AdminMainStack");
     } else {
         inner_stack_->set_visible_child(*back_widget_);
@@ -355,13 +366,7 @@ void HomeStack::OnKeyDelete(std::shared_ptr<kdb::Key> key) {
 }
 
 void HomeStack::OnQuitButtonClicked() {
-    key_selected_connection_.disconnect();
-    user_selected_connection_.disconnect();
-    aux_key_    = nullptr;
-    aux_person_ = nullptr;
-    back_widget_ = nullptr;
-    inner_stack_->set_visible_child("AdminMainStack");
-    window_->OnBackButtonClicked();
+    Logout();
 }
 
 void HomeStack::OnSolenoidPanelButtonClicked() {

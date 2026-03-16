@@ -29,7 +29,7 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
 
     // Conecta las señales del SolenoidPanel para la navegación de retorno.
     solenoid_panel_.signal_go_home.connect([this]() {
-        main_stack_->set_visible_child("AdminView");
+        main_stack_->set_visible_child("HomeView");
     });
     solenoid_panel_.signal_logout.connect(
         sigc::mem_fun(*this, &Window::OnBackButtonClicked));
@@ -76,7 +76,7 @@ void Window::OnBackButtonClicked() {
 
 // Navega al panel de administración y lo inicializa con el usuario identificado.
 void Window::OnUserLogged(std::shared_ptr<kdb::Person> person) {
-    main_stack_->set_visible_child("AdminView");
+    main_stack_->set_visible_child("HomeView");
     home_stack_.PersonLogged(person);
 }
 

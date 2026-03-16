@@ -1446,7 +1446,7 @@
             </child>
           </object>
           <packing>
-            <property name="name">AdminView</property>
+            <property name="name">HomeView</property>
             <property name="title" translatable="yes">page2</property>
             <property name="position">2</property>
           </packing>
