@@ -82,6 +82,8 @@ void UsersViewStack::RefreshLabels() {
 void UsersViewStack::view(std::vector<kdb::Person> users, int access) {
     toggle_conn_.disconnect();
     users_tree_view_->get_selection()->set_mode(Gtk::SELECTION_SINGLE);
+    password_column_->set_visible(access >= 2);
+    uid_column_->set_visible(access >= 2);
     access_ = access;
     add_key_button_->show();
     remove_key_button_->show();
@@ -114,6 +116,8 @@ void UsersViewStack::select(std::vector<kdb::Person> users) {
         }
         return true;
     }, false);
+    password_column_->set_visible(false);
+    uid_column_->set_visible(false);
     select_user_button_->show();
     add_key_button_->hide();
     remove_key_button_->hide();

@@ -13,6 +13,7 @@ Sistema de gestión de llaves físicas para una empresa, corriendo en Raspberry 
   - `UserCreateStack` → crear/editar usuario
   - `KeyViewStack` → lista de llaves
   - `KeyCreateStack` → crear/editar llave
+  - `HistoryViewStack` → historial de acciones (filtrable por llave o usuario)
 - `SolenoidPanel` → panel de solenoides con tres modos: PICKUP, ADMIN, SELECT
 - `Window` → ventana principal que contiene todos los stacks
 
@@ -32,8 +33,9 @@ Sistema de gestión de llaves físicas para una empresa, corriendo en Raspberry 
 - `NfcManager` (nfc_manager.h/cpp): hilo separado, detecta tags ISO14443A, guarda UID en `uid`, emite `Glib::Dispatcher dispatcher` para comunicar con GTK thread-safe. `StopPolling()` usa `detach()`.
 - `db_schema.hpp` + `db_schema.cpp`: modelos LiteSQL (autogenerados por LiteSQL tool)
 - `globals.h`: instancias globales `db` (DbSchema*) y `nfcman` (unique_ptr<NfcManager>), `PosToString(int pos)` y `PosFromString(string)` para conversión posición↔string (A1-D8)
-- `models.h`: `ModelColumns` (usuarios) y `KeyModelColumns` (llaves) para Gtk::TreeView
+- `models.h`: `ModelColumns` (usuarios), `KeyModelColumns` (llaves) y `HistoryModelColumns` (historial) para Gtk::TreeView
 - `sound_manager.h/cpp`: clase estática SoundManager (libcanberra-gtk3), ver sección Sonido
+- `history_logger.h/cpp`: funciones estáticas `history::LogPickup`, `LogReturn`, `LogKeyDeactivated`, `LogAdminOpen` etc. Escribe en tabla History vía SQL directo.
 
 ## SolenoidPanel — Cuatro Modos
 - **PICKUP**: abre el solenoide de la llave `key` pasada, muestra cuenta atrás, vuelve a HomeStack al terminar
@@ -57,6 +59,24 @@ KeyCreateStack::signal_position_select_requested
             → KeyCreateStack::SetPosition(pos) + navega de vuelta a KeyCreateStack
 ```
 
+## Timer de Inactividad (Window)
+- Se activa cuando `main_stack_` muestra "HomeView" (usuario logueado).
+- 30 segundos sin interacción → `home_stack_.Logout()`.
+- Implementado con `gdk_event_handler_set` en el constructor de Window: intercepta `GDK_BUTTON_PRESS` y `GDK_TOUCH_BEGIN` a nivel GDK (antes de que cualquier widget reciba el evento) y llama `ResetInactivityTimer()`. Debe llamar `gtk_main_do_event(ev)` para reenviar el evento al pipeline normal de GTK.
+- `StopInactivityTimer()` se llama al entrar en vistas que no son HomeView.
+- `on_key_press_event` sigue activo para manejar la tecla ESC.
+- `db->verbose = false` en main.cpp para silenciar LiteSQL.
+
+## Selección Múltiple Táctil (KeyViewStack / UsersViewStack)
+Sin Ctrl disponible en pantalla táctil, se usa un `button-press-event` handler que simula Ctrl permanente:
+- En `select()`: `set_mode(SELECTION_MULTIPLE)` + conectar handler en `toggle_conn_` que por cada tap togglea la selección de la fila (select si no estaba, unselect si estaba). `return true` consume el evento para que GTK no sobreescriba la selección.
+- En `view()`: `toggle_conn_.disconnect()` + `set_mode(SELECTION_SINGLE)`.
+- `GetSelectedKeys()` / `GetSelectedPersons()` usan `get_selection()->get_selected_rows()`.
+
+## Visibilidad de Columnas por Nivel de Acceso (UsersViewStack)
+- **Modo `select()`**: siempre oculta `password_column_` y `uid_column_` (cualquier nivel de acceso).
+- **Modo `view()`**: muestra `password_column_` y `uid_column_` solo si `access >= 2` (admin).
+
 ## Sistema de Sonido (SoundManager)
 Clase estática en `include/sound_manager.h` + `src/sound_manager.cpp`.
 - `SoundManager::Init()`: obtiene contexto canberra, pre-cachea todos los sonidos con `CA_PROP_CANBERRA_CACHE_CONTROL "permanent"` para eliminar latencia de primera reproducción.
@@ -69,29 +89,24 @@ Mapeo de eventos:
 - `kLoginError` → `"dialog-error"`
 - `kKeyReturn` → `"complete"`
 
-Integración: `Window` llama `SoundManager::Init()` y `ConnectToAllButtons(this)` al final del constructor. `LoginStack` llama `Play()` en los callbacks de login. Los botones dinámicos deben llamar `SoundManager::Play(kClick)` al crearse.
-
-Dependencia Makefile: `pkg-config gtkmm-3.0 libcanberra-gtk3` en CXXFLAGS y LDFLAGS.
+Integración: `Window` llama `SoundManager::Init()` y `ConnectToAllButtons(this)` al final del constructor.
 
 ## Dialog "Llave ya en uso" (HomeStack::OnKeyKept)
 ```cpp
 if (key->keeper().get().count() > 0) {
-    auto* dlg = new Gtk::MessageDialog(
-        *window_, Tr().key_view.err_key_in_use,
-        false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+    auto* dlg = new Gtk::MessageDialog(...);
     auto closed = std::make_shared<bool>(false);
     dlg->signal_response().connect([dlg, closed](int) {
         *closed = true; dlg->hide(); delete dlg;
     });
     Glib::signal_timeout().connect_once([dlg, closed]() {
         if (!*closed) dlg->response(Gtk::RESPONSE_OK);
-    }, 1000);
+    }, 2000);
     dlg->show();
     return;
 }
 ```
 `shared_ptr<bool> closed`: evita doble-delete si el usuario pulsa OK antes del timeout.
-El timeout llama a `dlg->response()` en lugar de `delete` para que todo pase por `signal_response`.
 
 ## Modo Kiosco
 Window lee la variable de entorno `KIOSK` para activar `fullscreen()`. Si no está definida, ventana normal (útil durante desarrollo). ESC cierra la aplicación.
@@ -108,6 +123,7 @@ Window lee la variable de entorno `KIOSK` para activar `fullscreen()`. Si no est
 - **Compilar después de cada adición**: el usuario lo ha pedido explícitamente para no programar a ciegas y detectar errores inmediatamente.
 - **Discutir antes de escribir**: para funcionalidades nuevas, primero discutir diseño e implementación, luego escribir.
 - Los métodos que Window llama directamente deben ser `public` en el header.
+- **No revertir con git** sin confirmar: puede haber cambios funcionales mezclados con los que se quieren deshacer.
 
 ## Hardware del Sistema
 - **Raspberry Pi 4** (2GB RAM) como unidad central
@@ -117,21 +133,21 @@ Window lee la variable de entorno `KIOSK` para activar `fullscreen()`. Si no est
 - **Circuito solenoides**: matriz con diodos — controla 32 solenoides con 4+8=12 relés
   - Solenoide desactivado = pasador cae = llave bloqueada (lógica inversa)
   - Para abrir: activar relé de fila LUEGO relé de columna; para cerrar: desactivar fila primero
-- **Pantalla táctil** conectada por USB
+- **Pantalla táctil** conectada por USB (sin teclado físico para usuario normal)
 - **Teclado numérico** (usuario normal): passwords deben ser numéricas
 
 ## Requisitos Funcionales del TFG (estado)
 - RF-01: Identificación NFC/password ✓ implementado
 - RF-02: Verificación de permisos ✓ implementado
 - RF-03: Control hardware (solenoides) — SolenoidPanel implementado en UI, falta I2C real
-- RF-04: Historial de acciones ✗ pendiente
+- RF-04: Historial de acciones ✓ implementado (history_logger + HistoryViewStack)
 - RF-05: Interfaz de gestión remota ✗ pendiente
-- RF-06: Múltiples idiomas ✓ implementado — Catalán, Español, Inglés completos en `translations.h`. Variable global `current_language`, función `Tr()` para acceso. Cambio en caliente con `RefreshLabels()`.
+- RF-06: Múltiples idiomas ✓ implementado — Catalán, Español, Inglés completos en `translations.h`
 
 ## Partes Pendientes de Implementar
-1. **Historial (RF-04)**: tabla `History` via SQL directo, `HistoryViewStack` UI, conectar `history_button_` en HomeStack. Registrar acciones en LoginStack, SolenoidPanel, HomeStack (CRUD).
-2. **Devolución de llaves por NFC**: modo RETURN definido en SolenoidPanel y `OnKeyLogged` en Window con comentario de desvinculación, pero flujo no probado (sin hardware NFC disponible actualmente).
-3. **Control I2C real**: SolenoidPanel activa/desactiva solenoides en UI, pero la escritura a XL9535 por I2C no está implementada.
+1. **Devolución de llaves por NFC**: modo RETURN definido en SolenoidPanel y `OnKeyLogged` en Window, pero flujo no probado (sin hardware NFC disponible actualmente).
+2. **Control I2C real**: SolenoidPanel activa/desactiva solenoides en UI, pero la escritura a XL9535 por I2C no está implementada.
+3. **RF-05 Gestión remota**: no iniciado.
 
 ## Posibles Bugs/Issues Conocidos
 *(Vacío — reportar aquí los que se detecten)*
