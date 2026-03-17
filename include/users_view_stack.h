@@ -18,8 +18,8 @@ class UsersViewStack {
 public:
     UsersViewStack(const Glib::RefPtr<Gtk::Builder>& builder);
 
-    // Señal emitida cuando el usuario selecciona una persona en modo selección.
-    sigc::signal<void, std::shared_ptr<kdb::Person>> user_selected;
+    // Señal emitida cuando el usuario selecciona una o más personas en modo selección.
+    sigc::signal<void, std::vector<std::shared_ptr<kdb::Person>>> user_selected;
 
     // Señal para iniciar flujo de vincular una llave al usuario seleccionado.
     sigc::signal<void, std::shared_ptr<kdb::Person>> user_link;
@@ -75,6 +75,9 @@ private:
     Gtk::TreeViewColumn* password_column_;
     Gtk::TreeViewColumn* uid_column_;
 
+    // Conexión del handler de toggle en modo selección.
+    sigc::connection toggle_conn_;
+
     // Modelo de datos enlazado al TreeView.
     Glib::RefPtr<Gtk::ListStore> tree_model_;
 
@@ -95,6 +98,9 @@ private:
 
     // Devuelve un puntero al usuario seleccionado, o nullptr si no hay selección.
     std::shared_ptr<kdb::Person> GetSelectedPerson();
+
+    // Devuelve todos los usuarios seleccionados (modo MULTIPLE).
+    std::vector<std::shared_ptr<kdb::Person>> GetSelectedPersons();
 
     // Manejadores de los botones de acción.
     void OnAddKeyButtonClicked();

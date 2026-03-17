@@ -80,6 +80,8 @@ void UsersViewStack::RefreshLabels() {
 // --- Iniciadores públicos ---
 
 void UsersViewStack::view(std::vector<kdb::Person> users, int access) {
+    toggle_conn_.disconnect();
+    users_tree_view_->get_selection()->set_mode(Gtk::SELECTION_SINGLE);
     access_ = access;
     add_key_button_->show();
     remove_key_button_->show();
@@ -100,6 +102,18 @@ void UsersViewStack::view(std::vector<kdb::Person> users, int access) {
 }
 
 void UsersViewStack::select(std::vector<kdb::Person> users) {
+    users_tree_view_->get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
+    toggle_conn_ = users_tree_view_->signal_button_press_event().connect([this](GdkEventButton* ev) -> bool {
+        Gtk::TreePath path;
+        Gtk::TreeViewColumn* col;
+        int cx, cy;
+        if (users_tree_view_->get_path_at_pos((int)ev->x, (int)ev->y, path, col, cx, cy)) {
+            auto sel = users_tree_view_->get_selection();
+            if (sel->is_selected(path)) sel->unselect(path);
+            else                        sel->select(path);
+        }
+        return true;
+    }, false);
     select_user_button_->show();
     add_key_button_->hide();
     remove_key_button_->hide();
@@ -128,13 +142,27 @@ std::shared_ptr<kdb::Person> UsersViewStack::GetSelectedPerson() {
     return nullptr;
 }
 
+std::vector<std::shared_ptr<kdb::Person>> UsersViewStack::GetSelectedPersons() {
+    std::vector<std::shared_ptr<kdb::Person>> result;
+    for (auto& path : users_tree_view_->get_selection()->get_selected_rows()) {
+        auto iter = tree_model_->get_iter(path);
+        if (iter) {
+            try {
+                result.push_back(std::make_shared<kdb::Person>(
+                    litesql::select<kdb::Person>(*db, kdb::Person::Id == (*iter)[columns_.id_col]).one()));
+            } catch (...) {}
+        }
+    }
+    return result;
+}
+
 void UsersViewStack::Refresh() {
     tree_model_->clear();
     for (auto& person : current_users_) {
         Gtk::TreeModel::Row row = *(tree_model_->append());
         row[columns_.id_col]        = (int)person.id;
-        row[columns_.name_col]   = person.name;
-        row[columns_.password_col] = person.password;
+        row[columns_.name_col]      = person.name;
+        row[columns_.password_col]  = person.password;
         row[columns_.uid_col]       = person.uid;
     }
 }
@@ -169,9 +197,9 @@ void UsersViewStack::OnEditButtonClicked() {
 }
 
 void UsersViewStack::OnSelectUserButtonClicked() {
-    auto person = GetSelectedPerson();
-    if (person)
-        user_selected.emit(person);
+    auto persons = GetSelectedPersons();
+    if (!persons.empty())
+        user_selected.emit(persons);
 }
 
 void UsersViewStack::OnHistoryPersonButtonClicked() {

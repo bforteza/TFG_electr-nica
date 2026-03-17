@@ -103,6 +103,8 @@ void KeyViewStack::RefreshLabels() {
 // --- Iniciadores públicos ---
 
 void KeyViewStack::view(std::shared_ptr<kdb::Person> person) {
+    toggle_conn_.disconnect();
+    keys_tree_view_->get_selection()->set_mode(Gtk::SELECTION_SINGLE);
     select_key_button_->hide();
     access_ = (int)person->a1 + 2 * (int)person->a2;
     Configure();
@@ -119,6 +121,8 @@ void KeyViewStack::view(std::shared_ptr<kdb::Person> person) {
 }
 
 void KeyViewStack::view(std::vector<kdb::Key> keys) {
+    toggle_conn_.disconnect();
+    keys_tree_view_->get_selection()->set_mode(Gtk::SELECTION_SINGLE);
     select_key_button_->hide();
     Configure();
     current_keys_ = keys;
@@ -126,6 +130,18 @@ void KeyViewStack::view(std::vector<kdb::Key> keys) {
 }
 
 void KeyViewStack::select(std::vector<kdb::Key> keys) {
+    keys_tree_view_->get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
+    toggle_conn_ = keys_tree_view_->signal_button_press_event().connect([this](GdkEventButton* ev) -> bool {
+        Gtk::TreePath path;
+        Gtk::TreeViewColumn* col;
+        int cx, cy;
+        if (keys_tree_view_->get_path_at_pos((int)ev->x, (int)ev->y, path, col, cx, cy)) {
+            auto sel = keys_tree_view_->get_selection();
+            if (sel->is_selected(path)) sel->unselect(path);
+            else                        sel->select(path);
+        }
+        return true;
+    }, false);
     keep_key_button_->hide();
     add_user_button_->hide();
     remove_user_button_->hide();
@@ -154,6 +170,20 @@ std::shared_ptr<kdb::Key> KeyViewStack::GetSelectedKey() {
     return nullptr;
 }
 
+std::vector<std::shared_ptr<kdb::Key>> KeyViewStack::GetSelectedKeys() {
+    std::vector<std::shared_ptr<kdb::Key>> result;
+    for (auto& path : keys_tree_view_->get_selection()->get_selected_rows()) {
+        auto iter = tree_model_->get_iter(path);
+        if (iter) {
+            try {
+                result.push_back(std::make_shared<kdb::Key>(
+                    litesql::select<kdb::Key>(*db, kdb::Key::Id == (*iter)[columns_.id_col]).one()));
+            } catch (...) {}
+        }
+    }
+    return result;
+}
+
 void KeyViewStack::Refresh() {
     tree_model_->clear();
     for (auto& key : current_keys_) {
@@ -168,7 +198,6 @@ void KeyViewStack::Refresh() {
             row[columns_.keeper_col] = (Glib::ustring)key.keeper().get().one().name;
         } catch (...) {}
     }
-    ;
 }
 
 void KeyViewStack::Configure() {
@@ -204,10 +233,9 @@ void KeyViewStack::Configure() {
 // --- Manejadores de botones ---
 
 void KeyViewStack::OnSelectKeyButtonClicked() {
-    int id = GetSelectionId();
-    if (id)
-        key_selected.emit(
-            std::make_shared<kdb::Key>(litesql::select<kdb::Key>(*db, kdb::Key::Id == id).one()));
+    auto keys = GetSelectedKeys();
+    if (!keys.empty())
+        key_selected.emit(keys);
 }
 
 void KeyViewStack::OnEditKeyButtonClicked() {

@@ -17,8 +17,8 @@ class KeyViewStack {
 public:
     KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder);
 
-    // Señal emitida cuando el usuario selecciona una llave en modo selección.
-    sigc::signal<void, std::shared_ptr<kdb::Key>> key_selected;
+    // Señal emitida cuando el usuario selecciona una o más llaves en modo selección.
+    sigc::signal<void, std::vector<std::shared_ptr<kdb::Key>>> key_selected;
 
     // Señal para mostrar la lista de usuarios que tienen acceso a una llave.
     sigc::signal<void, std::vector<kdb::Person>> users_view;
@@ -95,6 +95,9 @@ private:
     Gtk::TreeViewColumn* active_column_;
     Gtk::TreeViewColumn* keeper_column_;
 
+    // Conexión del handler de toggle en modo selección.
+    sigc::connection toggle_conn_;
+
     // Modelo de datos enlazado al TreeView.
     Glib::RefPtr<Gtk::ListStore> tree_model_;
 
@@ -112,6 +115,9 @@ private:
 
     // Devuelve un puntero a la llave seleccionada, o nullptr si no hay selección.
     std::shared_ptr<kdb::Key> GetSelectedKey();
+
+    // Devuelve todas las llaves seleccionadas (modo MULTIPLE).
+    std::vector<std::shared_ptr<kdb::Key>> GetSelectedKeys();
 
     // Muestra u oculta botones según el nivel de acceso guardado en access_.
     void Configure();
