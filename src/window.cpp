@@ -2,7 +2,6 @@
 #include "sound_manager.h"
 #include "history_logger.h"
 #include <gdk/gdkkeysyms.h>
-#include <iostream>
 
 // Ruta al archivo de interfaz gráfica, relativa al directorio de trabajo.
 static constexpr const char* kGladePath = "./ui/MainWindow.glade";
@@ -76,21 +75,15 @@ Window* Window::create() {
 
 void Window::ResetInactivityTimer() {
     inactivity_timer_conn_.disconnect();
-    if (main_stack_->get_visible_child_name() != "HomeView") {
-        std::cout << "[InactivityTimer] Stop (no en HomeView: "
-                  << main_stack_->get_visible_child_name() << ")\n";
+    if (main_stack_->get_visible_child_name() != "HomeView")
         return;
-    }
-    std::cout << "[InactivityTimer] Reset (" << kInactivitySeconds << "s)\n";
     inactivity_timer_conn_ = Glib::signal_timeout().connect_seconds([this]() {
-        std::cout << "[InactivityTimer] Disparado — cerrando sesión\n";
         home_stack_.Logout();
         return false; // no repetir
     }, kInactivitySeconds);
 }
 
 void Window::StopInactivityTimer() {
-    std::cout << "[InactivityTimer] Detenido explícitamente\n";
     inactivity_timer_conn_.disconnect();
 }
 
