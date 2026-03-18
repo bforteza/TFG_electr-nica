@@ -26,10 +26,6 @@ public:
     // Limpia el mensaje de error e inicia el polling NFC.
     void Start();
 
-    // Actualiza los textos de la pantalla al idioma activo.
-    // Llamar tras cambiar current_language.
-    void RefreshLabels();
-
 private:
     // Campo de entrada de contraseña/identificación manual.
     Gtk::Entry* password_entry_;
@@ -47,6 +43,9 @@ private:
     Gtk::Button* lang_ca_button_;
     Gtk::Button* lang_es_button_;
     Gtk::Button* lang_en_button_;
+
+    // Actualiza los textos de la pantalla al idioma activo.
+    void RefreshLabels();
 
     // Llamado cuando el usuario pulsa Enter en el campo de contraseña.
     void OnPasswordEntered();

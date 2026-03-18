@@ -27,9 +27,6 @@ public:
     // Muestra solo los eventos relacionados con la persona dada.
     void view(std::shared_ptr<kdb::Person> person);
 
-    // Actualiza los textos de cabeceras de columnas al idioma activo.
-    void RefreshLabels();
-
 private:
     // Widget de lista para mostrar los eventos.
     Gtk::TreeView* history_tree_view_;
@@ -50,6 +47,9 @@ private:
 
     // Definición de columnas del modelo.
     HistoryModelColumns columns_;
+
+    // Actualiza los textos de cabeceras de columnas al idioma activo.
+    void RefreshLabels();
 
     // Convierte el valor entero de etype en su cadena traducida.
     std::string EventTypeToString(int etype) const;

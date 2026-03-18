@@ -29,13 +29,6 @@ public:
     // al nivel de acceso del usuario.
     void PersonLogged(std::shared_ptr<kdb::Person> person);
 
-    // Actualiza los textos de los botones al idioma activo.
-    // Llamar tras cambiar current_language.
-    void RefreshLabels();
-
-    // Navega atrás: si estamos en AdminMainStack cierra sesión;
-    // si no, retorna al panel anterior guardado en back_widget_.
-    void OnBackButtonClicked();
 
     // Cierra sesión: limpia el estado de navegación y vuelve al login.
     // Llamado por el botón "Salir", el botón atrás en la vista raíz
@@ -110,6 +103,13 @@ private:
     // Se desconectan al pulsar atrás.
     sigc::connection key_selected_connection_;
     sigc::connection user_selected_connection_;
+
+    // Actualiza los textos de los botones al idioma activo.
+    void RefreshLabels();
+
+    // Navega atrás: si estamos en AdminMainStack cierra sesión;
+    // si no, retorna al panel anterior guardado en back_widget_.
+    void OnBackButtonClicked();
 
     // Oculta todos los botones de acción antes de mostrar los que corresponden
     // al nivel de acceso del usuario.

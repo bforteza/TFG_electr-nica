@@ -26,9 +26,6 @@ public:
     // Emitida cuando el usuario pulsa "Añadir llave" en modo edición.
     sigc::signal<void, std::shared_ptr<kdb::Person>> user_link_key;
 
-    // Actualiza los textos de etiquetas y botones al idioma activo.
-    void RefreshLabels();
-
 private:
     // Usuario que se está editando actualmente (nullptr en modo creación).
     std::shared_ptr<kdb::Person> edited_user_;
@@ -66,6 +63,9 @@ private:
 
     // Área de texto que muestra el UID NFC capturado.
     Gtk::TextView* uid_text_view_;
+
+    // Actualiza los textos de etiquetas y botones al idioma activo.
+    void RefreshLabels();
 
     // Limpia el formulario y reinicia los modos.
     void Reset();

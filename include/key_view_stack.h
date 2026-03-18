@@ -48,9 +48,6 @@ public:
     // oculta botones de edición y muestra el botón "Seleccionar".
     void select(std::vector<kdb::Key> keys);
 
-    // Actualiza los textos de botones y cabeceras de columnas al idioma activo.
-    void RefreshLabels();
-
 private:
     // Botón para dar acceso a un usuario sobre la llave seleccionada.
     Gtk::Button* add_user_button_;
@@ -99,6 +96,9 @@ private:
 
     // Lista de llaves actualmente mostrada en el TreeView.
     std::vector<kdb::Key> current_keys_;
+
+    // Actualiza los textos de botones y cabeceras de columnas al idioma activo.
+    void RefreshLabels();
 
     // Recarga el TreeView con el contenido de current_keys_.
     void Refresh();

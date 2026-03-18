@@ -44,9 +44,6 @@ public:
     // oculta botones de edición y muestra el botón "Seleccionar".
     void select(std::vector<kdb::Person> users);
 
-    // Actualiza los textos de botones y cabeceras de columnas al idioma activo.
-    void RefreshLabels();
-
 private:
     // Botón para vincular una llave al usuario seleccionado.
     Gtk::Button* add_key_button_;
@@ -86,6 +83,9 @@ private:
 
     // Lista de usuarios actualmente mostrada en el TreeView.
     std::vector<kdb::Person> current_users_;
+
+    // Actualiza los textos de botones y cabeceras de columnas al idioma activo.
+    void RefreshLabels();
 
     // Recarga el TreeView con el contenido de current_users_.
     void Refresh();

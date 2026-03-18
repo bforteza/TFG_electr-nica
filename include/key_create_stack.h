@@ -28,9 +28,6 @@ public:
     // Rellena el campo de posición con la posición seleccionada en el picker (1-based).
     void SetPosition(int pos);
 
-    // Actualiza los textos de botones al idioma activo.
-    void RefreshLabels();
-
     // Emitida cuando el usuario pulsa el botón de selección de posición.
     sigc::signal<void> position_select_requested;
 
@@ -75,6 +72,9 @@ private:
 
     // Usuario que inició la creación; se vincula a la llave al crearla.
     std::shared_ptr<kdb::Person> creator_;
+
+    // Actualiza los textos de botones al idioma activo.
+    void RefreshLabels();
 
     // Limpia el formulario y reinicia los modos.
     void Reset();
