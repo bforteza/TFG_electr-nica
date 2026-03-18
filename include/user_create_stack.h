@@ -33,10 +33,6 @@ private:
     // Usuario que se está editando actualmente (nullptr en modo creación).
     std::shared_ptr<kdb::Person> edited_user_;
 
-    // Indicadores de modo activo; solo uno puede ser true a la vez.
-    bool create_mode_ = true;
-    bool edit_mode_   = false;
-
     // Campos de entrada del formulario.
     Gtk::Entry* username_entry_;
     Gtk::Entry* password_entry_;
@@ -51,8 +47,7 @@ private:
     // Botón para capturar el UID NFC del usuario.
     Gtk::Button* add_uid_button_;
 
-    // Grupo de radio buttons para seleccionar el nivel de acceso.
-    Gtk::RadioButton::Group radio_group_;
+    // Radio buttons para seleccionar el nivel de acceso.
     Gtk::RadioButton* radio_level0_;   // Sin acceso especial (a1=false, a2=false)
     Gtk::RadioButton* radio_level1_;   // Acceso a gestión de llaves (a1=true)
     Gtk::RadioButton* radio_admin_;    // Administrador completo (a2=true)

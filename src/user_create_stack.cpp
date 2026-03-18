@@ -47,9 +47,9 @@ UserCreateStack::UserCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     if (!radio_admin_)
         throw std::runtime_error("No \"A2RadioButton\" object in MainWindow.glade");
 
-    radio_group_ = radio_level0_->get_group();
-    radio_level1_->set_group(radio_group_);
-    radio_admin_->set_group(radio_group_);
+    auto radio_group = radio_level0_->get_group();
+    radio_level1_->set_group(radio_group);
+    radio_admin_->set_group(radio_group);
 
     builder->get_widget("UserCreateUsernameLabel", username_label_);
     if (!username_label_)
@@ -108,9 +108,9 @@ void UserCreateStack::RefreshLabels() {
     add_key_button_->set_label(Tr().user_create.btn_add_key);
     add_uid_button_->set_label(Tr().user_create.btn_add_nfc);
     // El botón de confirmar tiene etiqueta distinta según el modo activo.
-    if (create_mode_)
+    if (!edited_user_)
         generate_button_->set_label(Tr().user_create.btn_create);
-    else if (edit_mode_)
+    else
         generate_button_->set_label(Tr().user_create.btn_edit);
 }
 
@@ -118,7 +118,6 @@ void UserCreateStack::RefreshLabels() {
 
 void UserCreateStack::CreateUser() {
     Reset();
-    create_mode_ = true;
     add_key_button_->hide();
     RefreshLabels();
 }
@@ -130,7 +129,6 @@ void UserCreateStack::UserEdit(std::shared_ptr<kdb::Person> person) {
     password_entry_->set_text((std::string)person->password);
     repeat_password_entry_->set_text((std::string)person->password);
     uid_text_view_->get_buffer()->set_text((std::string)person->uid);
-    edit_mode_ = true;
     add_key_button_->show();
     RefreshLabels();
 }
@@ -161,59 +159,44 @@ void UserCreateStack::OnGenerateButtonClicked() {
         valid = false;
     }
 
-    if (create_mode_) {
-        if (litesql::select<kdb::Person>(*db, kdb::Person::Name == username).count()) {
-            username_error_label_->set_text(Tr().user_create.error_username_exists);
-            valid = false;
-        }
-        if (litesql::select<kdb::Person>(*db, kdb::Person::Password == password).count()) {
-            password_error_label_->set_text(Tr().user_create.error_password_exists);
-            valid = false;
-        }
-        if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).count() +
-            litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid).count()) {
-            nfc_error_label_->set_text(Tr().user_create.error_card_in_use);
-            valid = false;
-        }
+    int exclude_id = edited_user_ ? (int)edited_user_->id : 0;
 
-        if (valid) {
-            kdb::Person new_person(*db);
-            new_person.uid      = uid;
-            new_person.name     = (std::string)username;
-            new_person.password = (std::string)password;
-            new_person.a1       = radio_level1_->get_active();
-            new_person.a2       = radio_admin_->get_active();
-            new_person.update();
-            UserEdit(std::make_shared<kdb::Person>(new_person));
-        }
+    if (litesql::select<kdb::Person>(*db, kdb::Person::Name == username
+                                         && kdb::Person::Id != exclude_id).count()) {
+        username_error_label_->set_text(Tr().user_create.error_username_exists);
+        valid = false;
+    }
+    if (litesql::select<kdb::Person>(*db, kdb::Person::Password == password
+                                         && kdb::Person::Id != exclude_id).count()) {
+        password_error_label_->set_text(Tr().user_create.error_password_exists);
+        valid = false;
+    }
+    if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid
+                                         && kdb::Person::Id != exclude_id).count() +
+        litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid).count()) {
+        nfc_error_label_->set_text(Tr().user_create.error_card_in_use);
+        valid = false;
+    }
 
-    } else if (edit_mode_) {
-        if (litesql::select<kdb::Person>(*db, kdb::Person::Name == username
-                                             && kdb::Person::Id != edited_user_->id).count()) {
-            username_error_label_->set_text(Tr().user_create.error_username_exists);
-            valid = false;
-        }
-        if (litesql::select<kdb::Person>(*db, kdb::Person::Password == password
-                                             && kdb::Person::Id != edited_user_->id).count()) {
-            password_error_label_->set_text(Tr().user_create.error_password_exists);
-            valid = false;
-        }
-        if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid
-                                             && kdb::Person::Id != edited_user_->id).count() +
-            litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid).count()) {
-            nfc_error_label_->set_text(Tr().user_create.error_card_in_use);
-            valid = false;
-        }
+    if (!valid) return;
 
-        if (valid) {
-            edited_user_->uid      = uid;
-            edited_user_->name     = (std::string)username;
-            edited_user_->password = (std::string)password;
-            edited_user_->a1       = radio_level1_->get_active();
-            edited_user_->a2       = radio_admin_->get_active();
-            edited_user_->update();
-            UserEdit(edited_user_);
-        }
+    if (!edited_user_) {
+        kdb::Person new_person(*db);
+        new_person.uid      = uid;
+        new_person.name     = (std::string)username;
+        new_person.password = (std::string)password;
+        new_person.a1       = radio_level1_->get_active();
+        new_person.a2       = radio_admin_->get_active();
+        new_person.update();
+        UserEdit(std::make_shared<kdb::Person>(new_person));
+    } else {
+        edited_user_->uid      = uid;
+        edited_user_->name     = (std::string)username;
+        edited_user_->password = (std::string)password;
+        edited_user_->a1       = radio_level1_->get_active();
+        edited_user_->a2       = radio_admin_->get_active();
+        edited_user_->update();
+        UserEdit(edited_user_);
     }
 }
 
@@ -243,7 +226,5 @@ void UserCreateStack::Reset() {
     repeat_password_entry_->set_text("");
     uid_text_view_->get_buffer()->set_text("");
 
-    create_mode_ = false;
-    edit_mode_   = false;
     edited_user_ = nullptr;
 }

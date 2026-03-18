@@ -82,9 +82,9 @@ void KeyCreateStack::RefreshLabels() {
     add_uid_button_->set_label(Tr().key_create.btn_add_nfc);
     position_picker_button_->set_label(Tr().key_create.btn_pick_position);
     // El botón de confirmar tiene etiqueta distinta según el modo activo.
-    if (create_mode_)
+    if (!edited_key_)
         generate_button_->set_label(Tr().key_create.btn_create);
-    else if (edit_mode_)
+    else
         generate_button_->set_label(Tr().key_create.btn_edit);
 }
 
@@ -92,8 +92,7 @@ void KeyCreateStack::RefreshLabels() {
 
 void KeyCreateStack::CreateKey(std::shared_ptr<kdb::Person> creator) {
     Reset();
-    creator_     = creator;
-    create_mode_ = true;
+    creator_ = creator;
     add_user_button_->hide();
     RefreshLabels();
 }
@@ -106,7 +105,6 @@ void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> key) {
     commentary_entry_->set_text((std::string)key->commentary);
     position_ = (int)key->pos;
     uid_text_view_->get_buffer()->set_text((std::string)key->uid);
-    edit_mode_ = true;
     add_user_button_->show();
     RefreshLabels();
 }
@@ -116,80 +114,61 @@ void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> key) {
 void KeyCreateStack::OnGenerateButtonClicked() {
     name_error_label_->set_text("");
     uid_error_label_->set_text("");
-    bool valid = true;
 
-    if (create_mode_) {
-        // Validar longitud del nombre.
-        if (key_name_entry_->get_text_length() < 3) {
-            name_error_label_->set_text(Tr().key_create.error_name_too_short);
-            valid = false;
-        }
-        // Validar nombre único.
-        if (litesql::select<kdb::Key>(*db, kdb::Key::Name == key_name_entry_->get_text()).count()) {
-            name_error_label_->set_text(Tr().key_create.error_name_exists);
-            valid = false;
-        }
-        // Validar UID único (no usado ni en persona ni en llave).
-        std::string uid = uid_text_view_->get_buffer()->get_text();
-        if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).count() +
-            litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid).count()) {
-            uid_error_label_->set_text(Tr().key_create.error_card_in_use);
-            valid = false;
-        }
-        // Posición seleccionada mediante el picker.
-        if (position_ == 0) {
-            position_picker_button_->set_label(Tr().key_create.error_position_invalid);
-            valid = false;
-        }
+    int exclude_id      = edited_key_ ? (int)edited_key_->id : 0;
+    std::string uid     = uid_text_view_->get_buffer()->get_text();
+    std::string name    = (std::string)key_name_entry_->get_text();
+    bool valid          = true;
 
-        if (valid) {
-            kdb::Key new_key(*db);
-            new_key.name        = (std::string)key_name_entry_->get_text();
-            new_key.ubi         = (std::string)ubi_entry_->get_text();
-            new_key.commentary  = (std::string)commentary_entry_->get_text();
-            new_key.uid         = (std::string)uid_text_view_->get_buffer()->get_text();
-            new_key.pos         = position_;
-            new_key.active      = true;
-            new_key.update();
-            auto key_ptr = std::make_shared<kdb::Key>(new_key);
-            history::LogKeyCreated(creator_, key_ptr);
-            if (creator_) {
-                creator_->keys().link(*key_ptr);
-                creator_->keepkeys().link(*key_ptr);
-            }
-            // Entra en modo edición con la llave recién creada.
-            KeyEdit(key_ptr);
-        }
+    // Validar longitud del nombre.
+    if (key_name_entry_->get_text_length() < 3) {
+        name_error_label_->set_text(Tr().key_create.error_name_too_short);
+        valid = false;
+    }
+    // Validar nombre único (excluyendo la llave actual en modo edición).
+    if (litesql::select<kdb::Key>(*db, kdb::Key::Name == name
+                                      && kdb::Key::Id != exclude_id).count()) {
+        name_error_label_->set_text(Tr().key_create.error_name_exists);
+        valid = false;
+    }
+    // Validar UID único (excluyendo la llave actual en modo edición).
+    if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).count() +
+        litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid
+                                      && kdb::Key::Id != exclude_id).count()) {
+        uid_error_label_->set_text(Tr().key_create.error_card_in_use);
+        valid = false;
+    }
+    // En modo creación, validar también que hay posición seleccionada.
+    if (!edited_key_ && position_ == 0) {
+        position_picker_button_->set_label(Tr().key_create.error_position_invalid);
+        valid = false;
+    }
 
-    } else if (edit_mode_) {
-        // Validar longitud del nombre.
-        if (key_name_entry_->get_text_length() < 3) {
-            name_error_label_->set_text(Tr().key_create.error_name_too_short);
-            valid = false;
-        }
-        // Validar nombre único (excluyendo la llave actual).
-        if (litesql::select<kdb::Key>(*db, kdb::Key::Name == key_name_entry_->get_text()
-                                          && kdb::Key::Id != edited_key_->id).count()) {
-            name_error_label_->set_text(Tr().key_create.error_name_exists);
-            valid = false;
-        }
-        // Validar UID único (excluyendo la llave actual).
-        std::string uid = uid_text_view_->get_buffer()->get_text();
-        if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).count() +
-            litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid
-                                          && kdb::Key::Id != edited_key_->id).count()) {
-            uid_error_label_->set_text(Tr().key_create.error_card_in_use);
-            valid = false;
-        }
+    if (!valid) return;
 
-        if (valid) {
-            edited_key_->name       = (std::string)key_name_entry_->get_text();
-            edited_key_->ubi        = (std::string)ubi_entry_->get_text();
-            edited_key_->commentary = (std::string)commentary_entry_->get_text();
-            edited_key_->uid        = (std::string)uid_text_view_->get_buffer()->get_text();
-            edited_key_->pos        = position_;
-            edited_key_->update();
+    if (!edited_key_) {
+        kdb::Key new_key(*db);
+        new_key.name        = name;
+        new_key.ubi         = (std::string)ubi_entry_->get_text();
+        new_key.commentary  = (std::string)commentary_entry_->get_text();
+        new_key.uid         = uid;
+        new_key.pos         = position_;
+        new_key.active      = true;
+        new_key.update();
+        auto key_ptr = std::make_shared<kdb::Key>(new_key);
+        history::LogKeyCreated(creator_, key_ptr);
+        if (creator_) {
+            creator_->keys().link(*key_ptr);
+            creator_->keepkeys().link(*key_ptr);
         }
+        KeyEdit(key_ptr);
+    } else {
+        edited_key_->name       = name;
+        edited_key_->ubi        = (std::string)ubi_entry_->get_text();
+        edited_key_->commentary = (std::string)commentary_entry_->get_text();
+        edited_key_->uid        = uid;
+        edited_key_->pos        = position_;
+        edited_key_->update();
     }
 }
 
@@ -226,9 +205,7 @@ void KeyCreateStack::Reset() {
     name_error_label_->set_text("");
     uid_error_label_->set_text("");
 
-    position_    = 0;
-    edit_mode_   = false;
-    create_mode_ = false;
-    edited_key_  = nullptr;
-    creator_     = nullptr;
+    position_   = 0;
+    edited_key_ = nullptr;
+    creator_    = nullptr;
 }

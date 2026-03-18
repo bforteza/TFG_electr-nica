@@ -70,10 +70,6 @@ private:
     // Área de texto que muestra el UID NFC capturado.
     Gtk::TextView* uid_text_view_;
 
-    // Indicadores de modo activo; solo uno puede ser true a la vez.
-    bool edit_mode_   = false;
-    bool create_mode_ = true;
-
     // Llave que se está editando actualmente (nullptr en modo creación).
     std::shared_ptr<kdb::Key> edited_key_;
 
