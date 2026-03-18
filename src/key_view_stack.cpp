@@ -102,29 +102,11 @@ void KeyViewStack::RefreshLabels() {
 
 // --- Iniciadores públicos ---
 
-void KeyViewStack::view(std::shared_ptr<kdb::Person> person) {
+void KeyViewStack::view(std::vector<kdb::Key> keys, int access) {
     toggle_conn_.disconnect();
     keys_tree_view_->get_selection()->set_mode(Gtk::SELECTION_SINGLE);
     select_key_button_->hide();
-    access_ = (int)person->a1 + 2 * (int)person->a2;
-    Configure();
-    if (access_ >= 2) {
-        current_keys_ = litesql::select<kdb::Key>(*db, kdb::Key::Active == true).all();
-    } else {
-        auto all = person->keys().get().all();
-        current_keys_.clear();
-        for (auto& k : all)
-            if ((bool)k.active)
-                current_keys_.push_back(k);
-    }
-    Refresh();
-}
-
-void KeyViewStack::view(std::vector<kdb::Key> keys) {
-    toggle_conn_.disconnect();
-    keys_tree_view_->get_selection()->set_mode(Gtk::SELECTION_SINGLE);
-    select_key_button_->hide();
-    Configure();
+    Configure(access);
     current_keys_ = keys;
     Refresh();
 }
@@ -154,13 +136,6 @@ void KeyViewStack::select(std::vector<kdb::Key> keys) {
 }
 
 // --- Auxiliares internos ---
-
-int KeyViewStack::GetSelectionId() {
-    auto sel = keys_tree_view_->get_selection();
-    if (auto iter = sel->get_selected())
-        return (*iter)[columns_.id_col];
-    return 0;
-}
 
 std::shared_ptr<kdb::Key> KeyViewStack::GetSelectedKey() {
     auto sel = keys_tree_view_->get_selection();
@@ -200,7 +175,7 @@ void KeyViewStack::Refresh() {
     }
 }
 
-void KeyViewStack::Configure() {
+void KeyViewStack::Configure(int access) {
     // Ocultar todos primero para no arrastrar estado de llamadas anteriores.
     keep_key_button_->hide();
     add_user_button_->hide();
@@ -214,18 +189,17 @@ void KeyViewStack::Configure() {
     active_column_->set_visible(false);
     pos_column_->set_visible(false);
 
-    if (access_ >= 0)
-        keep_key_button_->show();
-    if (access_ >= 2)
+    keep_key_button_->show();
+    if (access >= 2)
         pos_column_->set_visible(true);
-    if (access_ >= 1) {
+    if (access >= 1) {
         add_user_button_->show();
         remove_user_button_->show();
         edit_key_button_->show();
         delete_key_button_->show();
         view_users_button_->show();
     }
-    if (access_ >= 2)
+    if (access >= 2)
         history_key_button_->show();
     keys_tree_view_->columns_autosize();
 }

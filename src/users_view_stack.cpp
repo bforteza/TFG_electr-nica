@@ -84,14 +84,13 @@ void UsersViewStack::view(std::vector<kdb::Person> users, int access) {
     users_tree_view_->get_selection()->set_mode(Gtk::SELECTION_SINGLE);
     password_column_->set_visible(access >= 2);
     uid_column_->set_visible(access >= 2);
-    access_ = access;
     add_key_button_->show();
     remove_key_button_->show();
     view_keys_button_->show();
     select_user_button_->hide();
 
     // Editar usuario e historial son solo para administradores.
-    if (access_ >= 2) {
+    if (access >= 2) {
         edit_button_->show();
         history_person_button_->show();
     } else {
@@ -131,13 +130,6 @@ void UsersViewStack::select(std::vector<kdb::Person> users) {
 
 // --- Auxiliares internos ---
 
-int UsersViewStack::GetSelectionId() {
-    auto sel = users_tree_view_->get_selection();
-    if (auto iter = sel->get_selected())
-        return (*iter)[columns_.id_col];
-    return 0;
-}
-
 std::shared_ptr<kdb::Person> UsersViewStack::GetSelectedPerson() {
     auto sel = users_tree_view_->get_selection();
     if (auto iter = sel->get_selected())
@@ -174,24 +166,18 @@ void UsersViewStack::Refresh() {
 // --- Manejadores de botones ---
 
 void UsersViewStack::OnAddKeyButtonClicked() {
-    int id = GetSelectionId();
-    if (id)
-        user_link.emit(
-            std::make_shared<kdb::Person>(litesql::select<kdb::Person>(*db, kdb::Person::Id == id).one()));
+    auto person = GetSelectedPerson();
+    if (person) user_link.emit(person);
 }
 
 void UsersViewStack::OnRemoveKeyButtonClicked() {
-    int id = GetSelectionId();
-    if (id)
-        user_unlink.emit(
-            std::make_shared<kdb::Person>(litesql::select<kdb::Person>(*db, kdb::Person::Id == id).one()));
+    auto person = GetSelectedPerson();
+    if (person) user_unlink.emit(person);
 }
 
 void UsersViewStack::OnViewKeysButtonClicked() {
-    int id = GetSelectionId();
-    if (id)
-        keys_view.emit(
-            litesql::select<kdb::Person>(*db, kdb::Person::Id == id).one().keys().get().all());
+    auto person = GetSelectedPerson();
+    if (person) keys_view.emit(person);
 }
 
 void UsersViewStack::OnEditButtonClicked() {

@@ -41,12 +41,8 @@ public:
     // Señal para ver el historial de la llave seleccionada.
     sigc::signal<void, std::shared_ptr<kdb::Key>> key_history;
 
-    // Muestra la lista de llaves para el usuario dado según su nivel de acceso.
-    // access < 2: solo sus llaves asignadas. access >= 2: todas las llaves.
-    void view(std::shared_ptr<kdb::Person> person);
-
-    // Muestra una lista de llaves predefinida (sin filtro por acceso).
-    void view(std::vector<kdb::Key> keys);
+    // Muestra una lista de llaves. access controla qué botones son visibles.
+    void view(std::vector<kdb::Key> keys, int access = 2);
 
     // Muestra una lista de llaves en modo selección:
     // oculta botones de edición y muestra el botón "Seleccionar".
@@ -56,9 +52,6 @@ public:
     void RefreshLabels();
 
 private:
-    // Nivel de acceso del usuario actualmente identificado.
-    uint8_t access_ = 0;
-
     // Botón para dar acceso a un usuario sobre la llave seleccionada.
     Gtk::Button* add_user_button_;
 
@@ -110,17 +103,14 @@ private:
     // Recarga el TreeView con el contenido de current_keys_.
     void Refresh();
 
-    // Devuelve el ID de la fila seleccionada, o 0 si no hay selección.
-    int GetSelectionId();
-
     // Devuelve un puntero a la llave seleccionada, o nullptr si no hay selección.
     std::shared_ptr<kdb::Key> GetSelectedKey();
 
     // Devuelve todas las llaves seleccionadas (modo MULTIPLE).
     std::vector<std::shared_ptr<kdb::Key>> GetSelectedKeys();
 
-    // Muestra u oculta botones según el nivel de acceso guardado en access_.
-    void Configure();
+    // Muestra u oculta botones según el nivel de acceso.
+    void Configure(int access);
 
     // Manejadores de los botones de acción.
     void OnSelectKeyButtonClicked();

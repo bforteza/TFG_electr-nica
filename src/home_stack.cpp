@@ -3,7 +3,6 @@
 #include "globals.h"
 #include "history_logger.h"
 #include <gtkmm/messagedialog.h>
-#include <set>
 
 HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     : window_(window),
@@ -109,31 +108,27 @@ void HomeStack::RefreshLabels() {
 // --- Iniciador ---
 
 void HomeStack::PersonLogged(std::shared_ptr<kdb::Person> person) {
+    logged_person_ = person;
+    access_ = (int)person->a1 + 2 * (int)person->a2;
+
     name_label_->set_text((std::string)person->name);
     HideButtons();
 
-    int access = (int)person->a1 + 2 * (int)person->a2;
-    if (access >= 0)
-        view_keys_button_->show();
-    if (access >= 1)
+    view_keys_button_->show();
+    if (access_ >= 1)
         key_create_button_->show();
-    if (access >= 2) {
+    if (access_ >= 2) {
         view_users_button_->show();
         user_create_button_->show();
         solenoid_panel_button_->show();
         history_button_->show();
     }
-
-    logged_person_ = person;
 }
 
 // --- Navegación ---
 
 void HomeStack::Logout() {
-    key_selected_connection_.disconnect();
-    user_selected_connection_.disconnect();
-    aux_key_    = nullptr;
-    aux_person_ = nullptr;
+    ResetSelectionState();
     back_widget_ = nullptr;
     inner_stack_->set_visible_child("AdminMainStack");
     window_->OnBackButtonClicked();
@@ -144,10 +139,7 @@ void HomeStack::OnBackButtonClicked() {
         Logout();
         return;
     }
-    key_selected_connection_.disconnect();
-    user_selected_connection_.disconnect();
-    aux_key_    = nullptr;
-    aux_person_ = nullptr;
+    ResetSelectionState();
     if (back_widget_ == nullptr) {
         inner_stack_->set_visible_child("AdminMainStack");
     } else {
@@ -167,7 +159,10 @@ void HomeStack::OnViewUsersButtonClicked() {
 }
 
 void HomeStack::OnViewKeysButtonClicked() {
-    key_view_stack_.view(logged_person_);
+    std::vector<kdb::Key> keys = (access_ >= 2)
+        ? litesql::select<kdb::Key>(*db, kdb::Key::Active == true).all()
+        : logged_person_->keys().get(kdb::Key::Active == true).all();
+    key_view_stack_.view(keys, access_);
     inner_stack_->set_visible_child("ViewKeyStack");
 }
 
@@ -178,33 +173,20 @@ void HomeStack::OnKeyCreateButtonClicked() {
 
 // --- Auxiliares internos ---
 
-void HomeStack::ShowKeysView(std::vector<kdb::Key> keys) {
-    int access = (int)logged_person_->a1 + 2 * (int)logged_person_->a2;
+void HomeStack::ShowKeysView(std::shared_ptr<kdb::Person> person) {
+    std::vector<kdb::Key> keys = (access_ >= 2)
+        ? person->keys().get(kdb::Key::Active == true).all()
+        : litesql::intersect(
+              logged_person_->keys().get(kdb::Key::Active == true),
+              person->keys().get()).all();
 
-    std::vector<kdb::Key> filtered;
-    if (access >= 2) {
-        for (auto& k : keys)
-            if ((bool)k.active)
-                filtered.push_back(k);
-    } else {
-        // A1: solo sus propias llaves activas (intersección con las del usuario visto).
-        auto my_keys = logged_person_->keys().get().all();
-        std::set<int> my_ids;
-        for (auto& k : my_keys)
-            my_ids.insert((int)k.id);
-        for (auto& k : keys)
-            if ((bool)k.active && my_ids.count((int)k.id))
-                filtered.push_back(k);
-    }
-
-    key_view_stack_.view(filtered);
+    key_view_stack_.view(keys, access_);
     back_widget_ = inner_stack_->get_visible_child();
     inner_stack_->set_visible_child("ViewKeyStack");
 }
 
 void HomeStack::ShowUsersView(std::vector<kdb::Person> users) {
-    int access = (int)logged_person_->a1 + 2 * (int)logged_person_->a2;
-    users_view_stack_.view(users, access);
+    users_view_stack_.view(users, access_);
     back_widget_ = inner_stack_->get_visible_child();
     inner_stack_->set_visible_child("ViewUsersStack");
 }
@@ -222,24 +204,19 @@ void HomeStack::OnKeyEdit(std::shared_ptr<kdb::Key> key) {
 }
 
 void HomeStack::OnUserLinkKey(std::shared_ptr<kdb::Person> person) {
+    if ((bool)person->a2) {
+        ShowWarning(Tr().key_view.err_user_is_admin);
+        return;
+    }
     aux_person_ = person;
 
-    int access = (int)logged_person_->a1 + 2 * (int)logged_person_->a2;
-    std::vector<kdb::Key> available;
-    if (access >= 2) {
-        available = litesql::except(
-            litesql::select<kdb::Key>(*db, kdb::Key::Active == true),
-            aux_person_->keys().get()
-        ).all();
-    } else {
-        auto my_keys = logged_person_->keys().get().all();
-        auto already  = aux_person_->keys().get().all();
-        std::set<int> already_ids;
-        for (auto& k : already) already_ids.insert((int)k.id);
-        for (auto& k : my_keys)
-            if ((bool)k.active && !already_ids.count((int)k.id))
-                available.push_back(k);
-    }
+    std::vector<kdb::Key> available = (access_ >= 2)
+        ? litesql::except(
+              litesql::select<kdb::Key>(*db, kdb::Key::Active == true),
+              aux_person_->keys().get()).all()
+        : litesql::except(
+              logged_person_->keys().get(kdb::Key::Active == true),
+              aux_person_->keys().get()).all();
     key_view_stack_.select(available);
     back_widget_ = inner_stack_->get_visible_child();
     key_selected_connection_ = key_view_stack_.key_selected.connect(
@@ -271,21 +248,17 @@ void HomeStack::OnKeyLinkUser(std::shared_ptr<kdb::Key> key) {
 }
 
 void HomeStack::OnUserUnlinkKey(std::shared_ptr<kdb::Person> person) {
+    if ((bool)person->a2) {
+        ShowWarning(Tr().key_view.err_user_is_admin);
+        return;
+    }
     aux_person_ = person;
 
-    int access = (int)logged_person_->a1 + 2 * (int)logged_person_->a2;
-    std::vector<kdb::Key> removable;
-    if (access >= 2) {
-        removable = person->keys().get().all();
-    } else {
-        auto my_keys  = logged_person_->keys().get().all();
-        auto his_keys = person->keys().get().all();
-        std::set<int> my_ids;
-        for (auto& k : my_keys) my_ids.insert((int)k.id);
-        for (auto& k : his_keys)
-            if (my_ids.count((int)k.id))
-                removable.push_back(k);
-    }
+    std::vector<kdb::Key> removable = (access_ >= 2)
+        ? person->keys().get().all()
+        : litesql::intersect(
+              logged_person_->keys().get(),
+              person->keys().get()).all();
     key_view_stack_.select(removable);
     back_widget_ = inner_stack_->get_visible_child();
     key_selected_connection_ = key_view_stack_.key_selected.connect(
@@ -314,20 +287,7 @@ void HomeStack::OnKeyUnlinkUser(std::shared_ptr<kdb::Key> key) {
 void HomeStack::OnKeyKept(std::shared_ptr<kdb::Key> key) {
     // Si la llave ya tiene portador, muestra aviso y cancela.
     if (key->keeper().get().count() > 0) {
-        auto* dlg = new Gtk::MessageDialog(
-            *window_, Tr().key_view.err_key_in_use,
-            false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
-        auto closed = std::make_shared<bool>(false);
-        dlg->signal_response().connect([dlg, closed](int) {
-            *closed = true;
-            dlg->hide();
-            delete dlg;
-        });
-        Glib::signal_timeout().connect_once([dlg, closed]() {
-            if (!*closed)
-                dlg->response(Gtk::RESPONSE_OK);
-        }, 2000);
-        dlg->show();
+        ShowWarning(Tr().key_view.err_key_in_use);
         return;
     }
 
@@ -338,23 +298,13 @@ void HomeStack::OnKeyKept(std::shared_ptr<kdb::Key> key) {
 
 void HomeStack::OnKeyDelete(std::shared_ptr<kdb::Key> key) {
     if (key->keeper().get().count() == 0) {
-        auto* dlg = new Gtk::MessageDialog(
-            *window_, Tr().key_view.err_key_in_cabinet,
-            false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
-        auto closed = std::make_shared<bool>(false);
-        dlg->signal_response().connect([dlg, closed](int) {
-            *closed = true; dlg->hide(); delete dlg;
-        });
-        Glib::signal_timeout().connect_once([dlg, closed]() {
-            if (!*closed) dlg->response(Gtk::RESPONSE_OK);
-        }, 2000);
-        dlg->show();
+        ShowWarning(Tr().key_view.err_key_in_cabinet);
         return;
     }
     key->active = false;
     key->update();
     history::LogKeyDeactivated(logged_person_, key);
-    key_view_stack_.view(logged_person_);
+    OnViewKeysButtonClicked();
 }
 
 void HomeStack::OnQuitButtonClicked() {
@@ -372,6 +322,25 @@ void HomeStack::OnPositionSelectRequested() {
 void HomeStack::OnPositionSelected(int pos) {
     key_create_stack_.SetPosition(pos);
     inner_stack_->set_visible_child("KeyCreateStack");
+}
+
+void HomeStack::ShowWarning(const std::string& msg) {
+    auto* dlg = new Gtk::MessageDialog(*window_, msg, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+    auto closed = std::make_shared<bool>(false);
+    dlg->signal_response().connect([dlg, closed](int) {
+        *closed = true; dlg->hide(); delete dlg;
+    });
+    Glib::signal_timeout().connect_once([dlg, closed]() {
+        if (!*closed) dlg->response(Gtk::RESPONSE_OK);
+    }, 2000);
+    dlg->show();
+}
+
+void HomeStack::ResetSelectionState() {
+    key_selected_connection_.disconnect();
+    user_selected_connection_.disconnect();
+    aux_key_    = nullptr;
+    aux_person_ = nullptr;
 }
 
 void HomeStack::HideButtons() {

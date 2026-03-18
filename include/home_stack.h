@@ -98,6 +98,9 @@ private:
     // Usuario actualmente identificado en el sistema.
     std::shared_ptr<kdb::Person> logged_person_;
 
+    // Nivel de acceso del usuario identificado; calculado una vez en PersonLogged.
+    int access_ = 0;
+
     // Auxiliares para operaciones de vinculación: se preservan mientras se navega
     // entre sub-vistas para completar el flujo de link/unlink en dos pasos.
     std::shared_ptr<kdb::Person> aux_person_;
@@ -112,6 +115,12 @@ private:
     // al nivel de acceso del usuario.
     void HideButtons();
 
+    // Muestra un diálogo de aviso modal con cierre automático a los 2 segundos.
+    void ShowWarning(const std::string& msg);
+
+    // Desconecta señales temporales y limpia auxiliares de navegación en modo selección.
+    void ResetSelectionState();
+
     // Manejadores de los botones del panel principal.
     void OnUserCreateButtonClicked();
     void OnViewUsersButtonClicked();
@@ -120,7 +129,7 @@ private:
 
     // Muestra la sub-vista de llaves/usuarios guardando la vista actual como
     // destino de vuelta para el botón atrás.
-    void ShowKeysView(std::vector<kdb::Key> keys);
+    void ShowKeysView(std::shared_ptr<kdb::Person> person);
     void ShowUsersView(std::vector<kdb::Person> users);
 
     // Navega a la sub-vista de edición del elemento dado.

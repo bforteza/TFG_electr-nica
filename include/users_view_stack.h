@@ -31,7 +31,7 @@ public:
     sigc::signal<void, std::shared_ptr<kdb::Person>> user_edit;
 
     // Señal para mostrar las llaves asignadas al usuario seleccionado.
-    sigc::signal<void, std::vector<kdb::Key>> keys_view;
+    sigc::signal<void, std::shared_ptr<kdb::Person>> keys_view;
 
     // Señal para ver el historial del usuario seleccionado.
     sigc::signal<void, std::shared_ptr<kdb::Person>> person_history;
@@ -84,17 +84,11 @@ private:
     // Definición de columnas del modelo.
     ModelColumns columns_;
 
-    // Nivel de acceso del usuario logueado (para mostrar/ocultar botones de admin).
-    int access_ = 2;
-
     // Lista de usuarios actualmente mostrada en el TreeView.
     std::vector<kdb::Person> current_users_;
 
     // Recarga el TreeView con el contenido de current_users_.
     void Refresh();
-
-    // Devuelve el ID de la fila seleccionada, o 0 si no hay selección.
-    int GetSelectionId();
 
     // Devuelve un puntero al usuario seleccionado, o nullptr si no hay selección.
     std::shared_ptr<kdb::Person> GetSelectedPerson();
