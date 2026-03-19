@@ -34,6 +34,19 @@ classDiagram
         +Play(SoundEvent)
         +ConnectToAllButtons(Container)
     }
+    class HistoryLogger {
+        <<namespace>>
+        +LogPickup(Person, Key)
+        +LogReturn(Key)
+        +LogAdminOpen(Person, Key, int)
+        +LogKeyCreated(Person, Key)
+        +LogKeyDeactivated(Person, Key)
+    }
+    class Translations {
+        <<global>>
+        +Tr() Translations
+        +language_changed signal
+    }
     class UsersViewStack {
         +view(users, access)
         +select(users)
