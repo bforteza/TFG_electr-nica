@@ -74,5 +74,5 @@ void NfcManager::StartPolling() {
 
 void NfcManager::StopPolling() {
     polling_ = false;
-    worker_.detach();
+    if (worker_.joinable()) worker_.detach();
 }
