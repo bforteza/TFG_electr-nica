@@ -10,9 +10,9 @@
 // Cada stack se suscribe en su constructor para refrescar sus textos de UI.
 inline sigc::signal<void> language_changed;
 
-// Puntero a la base de datos activa. Se inicializa en main() y se usa en
-// todos los stacks para consultar y modificar registros.
-extern kdb::DbManager* db;
+// Instancia de la base de datos activa. Se inicializa en Application::on_startup()
+// y se usa en todos los stacks para consultar y modificar registros.
+inline std::unique_ptr<kdb::DbManager> db;
 
 // Gestor NFC. Se inicializa en main() y se usa desde LoginStack y UserCreateStack
 // para detectar tarjetas NFC en segundo plano.

@@ -2,6 +2,9 @@
 classDiagram
     direction TB
 
+    class Application {
+        +create()$
+    }
     class Window {
         +create()$
         +OnBackButtonClicked()
@@ -54,6 +57,7 @@ classDiagram
         +view(Person)
     }
 
+    Application *-- Window
     Window *-- LoginStack
     Window *-- HomeStack
     Window *-- SolenoidPanel

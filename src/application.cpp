@@ -1,4 +1,6 @@
 #include "application.h"
+#include "globals.h"
+#include "litesql.hpp"
 #include <iostream>
 #include <gtkmm/cssprovider.h>
 #include <gtkmm/stylecontext.h>
@@ -36,6 +38,21 @@ void Application::on_activate() {
 void Application::on_startup() {
     Gtk::Application::on_startup();
 
+    // Inicializa la base de datos. Si falla, termina la aplicación.
+    try {
+        // TODO: mover credenciales a un fichero de configuración externo.
+        db = std::make_unique<kdb::DbManager>("mysql", "user=usuario;password=CAMBIAR;database=miBaseDeDatos");
+        if (db->needsUpgrade())
+            db->upgrade();
+        db->verbose = false;
+    } catch (litesql::Except& e) {
+        std::cerr << "DB error: " << e << std::endl;
+        quit();
+        return;
+    }
+
+    nfcman = std::make_unique<NfcManager>();
+
     // Carga la hoja de estilos global (fuentes, tamaños para pantalla táctil).
     // Para ajustar tamaños edita ui/style.css — ver comentarios en ese archivo.
     auto css = Gtk::CssProvider::create();
@@ -50,10 +67,6 @@ void Application::on_startup() {
         Gdk::Screen::get_default(),
         css,
         GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-    // TODO: registrar acciones globales (Gio::Action) y mover aquí
-    // la inicialización de BD y NFC desde main.cpp para poder mostrar
-    // errores fatales con un diálogo GTK en lugar de cerr + return -1.
 }
 
 void Application::OnHideWindow(Gtk::Window* window) {
