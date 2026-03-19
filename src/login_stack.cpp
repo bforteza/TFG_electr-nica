@@ -79,10 +79,12 @@ void LoginStack::OnPasswordEntered()
 {
     std::string password = password_entry_->get_text();
     try {
-        user_logged.emit(std::make_shared<kdb::Person>(
-            litesql::select<kdb::Person>(*db, kdb::Person::Password == password).one()));
+        auto person = std::make_shared<kdb::Person>(
+            litesql::select<kdb::Person>(*db, kdb::Person::Password == password).one());
+        nfcman->StopPolling();
         error_label_->set_text("");
         SoundManager::Play(SoundEvent::kLoginOk);
+        user_logged.emit(person);
     } catch (...) {
         error_label_->set_text(Tr().login.error_invalid_credentials);
         SoundManager::Play(SoundEvent::kLoginError);
