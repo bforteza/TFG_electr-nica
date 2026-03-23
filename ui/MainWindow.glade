@@ -95,15 +95,14 @@
           <object class="GtkBox" id="LoginStack">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="name">LoginStack</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkLabel" id="LoginTitleLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="name">LoginTitleLabel</property>
                 <property name="label" translatable="yes">Introdueix credencials</property>
-                <attributes>
-                  <attribute name="font-desc" value="FreeMono Bold 55"/>
-                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -150,7 +149,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="padding">100</property>
+                <property name="padding">20</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -158,9 +157,6 @@
               <object class="GtkLabel" id="LogErrorLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <attributes>
-                  <attribute name="font-desc" value="FreeMono 15"/>
-                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -172,20 +168,21 @@
               <object class="GtkLabel" id="LoginDescLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="margin-start">15</property>
-                <property name="margin-end">15</property>
+                <property name="name">LoginDescLabel</property>
+                <property name="halign">center</property>
+                <property name="justify">center</property>
+                <property name="margin-start">40</property>
+                <property name="margin-end">40</property>
                 <property name="margin-top">10</property>
                 <property name="margin-bottom">10</property>
                 <property name="label" translatable="yes">Introdueix les credencials mitjançant el teclat numèric o aproxima l'identificador nfc al lector. Podeu retornar una clau utilitzant també l'identificador nfc. </property>
                 <property name="wrap">True</property>
-                <attributes>
-                  <attribute name="font-desc" value="FreeMono 15"/>
-                </attributes>
               </object>
               <packing>
+                <property name="pack-type">end</property>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -193,8 +190,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">center</property>
-                <property name="margin-end">10</property>
-                <property name="margin-bottom">10</property>
+                <property name="margin-bottom">20</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkButton" id="LangCaButton">
@@ -243,9 +239,10 @@
                 </child>
               </object>
               <packing>
+                <property name="pack-type">end</property>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -1222,21 +1219,20 @@
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkScrolledWindow">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="hscrollbar-policy">never</property>
-                        <property name="vscrollbar-policy">never</property>
-                        <property name="propagate-natural-height">True</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">2</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="spacing">6</property>
-                            <property name="margin-start">6</property>
-                            <property name="margin-end">6</property>
+                            <property name="homogeneous">True</property>
+                            <property name="spacing">2</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-end">4</property>
                             <property name="margin-top">4</property>
-                            <property name="margin-bottom">4</property>
                             <child>
                               <object class="GtkButton" id="KeepKeyButton">
                                 <property name="label" translatable="yes">Agafar clau</property>
@@ -1246,10 +1242,15 @@
                                 <property name="image">image6</property>
                                 <property name="always-show-image">True</property>
                               </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
                             </child>
                             <child>
                               <object class="GtkButton" id="AddUserToKeyButton">
-                                <property name="label" translatable="yes">Afegir usuari a clau</property>
+                                <property name="label" translatable="yes">Afegir usuari</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
@@ -1257,6 +1258,8 @@
                                 <property name="always-show-image">True</property>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -1270,6 +1273,8 @@
                                 <property name="always-show-image">True</property>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">2</property>
                               </packing>
                             </child>
@@ -1283,9 +1288,27 @@
                                 <property name="always-show-image">True</property>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">3</property>
                               </packing>
                             </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="homogeneous">True</property>
+                            <property name="spacing">2</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-end">4</property>
+                            <property name="margin-bottom">4</property>
                             <child>
                               <object class="GtkButton" id="EditKeyButton">
                                 <property name="label" translatable="yes">Editar clau</property>
@@ -1296,7 +1319,9 @@
                                 <property name="always-show-image">True</property>
                               </object>
                               <packing>
-                                <property name="position">4</property>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
@@ -1309,7 +1334,9 @@
                                 <property name="always-show-image">True</property>
                               </object>
                               <packing>
-                                <property name="position">5</property>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1322,7 +1349,9 @@
                                 <property name="always-show-image">True</property>
                               </object>
                               <packing>
-                                <property name="position">6</property>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                             <child>
@@ -1333,10 +1362,17 @@
                                 <property name="receives-default">True</property>
                               </object>
                               <packing>
-                                <property name="position">7</property>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">3</property>
                               </packing>
                             </child>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>

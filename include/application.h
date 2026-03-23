@@ -33,8 +33,6 @@ private:
     // Oculta todas las ventanas y termina el bucle principal.
     void OnActionQuit();
 
-    // TODO: navegar a la pantalla de selección de llave (pendiente de implementar).
-    void SetKeySelectWindow();
 };
 
 #endif // APPLICATION_H

@@ -34,25 +34,25 @@
 /* --- Botones ----------------------------------------------- */
 
 /* Botones genéricos: formularios, acciones en listas, back... */
-button > label {
+button label {
     /* [AJUSTAR] */
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 500;
 }
 
 /* Botones del menú principal: 6 botones que ocupan toda la pantalla */
-.menu-btn > label {
+.menu-btn label {
     /* [AJUSTAR] */
     font-size: 40px;
     font-weight: bold;
 }
 
 /* Botones de idioma: pequeños, solo texto corto */
-#LangCaButton > label,
-#LangEsButton > label,
-#LangEnButton > label {
+#LangCaButton label,
+#LangEsButton label,
+#LangEnButton label {
     /* [AJUSTAR] */
-    font-size: 11px;
+    font-size: 18px;
 }
 
 
@@ -60,7 +60,9 @@ button > label {
 
 entry {
     /* [AJUSTAR] Campos de texto y contraseña */
-    font-size: 18px;
+    font-size: 20px;
+    padding-top: 14px;
+    padding-bottom: 14px;
 }
 
 
@@ -86,10 +88,15 @@ treeview header button label {
     font-weight: bold;
 }
 
+#LoginStack {
+    padding-top: 100px;
+}
+
 #LoginTitleLabel {
     /* [AJUSTAR] Título de la pantalla de login */
-    font-size: 22px;
+    font-size: 50px;
     font-weight: bold;
+    margin-bottom: 20px;
 }
 
 #LoginDescLabel {

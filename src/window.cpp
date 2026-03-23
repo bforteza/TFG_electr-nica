@@ -53,9 +53,8 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
             static_cast<Window*>(data)->ResetInactivityTimer();
         gtk_main_do_event(ev);
     }, this, nullptr);
-
-    if (getenv("KIOSK"))
-        fullscreen();
+    set_decorated(false);
+    resize(1024, 600);
 }
 
 Window::~Window() {}

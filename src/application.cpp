@@ -78,7 +78,3 @@ void Application::OnActionQuit() {
         window->hide();
     quit();
 }
-
-void Application::SetKeySelectWindow() {
-    // TODO: navegar a la pantalla de selección/devolución de llave.
-}
