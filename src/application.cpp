@@ -3,6 +3,7 @@
 #include "litesql.hpp"
 #include <iostream>
 #include <gtkmm/cssprovider.h>
+#include <gtkmm/settings.h>
 #include <gtkmm/stylecontext.h>
 #include <gdkmm/screen.h>
 
@@ -37,6 +38,10 @@ void Application::on_activate() {
 
 void Application::on_startup() {
     Gtk::Application::on_startup();
+
+    // Tema GTK — cambiar "Arc" por el tema instalado en el sistema.
+    auto gtk_settings = Gtk::Settings::get_default();
+    gtk_settings->property_gtk_theme_name() = "Raleigh";
 
     // Inicializa la base de datos. Si falla, termina la aplicación.
     try {

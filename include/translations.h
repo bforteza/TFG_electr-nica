@@ -128,6 +128,8 @@ struct Translations {
         const char* err_key_in_use;
         const char* err_key_in_cabinet; // No se puede desactivar: la llave está en el armario
         const char* err_user_is_admin;  // No se puede vincular: el usuario es administrador
+        const char* confirm_delete_title;
+        const char* confirm_delete_body;
     } key_view;
 };
 
@@ -229,6 +231,8 @@ inline const Translations kTranslations[] = {
             "Atenció: la clau ja està en ús",
             "Atenció: la clau és a l'armari, no es pot desactivar",
             "Atenció: l'usuari és administrador, té accés a totes les claus",
+            "Eliminar clau",
+            "Aquesta acció no es pot desfer.",
         },
     },
     // ---- kSpanish ----
@@ -328,6 +332,8 @@ inline const Translations kTranslations[] = {
             "Atención: la llave ya está en uso",
             "Atención: la llave está en el armario, no se puede desactivar",
             "Atención: el usuario es administrador, tiene acceso a todas las llaves",
+            "Eliminar llave",
+            "Esta acción no se puede deshacer.",
         },
     },
     // ---- kEnglish ----
@@ -427,6 +433,8 @@ inline const Translations kTranslations[] = {
             "Warning: key already in use",
             "Warning: key is in the cabinet, cannot be deactivated",
             "Warning: user is an administrator, has access to all keys",
+            "Delete key",
+            "This action cannot be undone.",
         },
     },
 };

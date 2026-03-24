@@ -34,17 +34,52 @@
 /* --- Botones ----------------------------------------------- */
 
 /* Botones genéricos: formularios, acciones en listas, back... */
+button {
+    background-image: none;
+    background-color: #deedf7;
+    border: 1px solid #b0cfe6;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+
+button:active {
+    background-color: #b8d4e8;
+    box-shadow: none;
+}
+
 button label {
     /* [AJUSTAR] */
     font-size: 22px;
     font-weight: 500;
+    color: #1a1a2e;
 }
 
 /* Botones del menú principal: 6 botones que ocupan toda la pantalla */
+.menu-btn {
+    background-image: none;
+    background-color: #deedf7;
+    border: 2px solid #b0cfe6;
+    border-radius: 6px;
+}
+
+.menu-btn:active {
+    background-color: #b8d4e8;
+}
+
 .menu-btn label {
     /* [AJUSTAR] */
     font-size: 40px;
     font-weight: bold;
+    color: #1a1a2e;
+}
+
+/* Cabecera de tabla: sin redondeo, color suave */
+treeview header button {
+    background-image: none;
+    background-color: #c8dfed;
+    border-radius: 0;
+    border: none;
+    border-right: 1px solid #b0cfe6;
 }
 
 /* Botones de idioma: pequeños, solo texto corto */
@@ -84,7 +119,7 @@ treeview header button label {
 
 #NameLabel {
     /* [AJUSTAR] Nombre del usuario identificado en HomeStack */
-    font-size: 24px;
+    font-size: 40px;
     font-weight: bold;
 }
 

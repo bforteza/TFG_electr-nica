@@ -6,6 +6,7 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
+#include <gtkmm/messagedialog.h>
 #include "models.h"
 #include "dbmanager.hpp"
 #include "translations.h"

@@ -112,6 +112,7 @@ void KeyViewStack::view(std::vector<kdb::Key> keys, int access) {
 }
 
 void KeyViewStack::select(std::vector<kdb::Key> keys) {
+    
     keys_tree_view_->get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
     toggle_conn_ = keys_tree_view_->signal_button_press_event().connect([this](GdkEventButton* ev) -> bool {
         Gtk::TreePath path;
@@ -130,6 +131,7 @@ void KeyViewStack::select(std::vector<kdb::Key> keys) {
     edit_key_button_->hide();
     delete_key_button_->hide();
     view_users_button_->hide();
+    history_key_button_->hide();
     select_key_button_->show();
     current_keys_ = keys;
     Refresh();
@@ -173,6 +175,8 @@ void KeyViewStack::Refresh() {
             row[columns_.keeper_col] = (Glib::ustring)key.keeper().get().one().name;
         } catch (...) {}
     }
+    id_column_->set_visible(false);
+    active_column_->set_visible(false);
 }
 
 void KeyViewStack::Configure(int access) {
@@ -185,8 +189,7 @@ void KeyViewStack::Configure(int access) {
     view_users_button_->hide();
     history_key_button_->hide();
 
-    id_column_->set_visible(false);
-    active_column_->set_visible(false);
+   
     pos_column_->set_visible(false);
 
     keep_key_button_->show();
@@ -238,7 +241,13 @@ void KeyViewStack::OnViewUsersButtonClicked() {
 
 void KeyViewStack::OnDeleteKeyButtonClicked() {
     auto key = GetSelectedKey();
-    if (key)
+    if (!key) return;
+
+    Gtk::MessageDialog dialog(
+        Glib::ustring(Tr().key_view.confirm_delete_title) + " «" + (Glib::ustring)key->name + "»?",
+        false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_YES_NO, true);
+    dialog.set_secondary_text(Tr().key_view.confirm_delete_body);
+    if (dialog.run() == Gtk::RESPONSE_YES)
         key_delete.emit(key);
 }
 
