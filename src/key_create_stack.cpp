@@ -157,10 +157,10 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         new_key.update();
         auto key_ptr = std::make_shared<kdb::Key>(new_key);
         history::LogKeyCreated(creator_, key_ptr);
-        if (creator_) {
-            creator_->keys().link(*key_ptr);
-            creator_->keepkeys().link(*key_ptr);
+        if (!creator_->a2) {
+            creator_->keys().link(*key_ptr);     
         }
+        creator_->keepkeys().link(*key_ptr);
         KeyEdit(key_ptr);
     } else {
         edited_key_->name       = name;
