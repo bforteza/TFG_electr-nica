@@ -55,11 +55,13 @@ def index():
 def users_list():
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id, name, password, uid, a1, a2 FROM Person_ ORDER BY name")
+        cur.execute(
+            "SELECT id_, name_, password_, uid_, a1_, a2_ FROM Person_ ORDER BY name_"
+        )
         users = cur.fetchall()
     db.close()
     for u in users:
-        u["access"] = int(bool(u["a1"])) + 2 * int(bool(u["a2"]))
+        u["access"] = int(bool(u["a1_"])) + 2 * int(bool(u["a2_"]))
     return render_template("users/list.html", users=users)
 
 
@@ -77,7 +79,7 @@ def users_new():
         db = get_db()
         with db.cursor() as cur:
             cur.execute(
-                "INSERT INTO Person_ (type, name, password, uid, a1, a2) "
+                "INSERT INTO Person_ (type_, name_, password_, uid_, a1_, a2_) "
                 "VALUES ('Person', %s, %s, %s, %s, %s)",
                 (name, password, uid, a1, a2),
             )
@@ -99,7 +101,8 @@ def users_edit(user_id):
         a2       = 1 if request.form.get("a2") else 0
         with db.cursor() as cur:
             cur.execute(
-                "UPDATE Person_ SET name=%s, password=%s, uid=%s, a1=%s, a2=%s WHERE id=%s",
+                "UPDATE Person_ SET name_=%s, password_=%s, uid_=%s, a1_=%s, a2_=%s "
+                "WHERE id_=%s",
                 (name, password, uid, a1, a2, user_id),
             )
         db.commit()
@@ -108,7 +111,8 @@ def users_edit(user_id):
         return redirect(url_for("users_list"))
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id, name, password, uid, a1, a2 FROM Person_ WHERE id=%s", (user_id,)
+            "SELECT id_, name_, password_, uid_, a1_, a2_ FROM Person_ WHERE id_=%s",
+            (user_id,),
         )
         user = cur.fetchone()
     db.close()
@@ -122,14 +126,14 @@ def users_edit(user_id):
 def users_delete(user_id):
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT name FROM Person_ WHERE id=%s", (user_id,))
+        cur.execute("SELECT name_ FROM Person_ WHERE id_=%s", (user_id,))
         user = cur.fetchone()
         if user:
-            cur.execute("DELETE FROM Key_Person_Acces WHERE person=%s", (user_id,))
-            cur.execute("DELETE FROM Key_Person_Keep  WHERE person=%s", (user_id,))
-            cur.execute("DELETE FROM Person_ WHERE id=%s", (user_id,))
+            cur.execute("DELETE FROM Key_Person_Acces WHERE Person2_=%s", (user_id,))
+            cur.execute("DELETE FROM Key_Person_Keep  WHERE Person2_=%s", (user_id,))
+            cur.execute("DELETE FROM Person_ WHERE id_=%s", (user_id,))
             db.commit()
-            flash(f'Usuario "{user["name"]}" eliminado.', "success")
+            flash(f'Usuario "{user["name_"]}" eliminado.', "success")
         else:
             flash("Usuario no encontrado.", "danger")
     db.close()
@@ -143,17 +147,19 @@ def keys_list():
     db = get_db()
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id, name, ubi, commentary, pos, active, uid FROM Key_ ORDER BY pos"
+            "SELECT id_, name_, ubi_, commentary_, pos_, active_, uid_ "
+            "FROM Key_ ORDER BY pos_"
         )
         keys = cur.fetchall()
         for k in keys:
             cur.execute(
-                "SELECT p.name FROM Person_ p "
-                "JOIN Key_Person_Keep kk ON p.id = kk.person WHERE kk.key = %s",
-                (k["id"],),
+                "SELECT p.name_ FROM Person_ p "
+                "JOIN Key_Person_Keep kk ON p.id_ = kk.Person2_ "
+                "WHERE kk.Key1_ = %s",
+                (k["id_"],),
             )
             keeper = cur.fetchone()
-            k["keeper"] = keeper["name"] if keeper else None
+            k["keeper"] = keeper["name_"] if keeper else None
     db.close()
     return render_template("keys/list.html", keys=keys)
 
@@ -162,18 +168,18 @@ def keys_list():
 def keys_new():
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id, name FROM Person_ ORDER BY name")
+        cur.execute("SELECT id_, name_ FROM Person_ ORDER BY name_")
         persons = cur.fetchall()
-        cur.execute("SELECT pos FROM Key_ WHERE pos >= 0")
-        taken_pos = {row["pos"] for row in cur.fetchall()}
+        cur.execute("SELECT pos_ FROM Key_ WHERE pos_ >= 0")
+        taken_pos = {row["pos_"] for row in cur.fetchall()}
 
     if request.method == "POST":
-        name          = request.form["name"].strip()
-        ubi           = request.form["ubi"].strip()
-        commentary    = request.form["commentary"].strip()
-        pos           = pos_from_string(request.form.get("pos", ""))
-        active        = 1 if request.form.get("active") else 0
-        uid           = request.form["uid"].strip()
+        name           = request.form["name"].strip()
+        ubi            = request.form["ubi"].strip()
+        commentary     = request.form["commentary"].strip()
+        pos            = pos_from_string(request.form.get("pos", ""))
+        active         = 1 if request.form.get("active") else 0
+        uid            = request.form["uid"].strip()
         authorized_ids = request.form.getlist("authorized")
 
         if not name:
@@ -185,14 +191,14 @@ def keys_new():
             )
         with db.cursor() as cur:
             cur.execute(
-                "INSERT INTO Key_ (type, name, ubi, commentary, pos, active, uid) "
+                "INSERT INTO Key_ (type_, name_, ubi_, commentary_, pos_, active_, uid_) "
                 "VALUES ('Key', %s, %s, %s, %s, %s, %s)",
                 (name, ubi, commentary, pos, active, uid),
             )
             key_id = cur.lastrowid
             for pid in authorized_ids:
                 cur.execute(
-                    "INSERT INTO Key_Person_Acces (key, person) VALUES (%s, %s)",
+                    "INSERT INTO Key_Person_Acces (Key1_, Person2_) VALUES (%s, %s)",
                     (key_id, pid),
                 )
         db.commit()
@@ -212,7 +218,8 @@ def keys_edit(key_id):
     db = get_db()
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id, name, ubi, commentary, pos, active, uid FROM Key_ WHERE id=%s",
+            "SELECT id_, name_, ubi_, commentary_, pos_, active_, uid_ "
+            "FROM Key_ WHERE id_=%s",
             (key_id,),
         )
         key = cur.fetchone()
@@ -223,24 +230,24 @@ def keys_edit(key_id):
         return redirect(url_for("keys_list"))
 
     if request.method == "POST":
-        name          = request.form["name"].strip()
-        ubi           = request.form["ubi"].strip()
-        commentary    = request.form["commentary"].strip()
-        pos           = pos_from_string(request.form.get("pos", ""))
-        active        = 1 if request.form.get("active") else 0
-        uid           = request.form["uid"].strip()
+        name           = request.form["name"].strip()
+        ubi            = request.form["ubi"].strip()
+        commentary     = request.form["commentary"].strip()
+        pos            = pos_from_string(request.form.get("pos", ""))
+        active         = 1 if request.form.get("active") else 0
+        uid            = request.form["uid"].strip()
         authorized_ids = [int(x) for x in request.form.getlist("authorized")]
 
         with db.cursor() as cur:
             cur.execute(
-                "UPDATE Key_ SET name=%s, ubi=%s, commentary=%s, pos=%s, active=%s, uid=%s "
-                "WHERE id=%s",
+                "UPDATE Key_ SET name_=%s, ubi_=%s, commentary_=%s, pos_=%s, "
+                "active_=%s, uid_=%s WHERE id_=%s",
                 (name, ubi, commentary, pos, active, uid, key_id),
             )
-            cur.execute("DELETE FROM Key_Person_Acces WHERE key=%s", (key_id,))
+            cur.execute("DELETE FROM Key_Person_Acces WHERE Key1_=%s", (key_id,))
             for pid in authorized_ids:
                 cur.execute(
-                    "INSERT INTO Key_Person_Acces (key, person) VALUES (%s, %s)",
+                    "INSERT INTO Key_Person_Acces (Key1_, Person2_) VALUES (%s, %s)",
                     (key_id, pid),
                 )
         db.commit()
@@ -249,12 +256,12 @@ def keys_edit(key_id):
         return redirect(url_for("keys_list"))
 
     with db.cursor() as cur:
-        cur.execute("SELECT id, name FROM Person_ ORDER BY name")
+        cur.execute("SELECT id_, name_ FROM Person_ ORDER BY name_")
         persons = cur.fetchall()
-        cur.execute("SELECT person FROM Key_Person_Acces WHERE key=%s", (key_id,))
-        authorized_ids = [row["person"] for row in cur.fetchall()]
-        cur.execute("SELECT pos FROM Key_ WHERE pos >= 0 AND id != %s", (key_id,))
-        taken_pos = {row["pos"] for row in cur.fetchall()}
+        cur.execute("SELECT Person2_ FROM Key_Person_Acces WHERE Key1_=%s", (key_id,))
+        authorized_ids = [row["Person2_"] for row in cur.fetchall()]
+        cur.execute("SELECT pos_ FROM Key_ WHERE pos_ >= 0 AND id_ != %s", (key_id,))
+        taken_pos = {row["pos_"] for row in cur.fetchall()}
     db.close()
 
     return render_template(
@@ -267,14 +274,14 @@ def keys_edit(key_id):
 def keys_delete(key_id):
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT name FROM Key_ WHERE id=%s", (key_id,))
+        cur.execute("SELECT name_ FROM Key_ WHERE id_=%s", (key_id,))
         key = cur.fetchone()
         if key:
-            cur.execute("DELETE FROM Key_Person_Acces WHERE key=%s", (key_id,))
-            cur.execute("DELETE FROM Key_Person_Keep  WHERE key=%s", (key_id,))
-            cur.execute("DELETE FROM Key_ WHERE id=%s", (key_id,))
+            cur.execute("DELETE FROM Key_Person_Acces WHERE Key1_=%s", (key_id,))
+            cur.execute("DELETE FROM Key_Person_Keep  WHERE Key1_=%s", (key_id,))
+            cur.execute("DELETE FROM Key_ WHERE id_=%s", (key_id,))
             db.commit()
-            flash(f'Llave "{key["name"]}" eliminada.', "success")
+            flash(f'Llave "{key["name_"]}" eliminada.', "success")
         else:
             flash("Llave no encontrada.", "danger")
     db.close()
@@ -293,19 +300,19 @@ def history_list():
     query  = "SELECT * FROM HistoryEvent_ WHERE 1=1"
     params = []
     if key_id:
-        query += " AND keyid=%s";    params.append(key_id)
+        query += " AND keyid_=%s";    params.append(key_id)
     if person_id:
-        query += " AND personid=%s"; params.append(person_id)
+        query += " AND personid_=%s"; params.append(person_id)
     if etype != "":
-        query += " AND etype=%s";    params.append(etype)
-    query += " ORDER BY timestamp DESC LIMIT 500"
+        query += " AND etype_=%s";    params.append(etype)
+    query += " ORDER BY timestamp_ DESC LIMIT 500"
 
     with db.cursor() as cur:
         cur.execute(query, params)
         events = cur.fetchall()
-        cur.execute("SELECT id, name FROM Key_    ORDER BY name")
+        cur.execute("SELECT id_, name_ FROM Key_    ORDER BY name_")
         keys = cur.fetchall()
-        cur.execute("SELECT id, name FROM Person_ ORDER BY name")
+        cur.execute("SELECT id_, name_ FROM Person_ ORDER BY name_")
         persons = cur.fetchall()
     db.close()
 

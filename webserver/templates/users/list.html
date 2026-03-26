@@ -25,10 +25,10 @@
       <tbody>
         {% for u in users %}
         <tr>
-          <td class="text-muted">{{ u.id }}</td>
-          <td><strong>{{ u.name }}</strong></td>
-          <td><code>{{ u.password or '—' }}</code></td>
-          <td><code>{{ u.uid or '—' }}</code></td>
+          <td class="text-muted">{{ u.id_ }}</td>
+          <td><strong>{{ u.name_ }}</strong></td>
+          <td><code>{{ u.password_ or '—' }}</code></td>
+          <td><code>{{ u.uid_ or '—' }}</code></td>
           <td>
             {% if u.access == 0 %}
               <span class="badge bg-secondary">0 — Solo ver sus llaves</span>
@@ -41,11 +41,11 @@
             {% endif %}
           </td>
           <td class="text-end">
-            <a href="{{ url_for('users_edit', user_id=u.id) }}" class="btn btn-sm btn-outline-secondary me-1">
+            <a href="{{ url_for('users_edit', user_id=u.id_) }}" class="btn btn-sm btn-outline-secondary me-1">
               <i class="bi bi-pencil"></i>
             </a>
-            <form action="{{ url_for('users_delete', user_id=u.id) }}" method="post" class="d-inline"
-                  onsubmit="return confirm('¿Eliminar usuario {{ u.name }}?')">
+            <form action="{{ url_for('users_delete', user_id=u.id_) }}" method="post" class="d-inline"
+                  onsubmit="return confirm('¿Eliminar usuario {{ u.name_ }}?')">
               <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
             </form>
           </td>

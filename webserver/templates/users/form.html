@@ -17,28 +17,28 @@
       <div class="mb-3">
         <label class="form-label">Nombre <span class="text-danger">*</span></label>
         <input type="text" name="name" class="form-control"
-               value="{{ user.name if user else '' }}" required>
+               value="{{ user.name_ if user else '' }}" required>
       </div>
       <div class="mb-3">
         <label class="form-label">Contraseña <small class="text-muted">(numérica)</small></label>
         <input type="text" name="password" class="form-control"
-               value="{{ user.password if user else '' }}" inputmode="numeric">
+               value="{{ user.password_ if user else '' }}" inputmode="numeric">
       </div>
       <div class="mb-3">
         <label class="form-label">UID NFC <small class="text-muted">(opcional)</small></label>
         <input type="text" name="uid" class="form-control"
-               value="{{ user.uid if user else '' }}" placeholder="p.ej. A3F2C1B0">
+               value="{{ user.uid_ if user else '' }}" placeholder="p.ej. A3F2C1B0">
       </div>
       <div class="mb-3">
         <label class="form-label d-block">Nivel de acceso</label>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="checkbox" name="a1" id="a1"
-                 {% if user and user.a1 %}checked{% endif %}>
+                 {% if user and user.a1_ %}checked{% endif %}>
           <label class="form-check-label" for="a1">a1 — Gestión de llaves</label>
         </div>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="checkbox" name="a2" id="a2"
-                 {% if user and user.a2 %}checked{% endif %}>
+                 {% if user and user.a2_ %}checked{% endif %}>
           <label class="form-check-label" for="a2">a2 — Administrador completo</label>
         </div>
         <div class="form-text">

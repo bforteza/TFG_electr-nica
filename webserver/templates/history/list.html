@@ -13,8 +13,8 @@
         <select name="key_id" class="form-select">
           <option value="">Todas</option>
           {% for k in keys %}
-            <option value="{{ k.id }}" {% if filter_key == k.id|string %}selected{% endif %}>
-              {{ k.name }}
+            <option value="{{ k.id_ }}" {% if filter_key == k.id_|string %}selected{% endif %}>
+              {{ k.name_ }}
             </option>
           {% endfor %}
         </select>
@@ -24,8 +24,8 @@
         <select name="person_id" class="form-select">
           <option value="">Todas</option>
           {% for p in persons %}
-            <option value="{{ p.id }}" {% if filter_person == p.id|string %}selected{% endif %}>
-              {{ p.name }}
+            <option value="{{ p.id_ }}" {% if filter_person == p.id_|string %}selected{% endif %}>
+              {{ p.name_ }}
             </option>
           {% endfor %}
         </select>
@@ -69,9 +69,9 @@
       <tbody>
         {% for ev in events %}
         <tr>
-          <td class="text-muted text-nowrap"><small>{{ ev.timestamp }}</small></td>
+          <td class="text-muted text-nowrap"><small>{{ ev.timestamp_ }}</small></td>
           <td>
-            {% set e = ev.etype %}
+            {% set e = ev.etype_ %}
             {% if e == 0 %}
               <span class="badge bg-primary">Recogida</span>
             {% elif e == 1 %}
@@ -86,9 +86,9 @@
               <span class="badge bg-dark">{{ e }}</span>
             {% endif %}
           </td>
-          <td>{{ ev.keyname or '<span class="text-muted">—</span>' | safe }}</td>
-          <td>{{ ev.personname or '<span class="text-muted">—</span>' | safe }}</td>
-          <td><span class="font-monospace">{{ pos_to_string(ev.pos) }}</span></td>
+          <td>{{ ev.keyname_ or '—' }}</td>
+          <td>{{ ev.personname_ or '—' }}</td>
+          <td><span class="font-monospace">{{ pos_to_string(ev.pos_) }}</span></td>
         </tr>
         {% else %}
         <tr><td colspan="5" class="text-center text-muted py-4">No hay eventos con esos filtros.</td></tr>
