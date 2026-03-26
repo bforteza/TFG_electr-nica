@@ -221,7 +221,7 @@ inline const Translations kTranslations[] = {
         // key_view
         {
             "Agafar clau",
-            "Afegir usuari a clau",
+            "Afegir usuari",
             "Llevar usuari",
             "Veure usuaris",
             "Editar clau",
@@ -322,7 +322,7 @@ inline const Translations kTranslations[] = {
         // key_view
         {
             "Coger llave",
-            "Agregar usuario a llave",
+            "Añadir usuario",
             "Quitar usuario",
             "Ver usuarios",
             "Editar llave",
@@ -423,7 +423,7 @@ inline const Translations kTranslations[] = {
         // key_view
         {
             "Take key",
-            "Add user to key",
+            "Add user",
             "Remove user",
             "View users",
             "Edit key",

@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Manual_Administrador.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<p><a id="inicio"></a></p>
+<h1 id="manual-del-administrador">Manual del Administrador</h1>
+<h2 id="armario-inteligente-de-llaves">Armario Inteligente de Llaves</h2>
+<p><strong>Versión:</strong> 1.0
+<strong>Idioma:</strong> Español
+<strong>Destinatario:</strong> Administrador del sistema</p>
+<hr>
+<p><a id="indice"></a></p>
+<h2 id="%C3%ADndice">Índice</h2>
+<ol>
+<li><a href="#introduccion">Introducción</a>
+<ul>
+<li><a href="#que-es">¿Qué es el sistema?</a></li>
+<li><a href="#componentes">Componentes del sistema</a></li>
+<li><a href="#niveles">Niveles de acceso</a></li>
+</ul>
+</li>
+<li><a href="#primeros-pasos">Primeros pasos</a>
+<ul>
+<li><a href="#encendido">Encendido y pantalla de inicio</a></li>
+<li><a href="#login-nfc">Identificación por NFC</a></li>
+<li><a href="#login-password">Identificación por contraseña</a></li>
+<li><a href="#cierre-sesion">Cierre de sesión automático</a></li>
+</ul>
+</li>
+<li><a href="#navegacion">Navegación entre pantallas</a></li>
+<li><a href="#uso-basico">Uso básico — Retirar y devolver llaves</a>
+<ul>
+<li><a href="#retirar">Retirar una llave</a></li>
+<li><a href="#devolver">Devolver una llave</a></li>
+</ul>
+</li>
+<li><a href="#gestion-llaves">Gestión de llaves</a>
+<ul>
+<li><a href="#ver-llaves">Ver el listado de llaves</a></li>
+<li><a href="#crear-llave">Crear una llave</a></li>
+<li><a href="#editar-llave">Editar una llave</a></li>
+<li><a href="#activar-llave">Activar y desactivar llaves</a></li>
+<li><a href="#acceso-llave">Gestionar qué usuarios tienen acceso</a></li>
+</ul>
+</li>
+<li><a href="#gestion-usuarios">Gestión de usuarios</a>
+<ul>
+<li><a href="#ver-usuarios">Ver el listado de usuarios</a></li>
+<li><a href="#crear-usuario">Crear un usuario</a></li>
+<li><a href="#editar-usuario">Editar un usuario</a></li>
+<li><a href="#acceso-usuario">Gestionar el acceso de un usuario a las llaves</a></li>
+</ul>
+</li>
+<li><a href="#historial">Historial de acciones</a>
+<ul>
+<li><a href="#historial-global">Historial global</a></li>
+<li><a href="#historial-filtrado">Historial por llave o por usuario</a></li>
+</ul>
+</li>
+<li><a href="#solenoides">Control directo de solenoides</a></li>
+<li><a href="#configuracion">Configuración</a>
+<ul>
+<li><a href="#idioma">Cambio de idioma</a></li>
+</ul>
+</li>
+<li><a href="#base-de-datos">Estructura de la base de datos</a></li>
+<li><a href="#problemas">Solución de problemas</a></li>
+<li><a href="#apendice">Apéndice</a>
+<ul>
+<li><a href="#tabla-posiciones">Tabla de posiciones del armario</a></li>
+<li><a href="#glosario">Glosario</a></li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><a id="introduccion"></a></p>
+<h2 id="1-introducci%C3%B3n">1. Introducción</h2>
+<p><a id="que-es"></a></p>
+<h3 id="%C2%BFqu%C3%A9-es-el-sistema">¿Qué es el sistema?</h3>
+<p>El Armario Inteligente de Llaves es un sistema de gestión y custodia de llaves físicas diseñado para entornos empresariales. Permite controlar qué usuarios tienen acceso a cada llave, registrar cada retirada y devolución, y actuar sobre las cerraduras del armario de forma electrónica.</p>
+<p>El sistema corre sobre una Raspberry Pi 4 y presenta una interfaz táctil de tipo kiosco, sin necesidad de teclado ni ratón para el uso habitual. La identificación de usuarios y llaves se realiza mediante tecnología NFC o, como alternativa, mediante contraseña numérica.</p>
+<p>Toda la actividad queda registrada en una base de datos local, garantizando la trazabilidad completa del armario sin depender de conexión a internet.</p>
+<hr>
+<p><a id="componentes"></a></p>
+<h3 id="componentes-del-sistema">Componentes del sistema</h3>
+<blockquote>
+<p><em>Captura pendiente: foto del armario completo con pantalla y lector NFC visibles.</em></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Raspberry Pi 4</strong> (2 GB RAM)</td>
+<td>Unidad central. Ejecuta el software, la base de datos y gestiona todos los periféricos.</td>
+</tr>
+<tr>
+<td><strong>Pantalla táctil IPS 7&quot;</strong> (1024×600)</td>
+<td>Interfaz de usuario. Conexión USB. Incluye altavoces para retroalimentación auditiva.</td>
+</tr>
+<tr>
+<td><strong>Lector NFC PN532</strong></td>
+<td>Identifica tarjetas y llaveros NFC. Conectado por I2C. Soporta estándar ISO 14443A.</td>
+</tr>
+<tr>
+<td><strong>Módulo de 16 relés (XL9535)</strong></td>
+<td>Controla los solenoides del armario. Conectado por I2C, con aislamiento galvánico.</td>
+</tr>
+<tr>
+<td><strong>Teclado numérico USB</strong></td>
+<td>Alternativa a la identificación NFC para introducir contraseñas.</td>
+</tr>
+<tr>
+<td><strong>Armario</strong></td>
+<td>4 filas × 8 columnas = <strong>32 posiciones</strong> (A1–D8). Cada posición tiene un solenoide, un LED indicador y un diodo de protección.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fuentes de alimentación:</strong>
+El sistema usa dos fuentes independientes — 5 V para la electrónica de control y 12 V para los solenoides — garantizando aislamiento eléctrico entre ambos circuitos.</p>
+<hr>
+<p><a id="niveles"></a></p>
+<h3 id="niveles-de-acceso">Niveles de acceso</h3>
+<p>El sistema define tres niveles de acceso. Cada nivel hereda las capacidades del anterior.</p>
+<table>
+<thead>
+<tr>
+<th>Nivel</th>
+<th>Nombre</th>
+<th>Capacidades</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>Usuario básico</td>
+<td>Consultar sus llaves asignadas. Retirar y devolver llaves.</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td>Usuario medio</td>
+<td>Todo lo anterior, más: crear llaves, editar sus llaves visibles, gestionar qué usuarios tienen acceso a ellas.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Administrador</td>
+<td>Control total: gestión de todos los usuarios y llaves del sistema, historial completo, control directo de solenoides.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota:</strong> Las opciones de administración no aparecen en pantalla para usuarios sin el nivel requerido. No se muestran bloqueadas, simplemente no existen para ellos.</p>
+</blockquote>
+<p>La interfaz adapta automáticamente las opciones visibles al nivel del usuario identificado.</p>
+<hr>
+<p><a id="primeros-pasos"></a></p>
+<h2 id="2-primeros-pasos">2. Primeros pasos</h2>
+<p><a id="encendido"></a></p>
+<h3 id="encendido-y-pantalla-de-inicio">Encendido y pantalla de inicio</h3>
+<p>Al arrancar el sistema aparece la pantalla de inicio. Desde aquí se pueden realizar dos acciones sin autenticación de usuario:</p>
+<ul>
+<li><strong>Identificar un llavero NFC</strong> para devolver directamente una llave sin necesidad de iniciar sesión.</li>
+<li><strong>Identificarse como usuario</strong> (por NFC o contraseña) para acceder al panel principal.</li>
+</ul>
+<p><img src="img/login.png" alt="Pantalla de inicio"></p>
+<hr>
+<p><a id="login-nfc"></a></p>
+<h3 id="identificaci%C3%B3n-por-nfc">Identificación por NFC</h3>
+<ol>
+<li>Acerque su tarjeta o llavero NFC al lector (módulo PN532, ubicado al lado del panel).</li>
+<li>El sistema lee el identificador único (UID) del tag.</li>
+<li>Si el UID corresponde a un <strong>usuario</strong>, se abre el panel principal con el nivel de acceso correspondiente.</li>
+<li>Si el UID corresponde a una <strong>llave activa</strong>, se inicia el flujo de devolución directa (sin sesión de usuario).</li>
+<li>Si el UID no está registrado o está duplicado, el sistema muestra un mensaje de error con el motivo exacto.</li>
+</ol>
+<blockquote>
+<p><strong>Nota:</strong> La identificación por NFC es el método recomendado. Elimina errores tipográficos y agiliza el proceso.</p>
+</blockquote>
+<hr>
+<p><a id="login-password"></a></p>
+<h3 id="identificaci%C3%B3n-por-contrase%C3%B1a">Identificación por contraseña</h3>
+<ol>
+<li>En la pantalla de inicio, introduzca su contraseña numérica mediante el teclado numérico o el teclado en pantalla.</li>
+<li>El sistema busca el usuario asociado a esa contraseña.</li>
+<li>Si la contraseña es correcta, se abre el panel principal.</li>
+<li>Si es incorrecta, el sistema muestra un mensaje de error.</li>
+</ol>
+<blockquote>
+<p><strong>Aviso:</strong> Las contraseñas son numéricas. El teclado físico del armario solo dispone de dígitos.</p>
+</blockquote>
+<hr>
+<p><a id="cierre-sesion"></a></p>
+<h3 id="cierre-de-sesi%C3%B3n-autom%C3%A1tico">Cierre de sesión automático</h3>
+<p>El sistema cierra la sesión de tres formas:</p>
+<ul>
+<li><strong>Automáticamente</strong>, tras <strong>30 segundos de inactividad</strong>. Evita que una sesión quede abierta si el usuario se aleja sin cerrarla manualmente. Cualquier interacción con la pantalla reinicia el contador.</li>
+<li><strong>Pulsando el botón de retroceso</strong> repetidamente hasta volver a la pantalla de inicio.</li>
+<li><strong>Pulsando el botón Salir</strong>, disponible en el panel principal.</li>
+</ul>
+<hr>
+<p><a id="navegacion"></a></p>
+<h2 id="3-navegaci%C3%B3n-entre-pantallas">3. Navegación entre pantallas</h2>
+<p>El siguiente diagrama muestra todas las pantallas del sistema y las transiciones posibles entre ellas. El color de cada pantalla indica el nivel de acceso mínimo requerido para acceder a ella:</p>
+<ul>
+<li><strong>Azul</strong> — accesible por cualquier usuario (nivel 0 y superiores)</li>
+<li><strong>Verde</strong> — requiere usuario medio o superior (nivel 1+)</li>
+<li><strong>Amarillo</strong> — exclusivo del administrador (nivel 2)</li>
+</ul>
+<p><img src="img/navegacion.drawio.pdf" alt="Diagrama de navegación"></p>
+<p>El sistema tiene dos flujos de entrada independientes desde la pantalla de inicio (<strong>LoginStack</strong>):</p>
+<ul>
+<li><strong>Flujo de usuario:</strong> el usuario se identifica (NFC o contraseña) → accede al panel principal (<strong>HomeStack</strong>).</li>
+<li><strong>Flujo de devolución directa:</strong> se acerca un llavero NFC → el sistema abre directamente el panel de solenoides en modo devolución, sin necesidad de iniciar sesión.</li>
+</ul>
+<h3 id="pantallas-del-sistema">Pantallas del sistema</h3>
+<table>
+<thead>
+<tr>
+<th>Pantalla</th>
+<th>Descripción</th>
+<th style="text-align:center">Nivel mínimo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LoginStack</strong></td>
+<td>Pantalla de inicio. Identificación de usuarios y llaves.</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td><strong>HomeStack</strong></td>
+<td>Panel principal tras identificarse. Punto de acceso al resto de secciones.</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td><strong>KeyViewStack</strong></td>
+<td>Listado de llaves. Permite retirar, editar, gestionar accesos y ver historial.</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td><strong>KeyCreateStack</strong></td>
+<td>Formulario de creación y edición de llaves.</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td><strong>UsersViewStack</strong></td>
+<td>Listado de usuarios. Permite editar, gestionar accesos y ver historial.</td>
+<td style="text-align:center">2</td>
+</tr>
+<tr>
+<td><strong>UserCreateStack</strong></td>
+<td>Formulario de creación y edición de usuarios.</td>
+<td style="text-align:center">2</td>
+</tr>
+<tr>
+<td><strong>HistoryViewStack</strong></td>
+<td>Historial de acciones. Accesible en modo global, por llave o por usuario.</td>
+<td style="text-align:center">2</td>
+</tr>
+<tr>
+<td><strong>SolenoidPanel</strong></td>
+<td>Panel de solenoides. Opera en cuatro modos según el contexto.</td>
+<td style="text-align:center">0*</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota:</strong> El <strong>SolenoidPanel</strong> es accesible sin sesión solo en el modo de devolución directa. Los modos de administración y selección requieren nivel 2 y nivel 1 respectivamente.</p>
+</blockquote>
+<p><img src="img/navegation.png" alt="Botones de navegación del panel principal"></p>
+<h3 id="navegaci%C3%B3n-cruzada">Navegación cruzada</h3>
+<p>Desde <strong>KeyViewStack</strong> se puede acceder directamente a <strong>UsersViewStack</strong> (y viceversa) para gestionar accesos sin volver al panel principal. Esta navegación funciona tanto en modo visualización como en modo selección.</p>
+<p>El <strong>HistoryViewStack</strong> es accesible desde tres puntos distintos: desde <strong>HomeStack</strong> (historial global), desde <strong>KeyViewStack</strong> (historial de una llave) y desde <strong>UsersViewStack</strong> (historial de un usuario).</p>
+<hr>
+<p><a id="uso-basico"></a></p>
+<h2 id="4-uso-b%C3%A1sico--retirar-y-devolver-llaves">4. Uso básico — Retirar y devolver llaves</h2>
+<p><a id="retirar"></a></p>
+<h3 id="retirar-una-llave">Retirar una llave</h3>
+<ol>
+<li>Identifíquese en la pantalla de inicio.</li>
+<li>En el panel principal, acceda a <strong>Ver llaves</strong>.</li>
+<li>El sistema muestra solo las llaves a las que tiene acceso.</li>
+<li>Seleccione la llave que desea retirar.</li>
+<li>El sistema abre el solenoide de la posición correspondiente y muestra una cuenta atrás de <strong>20 segundos</strong>.</li>
+<li>Retire la llave. El sistema registra la acción en el historial y cierra la sesión.</li>
+</ol>
+<p>Si necesita más tiempo, pulse <strong>Repetir</strong> para reiniciar el temporizador. Al expirar la cuenta atrás sin haber retirado la llave, el solenoide se cierra y la sesión finaliza automáticamente.</p>
+<p><img src="img/key_list.png" alt="Listado de llaves"></p>
+<blockquote>
+<p><strong>Aviso:</strong> Si la llave ya está en posesión de otro usuario, el sistema muestra un aviso y no abre el solenoide.</p>
+</blockquote>
+<hr>
+<p><a id="devolver"></a></p>
+<h3 id="devolver-una-llave">Devolver una llave</h3>
+<p>La devolución se realiza <strong>sin necesidad de iniciar sesión</strong>:</p>
+<ol>
+<li>Acerque el llavero NFC al lector desde la pantalla de inicio.</li>
+<li>El sistema identifica la llave y abre la posición correspondiente en el armario, mostrando una cuenta atrás de <strong>20 segundos</strong>.</li>
+<li>Deposite la llave en la posición indicada.</li>
+<li>El sistema registra la devolución en el historial y marca la llave como disponible.</li>
+</ol>
+<p>Si necesita más tiempo, pulse <strong>Repetir</strong> para reiniciar el temporizador. Al expirar la cuenta atrás, el solenoide se cierra automáticamente.</p>
+<blockquote>
+<p><strong>Nota:</strong> La devolución requiere obligatoriamente el llavero NFC. No es posible devolver una llave introduciendo una contraseña, lo que añade una capa de seguridad al proceso.</p>
+</blockquote>
+<hr>
+<p><a id="gestion-llaves"></a></p>
+<h2 id="5-gesti%C3%B3n-de-llaves">5. Gestión de llaves</h2>
+<p>Esta sección es accesible para usuarios de <strong>nivel 1 (medio) y superiores</strong>. Los usuarios de nivel 1 solo pueden gestionar las llaves que tienen visibles; el administrador tiene acceso a todas.</p>
+<p><a id="ver-llaves"></a></p>
+<h3 id="ver-el-listado-de-llaves">Ver el listado de llaves</h3>
+<p>Desde el panel principal, acceda a <strong>Llaves</strong>. El listado muestra:</p>
+<ul>
+<li>Nombre de la llave</li>
+<li>Ubicación física (campo libre, ej. &quot;Oficina 3&quot;, &quot;Almacén norte&quot;)</li>
+<li>Posición en el armario (ej. B4)</li>
+<li>Estado: disponible / retirada / inactiva</li>
+</ul>
+<!--listado de campos no correctos, rectificar con la imagen gestion_llaves_administrador.png-->
+<p><img src="img/key_list.png" alt="Listado de llaves"></p>
+<hr>
+<p><a id="crear-llave"></a></p>
+<h3 id="crear-una-llave">Crear una llave</h3>
+<ol>
+<li>En el listado de llaves, pulse <strong>Nueva llave</strong>.</li>
+<li>Rellene el formulario:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Nombre</strong></td>
+<td>Identificador descriptivo de la llave (ej. &quot;Llave almacén norte&quot;).</td>
+</tr>
+<tr>
+<td><strong>Ubicación</strong></td>
+<td>Lugar físico al que da acceso la llave.</td>
+</tr>
+<tr>
+<td><strong>Comentario</strong></td>
+<td>Información adicional (ej. horarios, puertas del llavero).</td>
+</tr>
+<tr>
+<td><strong>Posición en armario</strong></td>
+<td>Ranura física donde se guardará la llave (A1–D8).</td>
+</tr>
+<tr>
+<td><strong>Tag NFC</strong></td>
+<td>UID del llavero NFC asociado. Se registra acercando el llavero al lector.</td>
+</tr>
+</tbody>
+</table>
+<ol start="3">
+<li>Para asignar la posición física, pulse <strong>Seleccionar posición</strong>. El sistema abre el panel de solenoides en modo selección, donde puede elegir una ranura libre pulsándola directamente.</li>
+<li>Pulse <strong>Guardar</strong>. La llave queda registrada en la base de datos.</li>
+</ol>
+<p><img src="img/key_create.png" alt="Formulario de creación de llave"></p>
+<hr>
+<p><a id="editar-llave"></a></p>
+<h3 id="editar-una-llave">Editar una llave</h3>
+<ol>
+<li>En el listado de llaves, seleccione la llave y pulse <strong>Editar</strong>.</li>
+<li>Modifique los campos que desee (nombre, ubicación, comentario, tag NFC).</li>
+<li>Pulse <strong>Guardar</strong>.</li>
+</ol>
+<hr>
+<p><a id="activar-llave"></a></p>
+<h3 id="activar-y-desactivar-llaves">Activar y desactivar llaves</h3>
+<p>Una llave puede marcarse como <strong>inactiva</strong> cuando se da de baja temporalmente (pérdida, mantenimiento, etc.) sin eliminarla del sistema. Esto la excluye de los listados de uso pero conserva su historial.</p>
+<p>Para reactivarla, edítela y cambie su estado a activa.</p>
+<hr>
+<p><a id="acceso-llave"></a></p>
+<h3 id="gestionar-qu%C3%A9-usuarios-tienen-acceso">Gestionar qué usuarios tienen acceso</h3>
+<ol>
+<li>En el listado de llaves, seleccione la llave.</li>
+<li>Pulse <strong>Gestionar accesos</strong>.</li>
+<li>El sistema muestra el listado de usuarios con acceso a esa llave.</li>
+<li>Para <strong>añadir</strong> un usuario: pulse <strong>Añadir</strong> y selecciónelo del listado de usuarios.</li>
+<li>Para <strong>retirar</strong> el acceso: seleccione el usuario en la lista y pulse <strong>Eliminar acceso</strong>.</li>
+</ol>
+<blockquote>
+<p><strong>Nota:</strong> Retirar el acceso a un usuario no devuelve la llave si la tiene en su poder. Verifique el <a href="#historial">historial</a> si necesita saber dónde está la llave.</p>
+</blockquote>
+<hr>
+<p><a id="gestion-usuarios"></a></p>
+<h2 id="6-gesti%C3%B3n-de-usuarios">6. Gestión de usuarios</h2>
+<p>Esta sección es exclusiva del <strong>administrador (nivel 2)</strong>.</p>
+<p><a id="ver-usuarios"></a></p>
+<h3 id="ver-el-listado-de-usuarios">Ver el listado de usuarios</h3>
+<p>Desde el panel principal, acceda a <strong>Usuarios</strong>. El listado muestra nombre, nivel de acceso y estado de cada usuario.</p>
+<!--revisar imagen porque no coincide con los campos, nombre, contraseña y uid-->
+<p><img src="img/user_list.png" alt="Listado de usuarios"></p>
+<hr>
+<p><a id="crear-usuario"></a></p>
+<h3 id="crear-un-usuario">Crear un usuario</h3>
+<ol>
+<li>En el listado de usuarios, pulse <strong>Nuevo usuario</strong>.</li>
+<li>Rellene el formulario:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Nombre</strong></td>
+<td>Nombre del usuario.</td>
+</tr>
+<tr>
+<td><strong>Contraseña</strong></td>
+<td>Contraseña numérica (alternativa al NFC).</td>
+</tr>
+<tr>
+<td><strong>Tag NFC</strong></td>
+<td>UID de la tarjeta o llavero NFC del usuario. Se registra acercando el tag al lector.</td>
+</tr>
+<tr>
+<td><strong>Nivel de acceso</strong></td>
+<td>0 (básico), 1 (medio) o 2 (administrador).</td>
+</tr>
+</tbody>
+</table>
+<ol start="3">
+<li>Pulse <strong>Guardar</strong>.</li>
+</ol>
+<p><img src="img/user_create.png" alt="Formulario de creación de usuario"></p>
+<hr>
+<p><a id="editar-usuario"></a></p>
+<h3 id="editar-un-usuario">Editar un usuario</h3>
+<ol>
+<li>En el listado de usuarios, seleccione el usuario y pulse <strong>Editar</strong>.</li>
+<li>Modifique los campos necesarios (nombre, contraseña, tag NFC, nivel).</li>
+<li>Pulse <strong>Guardar</strong>.</li>
+</ol>
+<blockquote>
+<p><strong>Aviso:</strong> Cambiar el nivel de acceso de un usuario tiene efecto inmediato en la siguiente sesión.</p>
+</blockquote>
+<hr>
+<p><a id="acceso-usuario"></a></p>
+<h3 id="gestionar-el-acceso-de-un-usuario-a-las-llaves">Gestionar el acceso de un usuario a las llaves</h3>
+<ol>
+<li>En el listado de usuarios, seleccione el usuario.</li>
+<li>Pulse <strong>Gestionar llaves</strong>.</li>
+<li>El sistema muestra las llaves a las que tiene acceso ese usuario.</li>
+<li>Para <strong>añadir</strong> una llave: pulse <strong>Añadir</strong> y selecciónela del listado.</li>
+<li>Para <strong>retirar</strong> el acceso: seleccione la llave y pulse <strong>Eliminar acceso</strong>.</li>
+</ol>
+<hr>
+<p><a id="historial"></a></p>
+<h2 id="7-historial-de-acciones">7. Historial de acciones</h2>
+<p>El historial registra de forma permanente cada acción relevante del sistema. Los registros son <strong>inmutables</strong>: aunque se elimine una llave o un usuario, sus eventos históricos se conservan con los datos tal y como estaban en el momento de la acción.</p>
+<p>Cada registro contiene:</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tipo de evento</strong></td>
+<td>Retirada, devolución, llave desactivada, apertura de administrador, etc.</td>
+</tr>
+<tr>
+<td><strong>Fecha y hora</strong></td>
+<td>Marca de tiempo exacta del evento.</td>
+</tr>
+<tr>
+<td><strong>Usuario</strong></td>
+<td>Nombre e identificador del usuario implicado.</td>
+</tr>
+<tr>
+<td><strong>Llave</strong></td>
+<td>Nombre e identificador de la llave implicada.</td>
+</tr>
+<tr>
+<td><strong>Posición</strong></td>
+<td>Ranura del armario en el momento del evento.</td>
+</tr>
+</tbody>
+</table>
+<p><a id="historial-global"></a></p>
+<h3 id="historial-global">Historial global</h3>
+<p>Accesible desde el panel principal → <strong>Historial</strong>. Muestra todos los eventos del sistema ordenados cronológicamente.</p>
+<p><img src="img/history.png" alt="Historial de acciones"></p>
+<hr>
+<p><a id="historial-filtrado"></a></p>
+<h3 id="historial-por-llave-o-por-usuario">Historial por llave o por usuario</h3>
+<p>El historial puede filtrarse sin salir del contexto en el que se trabaja:</p>
+<ul>
+<li>Desde <strong>Llaves</strong> → seleccionar una llave → <strong>Ver historial</strong>: muestra solo los eventos de esa llave.</li>
+<li>Desde <strong>Usuarios</strong> → seleccionar un usuario → <strong>Ver historial</strong>: muestra solo los eventos de ese usuario.</li>
+</ul>
+<hr>
+<p><a id="solenoides"></a></p>
+<h2 id="8-control-directo-de-solenoides">8. Control directo de solenoides</h2>
+<p>Exclusivo del <strong>administrador (nivel 2)</strong>. Permite abrir o cerrar cualquier ranura del armario manualmente, independientemente de si hay una llave registrada en esa posición.</p>
+<p>Acceso: panel principal → <strong>Panel de solenoides</strong> (modo ADMIN).</p>
+<p><img src="img/solenoid_admin.png" alt="Panel de solenoides — modo ADMIN"></p>
+<p>El panel muestra una cuadrícula de 4 × 8 posiciones que reproduce la distribución física del armario. Cada posición tiene un color indicador:</p>
+<table>
+<thead>
+<tr>
+<th>Color</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Gris</strong></td>
+<td>Posición vacía, sin llave registrada.</td>
+</tr>
+<tr>
+<td><strong>Verde</strong></td>
+<td>Posición abierta.</td>
+</tr>
+<tr>
+<td><strong>Rojo</strong></td>
+<td>Posición asignada.</td>
+</tr>
+</tbody>
+</table>
+<p>Para <strong>abrir una ranura</strong>: pulse la posición deseada. El solenoide se activa y puede extraerse la llave manualmente.
+Para <strong>cerrarla</strong>: pulse de nuevo la misma posición.</p>
+<p>Solo puede haber una ranura abierta simultáneamente. Al pulsar una nueva posición, la anterior se cierra automáticamente.</p>
+<blockquote>
+<p><strong>Aviso:</strong> Este modo actúa directamente sobre el hardware. Utilícelo solo para mantenimiento o resolución de incidencias.</p>
+</blockquote>
+<hr>
+<p><a id="configuracion"></a></p>
+<h2 id="9-configuraci%C3%B3n">9. Configuración</h2>
+<p><a id="idioma"></a></p>
+<h3 id="cambio-de-idioma">Cambio de idioma</h3>
+<p>El sistema está disponible en tres idiomas: <strong>Español</strong>, <strong>Català</strong> e <strong>English</strong>.</p>
+<p>El cambio de idioma se aplica de forma inmediata a toda la interfaz sin necesidad de reiniciar.</p>
+<p><img src="img/login.png" alt="Selector de idioma"></p>
+<hr>
+<p><a id="base-de-datos"></a></p>
+<h2 id="10-estructura-de-la-base-de-datos">10. Estructura de la base de datos</h2>
+<p>La base de datos es local, gestionada por <strong>MariaDB</strong> a través de la capa de abstracción <strong>LiteSQL</strong>. Contiene las siguientes tablas:</p>
+<h3 id="tabla-person--usuarios">Tabla <code>Person</code> — Usuarios</h3>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Tipo</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Entero</td>
+<td>Identificador único del usuario.</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Texto</td>
+<td>Nombre del usuario.</td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td>Texto</td>
+<td>Contraseña numérica.</td>
+</tr>
+<tr>
+<td><code>uid</code></td>
+<td>Texto</td>
+<td>UID del tag NFC asociado.</td>
+</tr>
+<tr>
+<td><code>a1</code></td>
+<td>Booleano</td>
+<td>Nivel medio si es <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>a2</code></td>
+<td>Booleano</td>
+<td>Administrador si es <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>Texto</td>
+<td>Tipo de entidad (uso interno de LiteSQL).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="tabla-key--llaves">Tabla <code>Key</code> — Llaves</h3>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Tipo</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Entero</td>
+<td>Identificador único de la llave.</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Texto</td>
+<td>Nombre descriptivo.</td>
+</tr>
+<tr>
+<td><code>ubi</code></td>
+<td>Texto</td>
+<td>Ubicación física (campo libre).</td>
+</tr>
+<tr>
+<td><code>commentary</code></td>
+<td>Texto</td>
+<td>Comentario adicional.</td>
+</tr>
+<tr>
+<td><code>pos</code></td>
+<td>Entero</td>
+<td>Posición en el armario (0–31, equivale a A1–D8).</td>
+</tr>
+<tr>
+<td><code>active</code></td>
+<td>Booleano</td>
+<td><code>false</code> si la llave está dada de baja.</td>
+</tr>
+<tr>
+<td><code>uid</code></td>
+<td>Texto</td>
+<td>UID del tag NFC del llavero.</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>Texto</td>
+<td>Tipo de entidad (uso interno de LiteSQL).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="tabla-historyevent--historial">Tabla <code>HistoryEvent</code> — Historial</h3>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Tipo</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Entero</td>
+<td>Identificador del evento.</td>
+</tr>
+<tr>
+<td><code>event_type</code></td>
+<td>Texto</td>
+<td>Tipo: <code>pickup</code>, <code>return</code>, <code>key_deactivated</code>, <code>admin_open</code>, etc.</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td>Texto</td>
+<td>Fecha y hora del evento.</td>
+</tr>
+<tr>
+<td><code>user_id</code></td>
+<td>Entero</td>
+<td>ID del usuario en el momento del evento.</td>
+</tr>
+<tr>
+<td><code>user_name</code></td>
+<td>Texto</td>
+<td>Nombre del usuario (copia inmutable).</td>
+</tr>
+<tr>
+<td><code>key_id</code></td>
+<td>Entero</td>
+<td>ID de la llave en el momento del evento.</td>
+</tr>
+<tr>
+<td><code>key_name</code></td>
+<td>Texto</td>
+<td>Nombre de la llave (copia inmutable).</td>
+</tr>
+<tr>
+<td><code>key_pos</code></td>
+<td>Texto</td>
+<td>Posición de la llave (ej. <code>B4</code>).</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota:</strong> El historial almacena copias de los datos en el momento del evento. Si posteriormente se renombra o elimina una llave o usuario, los registros históricos no se ven afectados.</p>
+</blockquote>
+<hr>
+<h3 id="relaciones-entre-tablas">Relaciones entre tablas</h3>
+<p><img src="img/ERD.drawio.pdf" alt="Diagrama Entidad-Relación"></p>
+<p><strong><code>Key_Person_Acces</code></strong> — relación muchos a muchos entre <code>Key</code> y <code>Person</code>.
+Registra a qué llaves tiene acceso cada usuario. Un usuario puede tener acceso a ninguna, una o varias llaves; una llave puede ser accesible por varios usuarios.</p>
+<p><strong><code>Key_Person_Keep</code></strong> — relación uno a uno opcional entre <code>Key</code> y <code>Person</code>.
+Registra qué usuario tiene actualmente cada llave en su posesión. Una llave solo puede estar en poder de un usuario a la vez (restricción <code>UNIQUE</code>). Si la llave está en el armario, esta relación está vacía para esa llave.</p>
+<hr>
+<p><a id="problemas"></a></p>
+<h2 id="11-soluci%C3%B3n-de-problemas">11. Solución de problemas</h2>
+<table>
+<thead>
+<tr>
+<th>Síntoma</th>
+<th>Causa probable</th>
+<th>Acción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;UID no registrado&quot; al acercar tag</td>
+<td>El tag NFC no está en la base de datos.</td>
+<td>Registre el usuario o la llave con ese tag desde el panel de administración.</td>
+</tr>
+<tr>
+<td>&quot;UID duplicado&quot; al acercar tag</td>
+<td>Dos registros tienen el mismo UID.</td>
+<td>Acceda al panel de usuarios o llaves y corrija el UID duplicado.</td>
+</tr>
+<tr>
+<td>&quot;Contraseña incorrecta&quot;</td>
+<td>La contraseña introducida no coincide con ningún usuario.</td>
+<td>Verifique la contraseña. Si es necesario, edite el usuario desde administración.</td>
+</tr>
+<tr>
+<td>&quot;Llave ya retirada por [nombre]&quot;</td>
+<td>La llave está en posesión de otro usuario.</td>
+<td>Consulte el sus llaves para confirmar quién la tiene. Contacte con esa persona.</td>
+</tr>
+<tr>
+<td>Solenoide no responde</td>
+<td>Fallo de comunicación I2C o solenoide bloqueado mecánicamente.</td>
+<td>Use el <a href="#solenoides">panel de solenoides</a> para intentar abrirlo manualmente. Si persiste, revise el cableado I2C del módulo de relés.</td>
+</tr>
+<tr>
+<td>La sesión se cierra sola</td>
+<td>Temporizador de inactividad (30 s).</td>
+<td>Comportamiento normal. Vuelva a identificarse.</td>
+</tr>
+<tr>
+<td>El lector NFC no detecta tags</td>
+<td>Distancia excesiva o tag incompatible.</td>
+<td>Acerque el tag a menos de 3 cm del lector. Verifique que el tag es ISO 14443A (NTAG213, NTAG215 o similar).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a id="apendice"></a></p>
+<h2 id="12-ap%C3%A9ndice">12. Apéndice</h2>
+<p><a id="tabla-posiciones"></a></p>
+<h3 id="tabla-de-posiciones-del-armario">Tabla de posiciones del armario</h3>
+<p>El armario tiene 32 posiciones organizadas en 4 filas y 8 columnas. La nomenclatura combina una letra de fila (A–D) con un número de columna (1–8).</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>A1</td>
+<td>A2</td>
+<td>A3</td>
+<td>A4</td>
+<td>A5</td>
+<td>A6</td>
+<td>A7</td>
+<td>A8</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>B1</td>
+<td>B2</td>
+<td>B3</td>
+<td>B4</td>
+<td>B5</td>
+<td>B6</td>
+<td>B7</td>
+<td>B8</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>C1</td>
+<td>C2</td>
+<td>C3</td>
+<td>C4</td>
+<td>C5</td>
+<td>C6</td>
+<td>C7</td>
+<td>C8</td>
+</tr>
+<tr>
+<td><strong>D</strong></td>
+<td>D1</td>
+<td>D2</td>
+<td>D3</td>
+<td>D4</td>
+<td>D5</td>
+<td>D6</td>
+<td>D7</td>
+<td>D8</td>
+</tr>
+</tbody>
+</table>
+<p>La fila A corresponde a la fila superior del armario físico.</p>
+<hr>
+<p><a id="glosario"></a></p>
+<h3 id="glosario">Glosario</h3>
+<table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Definición</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFC</strong></td>
+<td>Near Field Communication. Tecnología inalámbrica de corto alcance (&lt; 5 cm) para identificación de tags.</td>
+</tr>
+<tr>
+<td><strong>Tag NFC</strong></td>
+<td>Etiqueta o tarjeta con un chip NFC. Cada tag tiene un UID único de fábrica.</td>
+</tr>
+<tr>
+<td><strong>UID</strong></td>
+<td>Unique Identifier. Código único grabado en cada tag NFC. El sistema lo usa para identificar usuarios y llaves.</td>
+</tr>
+<tr>
+<td><strong>Solenoide</strong></td>
+<td>Actuador electromagnético que desbloquea mecánicamente la ranura de una llave al recibir corriente.</td>
+</tr>
+<tr>
+<td><strong>I2C</strong></td>
+<td>Bus de comunicación serie de dos hilos usado para conectar el lector NFC y el módulo de relés a la Raspberry Pi.</td>
+</tr>
+<tr>
+<td><strong>LiteSQL</strong></td>
+<td>Librería de abstracción de base de datos usada por el sistema. Permite operar con MariaDB mediante objetos C++.</td>
+</tr>
+<tr>
+<td><strong>Kiosco</strong></td>
+<td>Modo de funcionamiento en pantalla completa sin acceso al escritorio del sistema operativo.</td>
+</tr>
+<tr>
+<td><strong>LoginStack</strong></td>
+<td>Pantalla de inicio del sistema.</td>
+</tr>
+<tr>
+<td><strong>HomeStack</strong></td>
+<td>Panel principal que aparece tras identificarse.</td>
+</tr>
+<tr>
+<td><strong>SolenoidPanel</strong></td>
+<td>Panel de control de ranuras del armario.</td>
+</tr>
+<tr>
+<td><strong>HistoryEvent</strong></td>
+<td>Registro individual del historial de acciones.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Fin del manual.</em></p>
+<p><a href="#indice">Volver al índice</a></p>
+
+</body>
+</html>
