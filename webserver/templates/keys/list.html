@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Llaves — Armario de Llaves{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-key me-2"></i>Llaves</h2>
+  <a href="{{ url_for('keys_new') }}" class="btn btn-primary">
+    <i class="bi bi-plus-lg me-1"></i>Nueva llave
+  </a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th>Pos.</th>
+          <th>Nombre</th>
+          <th>Ubicación</th>
+          <th>Estado</th>
+          <th>En posesión de</th>
+          <th>UID NFC</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for k in keys %}
+        <tr>
+          <td><span class="badge bg-dark font-monospace">{{ pos_to_string(k.pos) }}</span></td>
+          <td><strong>{{ k.name }}</strong></td>
+          <td>{{ k.ubi or '—' }}</td>
+          <td>
+            {% if k.active %}
+              <span class="badge bg-success">Activa</span>
+            {% else %}
+              <span class="badge bg-secondary">Inactiva</span>
+            {% endif %}
+          </td>
+          <td>{{ k.keeper or '<span class="text-muted">En armario</span>' | safe }}</td>
+          <td><code>{{ k.uid or '—' }}</code></td>
+          <td class="text-end">
+            <a href="{{ url_for('keys_edit', key_id=k.id) }}" class="btn btn-sm btn-outline-secondary me-1">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <form action="{{ url_for('keys_delete', key_id=k.id) }}" method="post" class="d-inline"
+                  onsubmit="return confirm('¿Eliminar llave {{ k.name }}?')">
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No hay llaves.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if action == 'edit' else 'Nuevo' }} usuario — Armario de Llaves{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('users_list') }}" class="text-decoration-none text-muted">
+    <i class="bi bi-arrow-left me-1"></i>Volver a usuarios
+  </a>
+</div>
+
+<div class="card shadow-sm" style="max-width:520px;">
+  <div class="card-header">
+    <h5 class="mb-0">{{ 'Editar usuario' if action == 'edit' else 'Nuevo usuario' }}</h5>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label">Nombre <span class="text-danger">*</span></label>
+        <input type="text" name="name" class="form-control"
+               value="{{ user.name if user else '' }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contraseña <small class="text-muted">(numérica)</small></label>
+        <input type="text" name="password" class="form-control"
+               value="{{ user.password if user else '' }}" inputmode="numeric">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">UID NFC <small class="text-muted">(opcional)</small></label>
+        <input type="text" name="uid" class="form-control"
+               value="{{ user.uid if user else '' }}" placeholder="p.ej. A3F2C1B0">
+      </div>
+      <div class="mb-3">
+        <label class="form-label d-block">Nivel de acceso</label>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="a1" id="a1"
+                 {% if user and user.a1 %}checked{% endif %}>
+          <label class="form-check-label" for="a1">a1 — Gestión de llaves</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="a2" id="a2"
+                 {% if user and user.a2 %}checked{% endif %}>
+          <label class="form-check-label" for="a2">a2 — Administrador completo</label>
+        </div>
+        <div class="form-text">
+          Ninguno = nivel 0 · a1 = nivel 1 · a2 = nivel 2 · ambos = nivel 3
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          {{ 'Guardar cambios' if action == 'edit' else 'Crear usuario' }}
+        </button>
+        <a href="{{ url_for('users_list') }}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

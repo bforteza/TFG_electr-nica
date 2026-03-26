@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Historial — Armario de Llaves{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-clock-history me-2"></i>Historial</h2>
+
+<!-- Filtros -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Llave</label>
+        <select name="key_id" class="form-select">
+          <option value="">Todas</option>
+          {% for k in keys %}
+            <option value="{{ k.id }}" {% if filter_key == k.id|string %}selected{% endif %}>
+              {{ k.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Persona</label>
+        <select name="person_id" class="form-select">
+          <option value="">Todas</option>
+          {% for p in persons %}
+            <option value="{{ p.id }}" {% if filter_person == p.id|string %}selected{% endif %}>
+              {{ p.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Tipo de evento</label>
+        <select name="etype" class="form-select">
+          <option value="">Todos</option>
+          {% for code, label in etype_names.items() %}
+            <option value="{{ code }}" {% if filter_etype == code|string %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-grow-1">
+          <i class="bi bi-funnel me-1"></i>Filtrar
+        </button>
+        <a href="{{ url_for('history_list') }}" class="btn btn-outline-secondary">
+          <i class="bi bi-x-lg"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tabla -->
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 table-sm">
+      <thead class="table-dark">
+        <tr>
+          <th>Fecha y hora</th>
+          <th>Evento</th>
+          <th>Llave</th>
+          <th>Persona</th>
+          <th>Posición</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in events %}
+        <tr>
+          <td class="text-muted text-nowrap"><small>{{ ev.timestamp }}</small></td>
+          <td>
+            {% set e = ev.etype %}
+            {% if e == 0 %}
+              <span class="badge bg-primary">Recogida</span>
+            {% elif e == 1 %}
+              <span class="badge bg-success">Devolución</span>
+            {% elif e == 2 %}
+              <span class="badge bg-warning text-dark">Admin abre</span>
+            {% elif e == 3 %}
+              <span class="badge bg-info text-dark">Llave creada</span>
+            {% elif e == 4 %}
+              <span class="badge bg-secondary">Llave desactivada</span>
+            {% else %}
+              <span class="badge bg-dark">{{ e }}</span>
+            {% endif %}
+          </td>
+          <td>{{ ev.keyname or '<span class="text-muted">—</span>' | safe }}</td>
+          <td>{{ ev.personname or '<span class="text-muted">—</span>' | safe }}</td>
+          <td><span class="font-monospace">{{ pos_to_string(ev.pos) }}</span></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-4">No hay eventos con esos filtros.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if events|length == 500 %}
+  <div class="card-footer text-muted text-center small">
+    Mostrando los últimos 500 eventos.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -18,3 +18,8 @@ ui/*~
 # Archivos de sistema
 .DS_Store
 Thumbs.db
+
+# Webserver Python
+webserver/venv/
+webserver/__pycache__/
+webserver/*.pyc
