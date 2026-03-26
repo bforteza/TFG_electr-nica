@@ -31,6 +31,7 @@ public:
         add(commentary_col);
         add(pos_col);
         add(active_col);
+        add(pub_col);
         add(id_col);
     }
 
@@ -40,6 +41,7 @@ public:
     Gtk::TreeModelColumn<std::string>   commentary_col;
     Gtk::TreeModelColumn<std::string>   pos_col;
     Gtk::TreeModelColumn<bool>          active_col;
+    Gtk::TreeModelColumn<std::string>   pub_col;
     Gtk::TreeModelColumn<int>           id_col;
 };
 

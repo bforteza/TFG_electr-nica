@@ -109,7 +109,7 @@ void HomeStack::RefreshLabels() {
 
 void HomeStack::PersonLogged(std::shared_ptr<kdb::Person> person) {
     logged_person_ = person;
-    access_ = (int)person->a1 + 2 * (int)person->a2;
+    access_ = (int)person->level;
 
     name_label_->set_text((std::string)person->name);
     HideButtons();
@@ -159,9 +159,17 @@ void HomeStack::OnViewUsersButtonClicked() {
 }
 
 void HomeStack::OnViewKeysButtonClicked() {
-    std::vector<kdb::Key> keys = (access_ >= 2)
-        ? litesql::select<kdb::Key>(*db, kdb::Key::Active == true).all()
-        : logged_person_->keys().get(kdb::Key::Active == true).all();
+    std::vector<kdb::Key> keys;
+    if (access_ >= 2) {
+        keys = litesql::select<kdb::Key>(*db, kdb::Key::Active == true).all();
+    } else {
+        // Llaves asignadas al usuario + llaves públicas activas (sin duplicados).
+        keys = litesql::union_(
+            logged_person_->keys().get(kdb::Key::Active == true),
+            litesql::select<kdb::Key>(*db, kdb::Key::Active == true
+                                          && kdb::Key::Pub == true)
+        ).all();
+    }
     key_view_stack_.view(keys, access_);
     inner_stack_->set_visible_child("ViewKeyStack");
 }
@@ -204,7 +212,7 @@ void HomeStack::OnKeyEdit(std::shared_ptr<kdb::Key> key) {
 }
 
 void HomeStack::OnUserLinkKey(std::shared_ptr<kdb::Person> person) {
-    if ((bool)person->a2) {
+    if ((int)person->level >= 2) {
         ShowWarning(Tr().key_view.err_user_is_admin);
         return;
     }
@@ -212,10 +220,10 @@ void HomeStack::OnUserLinkKey(std::shared_ptr<kdb::Person> person) {
 
     std::vector<kdb::Key> available = (access_ >= 2)
         ? litesql::except(
-              litesql::select<kdb::Key>(*db, kdb::Key::Active == true),
+              litesql::select<kdb::Key>(*db, kdb::Key::Active == true && kdb::Key::Pub == false),
               aux_person_->keys().get()).all()
         : litesql::except(
-              logged_person_->keys().get(kdb::Key::Active == true),
+              logged_person_->keys().get(kdb::Key::Active == true && kdb::Key::Pub == false),
               aux_person_->keys().get()).all();
     key_view_stack_.select(available);
     back_widget_ = inner_stack_->get_visible_child();
@@ -229,12 +237,16 @@ void HomeStack::OnUserLinkKey(std::shared_ptr<kdb::Person> person) {
 }
 
 void HomeStack::OnKeyLinkUser(std::shared_ptr<kdb::Key> key) {
+    if ((bool)key->pub) {
+        ShowWarning(Tr().key_view.err_key_is_public);
+        return;
+    }
     aux_key_ = key;
 
-    // Excluir admins (a2=true): no necesitan vinculación, acceden a todas las llaves.
+    // Excluir admins (level>=2): no necesitan vinculación, acceden a todas las llaves.
     users_view_stack_.select(
         litesql::except(
-            litesql::select<kdb::Person>(*db, kdb::Person::A2 == false),
+            litesql::select<kdb::Person>(*db, kdb::Person::Level < 2),
             aux_key_->owners().get()
         ).all());
     back_widget_ = inner_stack_->get_visible_child();
@@ -248,7 +260,7 @@ void HomeStack::OnKeyLinkUser(std::shared_ptr<kdb::Key> key) {
 }
 
 void HomeStack::OnUserUnlinkKey(std::shared_ptr<kdb::Person> person) {
-    if ((bool)person->a2) {
+    if ((int)person->level >= 2) {
         ShowWarning(Tr().key_view.err_user_is_admin);
         return;
     }
@@ -271,6 +283,10 @@ void HomeStack::OnUserUnlinkKey(std::shared_ptr<kdb::Person> person) {
 }
 
 void HomeStack::OnKeyUnlinkUser(std::shared_ptr<kdb::Key> key) {
+    if ((bool)key->pub) {
+        ShowWarning(Tr().key_view.err_key_is_public);
+        return;
+    }
     aux_key_ = key;
 
     users_view_stack_.select(key->owners().get().all());
@@ -322,6 +338,11 @@ void HomeStack::OnPositionSelectRequested() {
 void HomeStack::OnPositionSelected(int pos) {
     key_create_stack_.SetPosition(pos);
     inner_stack_->set_visible_child("KeyCreateStack");
+}
+
+void HomeStack::SelfEditProfile(std::shared_ptr<kdb::Person> person) {
+    user_create_stack_.SelfEdit(person);
+    inner_stack_->set_visible_child("UserCreateStack");
 }
 
 void HomeStack::ShowWarning(const std::string& msg) {

@@ -64,6 +64,7 @@ KeyViewStack::KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     keys_tree_view_->append_column("",            columns_.commentary_col);
     keys_tree_view_->append_column("",            columns_.pos_col);
     keys_tree_view_->append_column("",            columns_.active_col);
+    keys_tree_view_->append_column("",            columns_.pub_col);
     keys_tree_view_->append_column("",            columns_.keeper_col);
 
     id_column_          = keys_tree_view_->get_column(0);
@@ -72,7 +73,8 @@ KeyViewStack::KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     commentary_column_  = keys_tree_view_->get_column(3);
     pos_column_         = keys_tree_view_->get_column(4);
     active_column_      = keys_tree_view_->get_column(5);
-    keeper_column_      = keys_tree_view_->get_column(6);
+    pub_column_         = keys_tree_view_->get_column(6);
+    keeper_column_      = keys_tree_view_->get_column(7);
 
     keys_tree_view_->set_enable_search(true);
     keys_tree_view_->set_search_column(columns_.name_col);
@@ -97,6 +99,7 @@ void KeyViewStack::RefreshLabels() {
     commentary_column_->set_title(Tr().key_view.col_comments);
     pos_column_->set_title(Tr().key_view.col_position);
     active_column_->set_title(Tr().key_view.col_active);
+    pub_column_->set_title(Tr().key_view.col_public);
     keeper_column_->set_title(Tr().key_view.col_keeper);
 }
 
@@ -171,6 +174,7 @@ void KeyViewStack::Refresh() {
         row[columns_.commentary_col]  = key.commentary;
         row[columns_.pos_col]         = PosToString(key.pos);
         row[columns_.active_col]      = key.active;
+        row[columns_.pub_col]         = (bool)key.pub ? Tr().key_view.col_pub_yes : "";
         try {
             row[columns_.keeper_col] = (Glib::ustring)key.keeper().get().one().name;
         } catch (...) {}
@@ -191,10 +195,13 @@ void KeyViewStack::Configure(int access) {
 
    
     pos_column_->set_visible(false);
+    pub_column_->set_visible(false);
 
     keep_key_button_->show();
     if (access >= 2)
         pos_column_->set_visible(true);
+    if (access >= 1)
+        pub_column_->set_visible(true);
     if (access >= 1) {
         add_user_button_->show();
         remove_user_button_->show();

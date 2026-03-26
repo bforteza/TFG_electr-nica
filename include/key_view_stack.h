@@ -84,6 +84,7 @@ private:
     Gtk::TreeViewColumn* commentary_column_;
     Gtk::TreeViewColumn* pos_column_;
     Gtk::TreeViewColumn* active_column_;
+    Gtk::TreeViewColumn* pub_column_;
     Gtk::TreeViewColumn* keeper_column_;
 
     // Conexión del handler de toggle en modo selección.

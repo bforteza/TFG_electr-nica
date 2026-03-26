@@ -129,8 +129,22 @@ void UserCreateStack::UserEdit(std::shared_ptr<kdb::Person> person) {
     password_entry_->set_text((std::string)person->password);
     repeat_password_entry_->set_text((std::string)person->password);
     uid_text_view_->get_buffer()->set_text((std::string)person->uid);
+    int lv = (int)person->level;
+    if (lv >= 2)      radio_admin_->set_active(true);
+    else if (lv == 1) radio_level1_->set_active(true);
+    else              radio_level0_->set_active(true);
     add_key_button_->show();
     RefreshLabels();
+}
+
+void UserCreateStack::SelfEdit(std::shared_ptr<kdb::Person> person) {
+    UserEdit(person);          // configura el formulario (Reset() pone self_edit_mode_=false)
+    self_edit_mode_ = true;    // activar DESPUÉS para que OnGenerateButtonClicked lo vea
+    add_key_button_->hide();
+    access_level_label_->hide();
+    radio_level0_->hide();
+    radio_level1_->hide();
+    radio_admin_->hide();
 }
 
 // --- Manejadores de botones ---
@@ -185,18 +199,19 @@ void UserCreateStack::OnGenerateButtonClicked() {
         new_person.uid      = uid;
         new_person.name     = (std::string)username;
         new_person.password = (std::string)password;
-        new_person.a1       = radio_level1_->get_active();
-        new_person.a2       = radio_admin_->get_active();
+        new_person.level    = radio_admin_->get_active() ? 2 : (radio_level1_->get_active() ? 1 : 0);
         new_person.update();
         UserEdit(std::make_shared<kdb::Person>(new_person));
     } else {
         edited_user_->uid      = uid;
         edited_user_->name     = (std::string)username;
         edited_user_->password = (std::string)password;
-        edited_user_->a1       = radio_level1_->get_active();
-        edited_user_->a2       = radio_admin_->get_active();
+        edited_user_->level    = radio_admin_->get_active() ? 2 : (radio_level1_->get_active() ? 1 : 0);
         edited_user_->update();
-        UserEdit(edited_user_);
+        if (self_edit_mode_)
+            SelfEdit(edited_user_);
+        else
+            UserEdit(edited_user_);
     }
 }
 
@@ -226,5 +241,12 @@ void UserCreateStack::Reset() {
     repeat_password_entry_->set_text("");
     uid_text_view_->get_buffer()->set_text("");
 
-    edited_user_ = nullptr;
+    edited_user_    = nullptr;
+    self_edit_mode_ = false;
+
+    // Restaurar visibilidad de controles que SelfEdit oculta.
+    access_level_label_->show();
+    radio_level0_->show();
+    radio_level1_->show();
+    radio_admin_->show();
 }

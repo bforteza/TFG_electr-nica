@@ -7,8 +7,7 @@
         <field name="name" type="string"/>
         <field name="password" type="string"/>
         <field name="uid" type="string"/>
-        <field name="a1" type="boolean"/>
-        <field name="a2" type="boolean"/> 
+        <field name="level" type="integer" default="0"/>
     </object>
     <object name="Key">
         <field name="name" type="string"/>
@@ -17,6 +16,7 @@
         <field name="pos" type="integer" default="0"/>
         <field name="active" type="boolean"/>
         <field name="uid" type="string"/>
+        <field name="pub" type="boolean" default="false"/>
     </object>
     <relation id="Acces">
         <relate object="Person" handle="keys" limit="many"/>

@@ -82,6 +82,7 @@ struct Translations {
         const char* error_position_invalid;
         const char* error_card_in_use;
         const char* btn_pick_position; // Botón para abrir el selector de posición
+        const char* lbl_public;        // Etiqueta del checkbox de llave pública
     } key_create;
 
     // --- SolenoidPanel ---
@@ -124,10 +125,13 @@ struct Translations {
         const char* col_comments;
         const char* col_position;
         const char* col_active;
+        const char* col_public;   // Cabecera de la columna pública/privada
+        const char* col_pub_yes;  // Texto de la celda cuando la llave es pública
         const char* col_keeper;
         const char* err_key_in_use;
         const char* err_key_in_cabinet; // No se puede desactivar: la llave está en el armario
         const char* err_user_is_admin;  // No se puede vincular: el usuario es administrador
+        const char* err_key_is_public;  // No se puede vincular: la llave es pública
         const char* confirm_delete_title;
         const char* confirm_delete_body;
     } key_view;
@@ -201,6 +205,7 @@ inline const Translations kTranslations[] = {
             "Atenció: posició no vàlida",
             "Atenció: tarjeta en us",
             "Triar posició",
+            "Clau pública",
         },
         // solenoid
         {
@@ -227,10 +232,11 @@ inline const Translations kTranslations[] = {
             "Editar clau",
             "Seleccionar",
             "Eliminar",
-            "Nom", "Ubicació", "Comentaris", "Posició", "Activa", "Agafada",
+            "Nom", "Ubicació", "Comentaris", "Posició", "Activa", "Pública", "Pública", "Agafada",
             "Atenció: la clau ja està en ús",
             "Atenció: la clau és a l'armari, no es pot desactivar",
             "Atenció: l'usuari és administrador, té accés a totes les claus",
+            "Atenció: la clau és pública, no es poden assignar usuaris",
             "Eliminar clau",
             "Aquesta acció no es pot desfer.",
         },
@@ -302,6 +308,7 @@ inline const Translations kTranslations[] = {
             "Atención: posición no válida",
             "Atención: tarjeta en uso",
             "Elegir posición",
+            "Llave pública",
         },
         // solenoid
         {
@@ -328,10 +335,11 @@ inline const Translations kTranslations[] = {
             "Editar llave",
             "Seleccionar",
             "Eliminar",
-            "Nombre", "Ubicación", "Comentarios", "Posición", "Activa", "En posesión de",
+            "Nombre", "Ubicación", "Comentarios", "Posición", "Activa", "Pública", "Pública", "En posesión de",
             "Atención: la llave ya está en uso",
             "Atención: la llave está en el armario, no se puede desactivar",
             "Atención: el usuario es administrador, tiene acceso a todas las llaves",
+            "Atención: la llave es pública, no se pueden asignar usuarios",
             "Eliminar llave",
             "Esta acción no se puede deshacer.",
         },
@@ -403,6 +411,7 @@ inline const Translations kTranslations[] = {
             "Warning: invalid position",
             "Warning: card already in use",
             "Pick position",
+            "Public key",
         },
         // solenoid
         {
@@ -429,10 +438,11 @@ inline const Translations kTranslations[] = {
             "Edit key",
             "Select",
             "Delete",
-            "Name", "Location", "Comments", "Position", "Active", "Held by",
+            "Name", "Location", "Comments", "Position", "Active", "Public", "Public", "Held by",
             "Warning: key already in use",
             "Warning: key is in the cabinet, cannot be deactivated",
             "Warning: user is an administrator, has access to all keys",
+            "Warning: key is public, users cannot be assigned",
             "Delete key",
             "This action cannot be undone.",
         },

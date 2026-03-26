@@ -41,6 +41,10 @@ public:
     // Recibe la posición elegida en SELECT, rellena el formulario y vuelve a KeyCreate.
     void OnPositionSelected(int pos);
 
+    // Abre el formulario de edición restringida para que el usuario configure su NFC.
+    // Se llama automáticamente al login cuando el usuario no tiene UID asignado.
+    void SelfEditProfile(std::shared_ptr<kdb::Person> person);
+
     // Recibe la activación de un slot en modo ADMIN desde Window para registrar el log.
     void OnSlotActivated(int pos, std::shared_ptr<kdb::Key> key);
 

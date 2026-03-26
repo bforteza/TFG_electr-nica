@@ -18,6 +18,7 @@
           <th>Nombre</th>
           <th>Ubicación</th>
           <th>Estado</th>
+          <th>Acceso</th>
           <th>En posesión de</th>
           <th>UID NFC</th>
           <th></th>
@@ -36,6 +37,13 @@
               <span class="badge bg-secondary">Inactiva</span>
             {% endif %}
           </td>
+          <td>
+            {% if k.pub_ %}
+              <span class="badge bg-info text-dark">Pública</span>
+            {% else %}
+              <span class="badge bg-light text-dark border">Privada</span>
+            {% endif %}
+          </td>
           <td>{{ k.keeper or '<span class="text-muted">En armario</span>' | safe }}</td>
           <td><code>{{ k.uid_ or '—' }}</code></td>
           <td class="text-end">
@@ -49,7 +57,7 @@
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="7" class="text-center text-muted py-4">No hay llaves.</td></tr>
+        <tr><td colspan="8" class="text-center text-muted py-4">No hay llaves.</td></tr>
         {% endfor %}
       </tbody>
     </table>

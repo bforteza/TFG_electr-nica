@@ -56,12 +56,12 @@ def users_list():
     db = get_db()
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id_, name_, password_, uid_, a1_, a2_ FROM Person_ ORDER BY name_"
+            "SELECT id_, name_, password_, uid_, level_ FROM Person_ ORDER BY name_"
         )
         users = cur.fetchall()
     db.close()
     for u in users:
-        u["access"] = int(bool(u["a1_"])) + 2 * int(bool(u["a2_"]))
+        u["access"] = int(u["level_"])
     return render_template("users/list.html", users=users)
 
 
@@ -71,17 +71,16 @@ def users_new():
         name     = request.form["name"].strip()
         password = request.form["password"].strip()
         uid      = request.form["uid"].strip()
-        a1       = 1 if request.form.get("a1") else 0
-        a2       = 1 if request.form.get("a2") else 0
+        level    = int(request.form.get("level", 0))
         if not name:
             flash("El nombre es obligatorio.", "danger")
             return render_template("users/form.html", user=None, action="new")
         db = get_db()
         with db.cursor() as cur:
             cur.execute(
-                "INSERT INTO Person_ (type_, name_, password_, uid_, a1_, a2_) "
-                "VALUES ('Person', %s, %s, %s, %s, %s)",
-                (name, password, uid, a1, a2),
+                "INSERT INTO Person_ (type_, name_, password_, uid_, level_) "
+                "VALUES ('Person', %s, %s, %s, %s)",
+                (name, password, uid, level),
             )
         db.commit()
         db.close()
@@ -97,13 +96,12 @@ def users_edit(user_id):
         name     = request.form["name"].strip()
         password = request.form["password"].strip()
         uid      = request.form["uid"].strip()
-        a1       = 1 if request.form.get("a1") else 0
-        a2       = 1 if request.form.get("a2") else 0
+        level    = int(request.form.get("level", 0))
         with db.cursor() as cur:
             cur.execute(
-                "UPDATE Person_ SET name_=%s, password_=%s, uid_=%s, a1_=%s, a2_=%s "
+                "UPDATE Person_ SET name_=%s, password_=%s, uid_=%s, level_=%s "
                 "WHERE id_=%s",
-                (name, password, uid, a1, a2, user_id),
+                (name, password, uid, level, user_id),
             )
         db.commit()
         db.close()
@@ -111,7 +109,7 @@ def users_edit(user_id):
         return redirect(url_for("users_list"))
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id_, name_, password_, uid_, a1_, a2_ FROM Person_ WHERE id_=%s",
+            "SELECT id_, name_, password_, uid_, level_ FROM Person_ WHERE id_=%s",
             (user_id,),
         )
         user = cur.fetchone()
@@ -147,7 +145,7 @@ def keys_list():
     db = get_db()
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id_, name_, ubi_, commentary_, pos_, active_, uid_ "
+            "SELECT id_, name_, ubi_, commentary_, pos_, active_, uid_, pub_ "
             "FROM Key_ ORDER BY pos_"
         )
         keys = cur.fetchall()
@@ -179,8 +177,9 @@ def keys_new():
         commentary     = request.form["commentary"].strip()
         pos            = pos_from_string(request.form.get("pos", ""))
         active         = 1 if request.form.get("active") else 0
+        pub            = 1 if request.form.get("pub") else 0
         uid            = request.form["uid"].strip()
-        authorized_ids = request.form.getlist("authorized")
+        authorized_ids = [] if pub else request.form.getlist("authorized")
 
         if not name:
             flash("El nombre es obligatorio.", "danger")
@@ -191,9 +190,9 @@ def keys_new():
             )
         with db.cursor() as cur:
             cur.execute(
-                "INSERT INTO Key_ (type_, name_, ubi_, commentary_, pos_, active_, uid_) "
-                "VALUES ('Key', %s, %s, %s, %s, %s, %s)",
-                (name, ubi, commentary, pos, active, uid),
+                "INSERT INTO Key_ (type_, name_, ubi_, commentary_, pos_, active_, uid_, pub_) "
+                "VALUES ('Key', %s, %s, %s, %s, %s, %s, %s)",
+                (name, ubi, commentary, pos, active, uid, pub),
             )
             key_id = cur.lastrowid
             for pid in authorized_ids:
@@ -218,7 +217,7 @@ def keys_edit(key_id):
     db = get_db()
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id_, name_, ubi_, commentary_, pos_, active_, uid_ "
+            "SELECT id_, name_, ubi_, commentary_, pos_, active_, uid_, pub_ "
             "FROM Key_ WHERE id_=%s",
             (key_id,),
         )
@@ -235,14 +234,15 @@ def keys_edit(key_id):
         commentary     = request.form["commentary"].strip()
         pos            = pos_from_string(request.form.get("pos", ""))
         active         = 1 if request.form.get("active") else 0
+        pub            = 1 if request.form.get("pub") else 0
         uid            = request.form["uid"].strip()
-        authorized_ids = [int(x) for x in request.form.getlist("authorized")]
+        authorized_ids = [] if pub else [int(x) for x in request.form.getlist("authorized")]
 
         with db.cursor() as cur:
             cur.execute(
                 "UPDATE Key_ SET name_=%s, ubi_=%s, commentary_=%s, pos_=%s, "
-                "active_=%s, uid_=%s WHERE id_=%s",
-                (name, ubi, commentary, pos, active, uid, key_id),
+                "active_=%s, uid_=%s, pub_=%s WHERE id_=%s",
+                (name, ubi, commentary, pos, active, uid, pub, key_id),
             )
             cur.execute("DELETE FROM Key_Person_Acces WHERE Key1_=%s", (key_id,))
             for pid in authorized_ids:

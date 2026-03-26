@@ -31,18 +31,21 @@
       </div>
       <div class="mb-3">
         <label class="form-label d-block">Nivel de acceso</label>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" name="a1" id="a1"
-                 {% if user and user.a1_ %}checked{% endif %}>
-          <label class="form-check-label" for="a1">a1 — Gestión de llaves</label>
+        {% set lv = user.level_ | int if user else 0 %}
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="level" id="level0" value="0"
+                 {% if lv == 0 %}checked{% endif %}>
+          <label class="form-check-label" for="level0">0 — Solo ver sus llaves</label>
         </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" name="a2" id="a2"
-                 {% if user and user.a2_ %}checked{% endif %}>
-          <label class="form-check-label" for="a2">a2 — Administrador completo</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="level" id="level1" value="1"
+                 {% if lv == 1 %}checked{% endif %}>
+          <label class="form-check-label" for="level1">1 — Gestión de llaves</label>
         </div>
-        <div class="form-text">
-          Ninguno = nivel 0 · a1 = nivel 1 · a2 = nivel 2 · ambos = nivel 3
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="level" id="level2" value="2"
+                 {% if lv == 2 %}checked{% endif %}>
+          <label class="form-check-label" for="level2">2 — Administrador completo</label>
         </div>
       </div>
       <div class="d-flex gap-2">

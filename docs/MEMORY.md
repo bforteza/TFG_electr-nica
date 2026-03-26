@@ -19,19 +19,31 @@ Sistema de gestión de llaves físicas para una empresa, corriendo en Raspberry 
 
 ## Modelos de Base de Datos (LiteSQL, MariaDB)
 **Person**: id, type, name, password, uid (NFC UID), a1 (bool), a2 (bool)
-**Key**: id, type, name, ubi (ubicación física), commentary, pos (int, hueco armario), active (bool), uid (NFC UID)
+**Key**: id, type, name, ubi (ubicación física), commentary, pos (int, hueco armario), active (bool), uid (NFC UID), **pub (bool, default false)**
+**HistoryEvent**: etype, timestamp, keyid, keyname, personid, personname, pos
+
 **Relaciones**:
 - `Key_Person_Acces` (M:N): llaves a las que tiene acceso una persona → `person.keys()` / `key.owners()`
 - `Key_Person_Keep` (1:N, Key1_ UNIQUE): quién tiene actualmente cada llave → `person.keepkeys()` / `key.keeper()`
 
+**Columnas en MariaDB** (LiteSQL añade `_` a todos los nombres): `id_`, `name_`, `pub_`, `active_`, etc.
+
 **Niveles de acceso** (calculado como `(int)a1 + 2*(int)a2`):
-- 0: solo ver sus llaves asignadas
+- 0: solo ver sus llaves asignadas + llaves públicas
 - 1 (a1=true): ver+gestionar llaves (crear, editar, vincular usuarios)
-- 2 (a2=true): administrador completo (+ gestión usuarios, crear usuarios)
+- 2 (a2=true): administrador completo (+ gestión usuarios, ver todas las llaves)
+
+## Campo `pub` — Llaves Públicas
+Una llave marcada como `pub=true` es accesible por **todos los usuarios** sin necesidad de estar en la relación `Key_Person_Acces`.
+- **KeyCreateStack**: `GtkCheckButton` con id `KeyPublicCheckButton` activa/desactiva el flag.
+- **HomeStack::OnViewKeysButtonClicked**: usuarios con `access_ < 2` ven `litesql::union_(person.keys, select<Key>(pub==true))`.
+- **HomeStack::OnKeyLinkUser / OnKeyUnlinkUser**: bloquean con `ShowWarning(Tr().key_view.err_key_is_public)` si `key->pub`.
+- Al crear una llave pública, el creador no queda vinculado en `Key_Person_Acces` (sí como `keeper`).
+- En el webserver, si una llave es pública, la sección de "Usuarios autorizados" se oculta con JS y no se persisten enlaces.
 
 ## Componentes Clave
 - `NfcManager` (nfc_manager.h/cpp): hilo separado, detecta tags ISO14443A, guarda UID en `uid`, emite `Glib::Dispatcher dispatcher` para comunicar con GTK thread-safe. `StopPolling()` usa `detach()`.
-- `db_schema.hpp` + `db_schema.cpp`: modelos LiteSQL (autogenerados por LiteSQL tool)
+- `db_schema.hpp` + `db_schema.cpp`: modelos LiteSQL (autogenerados por LiteSQL tool). **Regenerar con `litesql-gen -t c++ --output-dir=. GestorBaseDatos.xml` y copiar los .hpp/.cpp generados a include/ y src/ respectivamente.**
 - `globals.h`: instancias globales `db` (DbSchema*) y `nfcman` (unique_ptr<NfcManager>), `PosToString(int pos)` y `PosFromString(string)` para conversión posición↔string (A1-D8)
 - `models.h`: `ModelColumns` (usuarios), `KeyModelColumns` (llaves) y `HistoryModelColumns` (historial) para Gtk::TreeView
 - `sound_manager.h/cpp`: clase estática SoundManager (libcanberra-gtk3), ver sección Sonido
@@ -83,14 +95,6 @@ Clase estática en `include/sound_manager.h` + `src/sound_manager.cpp`.
 - `SoundManager::Play(SoundEvent)`: reproduce con IDs únicos (`next_id_++`) para evitar cancelación de sonido anterior.
 - `SoundManager::ConnectToAllButtons(Gtk::Container*)`: recorre recursivamente el árbol de widgets conectando `kClick` a cada `Gtk::Button`.
 
-Mapeo de eventos:
-- `kClick` → `"message"`
-- `kLoginOk` → `"complete"`
-- `kLoginError` → `"dialog-error"`
-- `kKeyReturn` → `"complete"`
-
-Integración: `Window` llama `SoundManager::Init()` y `ConnectToAllButtons(this)` al final del constructor.
-
 ## Dialog "Llave ya en uso" (HomeStack::OnKeyKept)
 ```cpp
 if (key->keeper().get().count() > 0) {
@@ -107,11 +111,42 @@ if (key->keeper().get().count() > 0) {
 }
 ```
 `shared_ptr<bool> closed`: evita doble-delete si el usuario pulsa OK antes del timeout.
+`HomeStack::ShowWarning(const std::string& msg)` es el método genérico para este patrón de diálogo auto-cerrante (2 segundos).
 
-## Modo Kiosco
-Window lee la variable de entorno `KIOSK` para activar `fullscreen()`. Si no está definida, ventana normal (útil durante desarrollo). ESC cierra la aplicación.
-- Producción: `KIOSK=1 ./bin/Debug/Pruebas2`
-- Desarrollo: ejecutar sin la variable.
+## Webserver (RF-05 Gestión Remota) — Flask + PyMySQL
+Ubicación: `./webserver/`
+Stack: Python/Flask, PyMySQL (acceso SQL directo a MariaDB), Bootstrap 5 + Bootstrap Icons, Jinja2.
+Ejecutar: `python app.py` (puerto 5000). Configuración de BD en `config.py`.
+
+### Rutas implementadas
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/` | Redirige a `/users` |
+| GET | `/users` | Lista todos los usuarios |
+| GET/POST | `/users/new` | Crear usuario |
+| GET/POST | `/users/<id>/edit` | Editar usuario |
+| POST | `/users/<id>/delete` | Eliminar usuario |
+| GET | `/keys` | Lista todas las llaves (con keeper y badge pública/privada) |
+| GET/POST | `/keys/new` | Crear llave (incluye campo pub, selector de posición, usuarios autorizados) |
+| GET/POST | `/keys/<id>/edit` | Editar llave |
+| POST | `/keys/<id>/delete` | Eliminar llave (borra relaciones Acces y Keep) |
+| GET | `/history` | Historial filtrable por llave, persona o tipo de evento |
+
+### Convenciones del webserver
+- SQL directo con PyMySQL (no ORM). Las columnas de MariaDB usan el sufijo `_` de LiteSQL: `name_`, `pub_`, `active_`, etc.
+- `pos_to_string(pos)` y `pos_from_string(s)` replican la lógica de `globals.h` en Python.
+- Las llaves públicas (`pub_=1`) no tienen usuarios autorizados: el form oculta la sección con JS (`togglePublic()`) y el backend ignora los `authorized` del POST si `pub=1`.
+- Templates en `templates/` organizados por entidad: `users/`, `keys/`, `history/`. Base en `base.html` con sidebar Bootstrap.
+
+### Acceso a la BD desde el webserver
+LiteSQL crea tablas con el sufijo `_` y campo de tipo `type_`:
+- `Person_` (columnas: `id_`, `type_`, `name_`, `password_`, `uid_`, `a1_`, `a2_`)
+- `Key_` (columnas: `id_`, `type_`, `name_`, `ubi_`, `commentary_`, `pos_`, `active_`, `uid_`, `pub_`)
+- `Key_Person_Acces` (columnas: `Key1_`, `Person2_`)
+- `Key_Person_Keep` (columnas: `Key1_`, `Person2_`)
+- `HistoryEvent_` (columnas: `id_`, `etype_`, `timestamp_`, `keyid_`, `keyname_`, `personid_`, `personname_`, `pos_`)
+
+Al insertar en `Person_` o `Key_` siempre incluir `type_='Person'` / `type_='Key'` (requerido por LiteSQL).
 
 ## Convenciones de Nomenclatura
 - Métodos: PascalCase (`PersonLogged`, `OnBackButtonClicked`, `RefreshLabels`)
@@ -141,13 +176,12 @@ Window lee la variable de entorno `KIOSK` para activar `fullscreen()`. Si no est
 - RF-02: Verificación de permisos ✓ implementado
 - RF-03: Control hardware (solenoides) — SolenoidPanel implementado en UI, falta I2C real
 - RF-04: Historial de acciones ✓ implementado (history_logger + HistoryViewStack)
-- RF-05: Interfaz de gestión remota ✗ pendiente
+- RF-05: Interfaz de gestión remota ✓ implementado (webserver Flask en ./webserver/)
 - RF-06: Múltiples idiomas ✓ implementado — Catalán, Español, Inglés completos en `translations.h`
 
 ## Partes Pendientes de Implementar
 1. **Devolución de llaves por NFC**: modo RETURN definido en SolenoidPanel y `OnKeyLogged` en Window, pero flujo no probado (sin hardware NFC disponible actualmente).
 2. **Control I2C real**: SolenoidPanel activa/desactiva solenoides en UI, pero la escritura a XL9535 por I2C no está implementada.
-3. **RF-05 Gestión remota**: no iniciado.
 
 ## Posibles Bugs/Issues Conocidos
 *(Vacío — reportar aquí los que se detecten)*

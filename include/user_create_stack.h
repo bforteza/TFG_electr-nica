@@ -23,12 +23,19 @@ public:
     // Inicializa el formulario en modo creación (campos en blanco).
     void CreateUser();
 
+    // Modo de edición restringida: el usuario edita su propio perfil.
+    // Oculta los radio buttons de nivel y el botón de asignar llaves.
+    void SelfEdit(std::shared_ptr<kdb::Person> person);
+
     // Emitida cuando el usuario pulsa "Añadir llave" en modo edición.
     sigc::signal<void, std::shared_ptr<kdb::Person>> user_link_key;
 
 private:
     // Usuario que se está editando actualmente (nullptr en modo creación).
     std::shared_ptr<kdb::Person> edited_user_;
+
+    // true cuando estamos en modo SelfEdit (usuario editando su propio perfil).
+    bool self_edit_mode_ = false;
 
     // Campos de entrada del formulario.
     Gtk::Entry* username_entry_;
@@ -45,9 +52,9 @@ private:
     Gtk::Button* add_uid_button_;
 
     // Radio buttons para seleccionar el nivel de acceso.
-    Gtk::RadioButton* radio_level0_;   // Sin acceso especial (a1=false, a2=false)
-    Gtk::RadioButton* radio_level1_;   // Acceso a gestión de llaves (a1=true)
-    Gtk::RadioButton* radio_admin_;    // Administrador completo (a2=true)
+    Gtk::RadioButton* radio_level0_;   // Sin acceso especial (level=0)
+    Gtk::RadioButton* radio_level1_;   // Acceso a gestión de llaves (level=1)
+    Gtk::RadioButton* radio_admin_;    // Administrador completo (level=2)
 
     // Etiquetas descriptivas de cada campo del formulario.
     Gtk::Label* username_label_;

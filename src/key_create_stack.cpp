@@ -24,6 +24,10 @@ KeyCreateStack::KeyCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     generate_button_->signal_clicked().connect(
         sigc::mem_fun(*this, &KeyCreateStack::OnGenerateButtonClicked));
 
+    builder->get_widget("KeyPublicCheckButton", public_check_button_);
+    if (!public_check_button_)
+        throw std::runtime_error("No \"KeyPublicCheckButton\" object in MainWindow.glade");
+
     builder->get_widget("AddUserButton", add_user_button_);
     if (!add_user_button_)
         throw std::runtime_error("No \"AddUserButton\" object in MainWindow.glade");
@@ -81,6 +85,7 @@ void KeyCreateStack::RefreshLabels() {
     add_user_button_->set_label(Tr().key_create.btn_add_users);
     add_uid_button_->set_label(Tr().key_create.btn_add_nfc);
     position_picker_button_->set_label(Tr().key_create.btn_pick_position);
+    public_check_button_->set_label(Tr().key_create.lbl_public);
     // El botón de confirmar tiene etiqueta distinta según el modo activo.
     if (!edited_key_)
         generate_button_->set_label(Tr().key_create.btn_create);
@@ -94,6 +99,7 @@ void KeyCreateStack::CreateKey(std::shared_ptr<kdb::Person> creator) {
     Reset();
     creator_ = creator;
     add_user_button_->hide();
+    public_check_button_->show();
     RefreshLabels();
 }
 
@@ -105,7 +111,9 @@ void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> key) {
     commentary_entry_->set_text((std::string)key->commentary);
     position_ = (int)key->pos;
     uid_text_view_->get_buffer()->set_text((std::string)key->uid);
+    public_check_button_->set_active((bool)key->pub);
     add_user_button_->show();
+    public_check_button_->show();
     RefreshLabels();
 }
 
@@ -146,6 +154,8 @@ void KeyCreateStack::OnGenerateButtonClicked() {
 
     if (!valid) return;
 
+    bool is_public = public_check_button_->get_active();
+
     if (!edited_key_) {
         kdb::Key new_key(*db);
         new_key.name        = name;
@@ -154,11 +164,13 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         new_key.uid         = uid;
         new_key.pos         = position_;
         new_key.active      = true;
+        new_key.pub         = is_public;
         new_key.update();
         auto key_ptr = std::make_shared<kdb::Key>(new_key);
         history::LogKeyCreated(creator_, key_ptr);
-        if (!creator_->a2) {
-            creator_->keys().link(*key_ptr);     
+        // Las llaves públicas no necesitan vinculación con el creador.
+        if ((int)creator_->level < 2 && !is_public) {
+            creator_->keys().link(*key_ptr);
         }
         creator_->keepkeys().link(*key_ptr);
         KeyEdit(key_ptr);
@@ -168,6 +180,7 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         edited_key_->commentary = (std::string)commentary_entry_->get_text();
         edited_key_->uid        = uid;
         edited_key_->pos        = position_;
+        edited_key_->pub        = is_public;
         edited_key_->update();
     }
 }
@@ -208,4 +221,5 @@ void KeyCreateStack::Reset() {
     position_   = 0;
     edited_key_ = nullptr;
     creator_    = nullptr;
+    public_check_button_->set_active(false);
 }

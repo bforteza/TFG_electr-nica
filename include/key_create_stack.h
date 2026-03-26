@@ -4,6 +4,7 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/label.h>
 #include <gtkmm/textview.h>
 #include <sigc++/signal.h>
@@ -42,6 +43,9 @@ private:
 
     // Botón para confirmar la creación o edición de la llave.
     Gtk::Button* generate_button_;
+
+    // Toggle para marcar la llave como pública (accesible por todos los usuarios).
+    Gtk::CheckButton* public_check_button_;
 
     // Botón para vincular usuarios a la llave.
     Gtk::Button* add_user_button_;
