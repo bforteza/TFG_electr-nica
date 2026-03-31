@@ -32,7 +32,7 @@
           <select name="pos" class="form-select">
             <option value="">— Sin asignar —</option>
             {% for p in ALL_POSITIONS %}
-              {% set p_int = loop.index0 %}
+              {% set p_int = loop.index %}
               <option value="{{ p }}"
                 {% if key and pos_to_string(key.pos_) == p %}selected{% endif %}
                 {% if p_int in taken_pos %}disabled{% endif %}>
