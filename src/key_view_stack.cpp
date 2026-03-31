@@ -76,6 +76,21 @@ KeyViewStack::KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     pub_column_         = keys_tree_view_->get_column(6);
     keeper_column_      = keys_tree_view_->get_column(7);
 
+    // Centrar contenido y cabecera de la columna pública
+    auto pub_cell = dynamic_cast<Gtk::CellRendererText*>(pub_column_->get_first_cell());
+    if (pub_cell) pub_cell->property_xalign() = 0.5f;
+    pub_column_->set_alignment(0.5f);
+
+    auto pos_cell = dynamic_cast<Gtk::CellRendererText*>(pos_column_->get_first_cell());
+    if (pos_cell) pos_cell->property_xalign() = 0.5f;
+    pos_column_->set_alignment(0.5f);
+
+    // Expandir columnas de texto para ocupar todo el ancho disponible
+    name_column_->set_expand(true);
+    ubi_column_->set_expand(true);
+    commentary_column_->set_expand(true);
+    keeper_column_->set_expand(true);
+
     keys_tree_view_->set_enable_search(true);
     keys_tree_view_->set_search_column(columns_.name_col);
 
@@ -166,7 +181,8 @@ std::vector<std::shared_ptr<kdb::Key>> KeyViewStack::GetSelectedKeys() {
 
 void KeyViewStack::Refresh() {
     tree_model_->clear();
-    for (auto& key : current_keys_) {
+    for (auto it = current_keys_.rbegin(); it != current_keys_.rend(); ++it) {
+        auto& key = *it;
         Gtk::TreeModel::Row row = *(tree_model_->append());
         row[columns_.id_col]          = key.id;
         row[columns_.name_col]        = (Glib::ustring)key.name;
@@ -174,7 +190,7 @@ void KeyViewStack::Refresh() {
         row[columns_.commentary_col]  = key.commentary;
         row[columns_.pos_col]         = PosToString(key.pos);
         row[columns_.active_col]      = key.active;
-        row[columns_.pub_col]         = (bool)key.pub ? Tr().key_view.col_pub_yes : "";
+        row[columns_.pub_col]         = (bool)key.pub ? "✓" : "✗";
         try {
             row[columns_.keeper_col] = (Glib::ustring)key.keeper().get().one().name;
         } catch (...) {}

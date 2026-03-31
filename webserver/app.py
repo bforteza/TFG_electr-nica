@@ -58,6 +58,20 @@ def pos_from_string(s):
         return 0
 
 
+def log_history(db, etype, keyid=0, keyname="", pos=0):
+    """Escribe un evento en HistoryEvent_ indicando que el origen es el webserver."""
+    from datetime import datetime
+    timestamp   = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    client_ip   = request.remote_addr or "IP desconocida"
+    person_name = f"Webserver ({client_ip})"
+    with db.cursor() as cur:
+        cur.execute(
+            "INSERT INTO HistoryEvent_ (type_, etype_, timestamp_, keyid_, keyname_, personid_, personname_, pos_) "
+            "VALUES ('HistoryEvent', %s, %s, %s, %s, %s, %s, %s)",
+            (etype, timestamp, keyid, keyname, 0, person_name, pos),
+        )
+
+
 app.jinja_env.globals.update(
     pos_to_string=pos_to_string,
     etype_name=lambda e: ETYPE_NAMES.get(int(e), str(e)),
@@ -522,6 +536,7 @@ def api_keys_create(body: KeyIn):
         new_id = cur.lastrowid
         for pid in authorized_ids:
             cur.execute("INSERT INTO Key_Person_Acces (Key1_, Person2_) VALUES (%s, %s)", (new_id, pid))
+    log_history(db, etype=3, keyid=new_id, keyname=body.name, pos=pos_int)
     db.commit()
     db.close()
     return {"id": new_id, "name": body.name, "pos": pos_to_string(pos_int), "active": body.active, "pub": body.pub}, 201
@@ -534,14 +549,16 @@ def api_keys_get(path: PathKeyId):
     with db.cursor() as cur:
         cur.execute("SELECT id_, name_, ubi_, commentary_, pos_, active_, pub_ FROM Key_ WHERE id_=%s", (path.key_id,))
         row = cur.fetchone()
-        if not row:
-            db.close()
-            return {"success": False, "message": "Llave no encontrada"}, 404
+    if not row:
+        db.close()
+        return {"success": False, "message": "Llave no encontrada"}, 404
+    with db.cursor() as cur:
         cur.execute(
             "SELECT p.name_ FROM Person_ p JOIN Key_Person_Keep kk ON p.id_=kk.Person2_ WHERE kk.Key1_=%s",
             (path.key_id,),
         )
         keeper = cur.fetchone()
+    with db.cursor() as cur:
         cur.execute(
             "SELECT p.id_, p.name_ FROM Person_ p JOIN Key_Person_Acces ka ON p.id_=ka.Person2_ WHERE ka.Key1_=%s",
             (path.key_id,),
@@ -596,13 +613,15 @@ def api_keys_delete(path: PathKeyId):
     """Elimina una llave y todas sus relaciones."""
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id_ FROM Key_ WHERE id_=%s", (path.key_id,))
-        if not cur.fetchone():
+        cur.execute("SELECT id_, name_, pos_ FROM Key_ WHERE id_=%s", (path.key_id,))
+        key = cur.fetchone()
+        if not key:
             db.close()
             return {"success": False, "message": "Llave no encontrada"}, 404
         cur.execute("DELETE FROM Key_Person_Acces WHERE Key1_=%s", (path.key_id,))
         cur.execute("DELETE FROM Key_Person_Keep  WHERE Key1_=%s", (path.key_id,))
         cur.execute("DELETE FROM Key_ WHERE id_=%s", (path.key_id,))
+    log_history(db, etype=4, keyid=path.key_id, keyname=key["name_"], pos=key["pos_"] or 0)
     db.commit()
     db.close()
     return {"success": True, "message": "Llave eliminada"}
