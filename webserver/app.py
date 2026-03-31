@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_openapi3 import OpenAPI, Info, Tag
 import pymysql.cursors
 from config import DB_CONFIG
@@ -7,12 +7,38 @@ from typing import Optional
 
 # ─── APP ──────────────────────────────────────────────────────────────────────
 
+class ErrorResponse(BaseModel):
+    success: bool = False
+    message: str
+
+
+def _validation_error_callback(e):
+    """Normaliza todos los errores de validación de Pydantic al formato estándar."""
+    try:
+        errors = e.errors()
+        if errors:
+            msg = errors[0].get("msg", "Datos de entrada incorrectos")
+            msg = msg.removeprefix("Value error, ")
+        else:
+            msg = "Datos de entrada incorrectos"
+    except Exception:
+        msg = "Datos de entrada incorrectos"
+    r = jsonify({"success": False, "message": msg})
+    r.status_code = 422
+    return r
+
+
 info = Info(
     title="Armario de Llaves",
     version="1.0.0",
     description="API REST para gestión remota del armario de llaves inteligente.",
 )
-app = OpenAPI(__name__, info=info)
+app = OpenAPI(
+    __name__,
+    info=info,
+    validation_error_model=ErrorResponse,
+    validation_error_callback=_validation_error_callback,
+)
 app.secret_key = "armario-llaves-secret"
 
 tag_users   = Tag(name="Usuarios",  description="Gestión de usuarios del sistema")
@@ -389,7 +415,8 @@ def history_list():
 
 # ── Usuarios ──────────────────────────────────────────────────────────────────
 
-@app.get("/api/users", tags=[tag_users], summary="Listar todos los usuarios")
+@app.get("/api/users", tags=[tag_users], summary="Listar todos los usuarios",
+         responses={"200": UserOut})
 def api_users_list():
     """Devuelve la lista completa de usuarios con id, nombre y nivel de acceso."""
     db = get_db()
@@ -400,7 +427,8 @@ def api_users_list():
     return [{"id": r["id_"], "name": r["name_"], "level": int(r["level_"])} for r in rows]
 
 
-@app.post("/api/users", tags=[tag_users], summary="Crear un usuario")
+@app.post("/api/users", tags=[tag_users], summary="Crear un usuario",
+          responses={"201": UserOut, "409": ErrorResponse, "422": ErrorResponse})
 def api_users_create(body: UserIn):
     """
     Crea un nuevo usuario. Devuelve el usuario creado con su id asignado.
@@ -426,7 +454,8 @@ def api_users_create(body: UserIn):
     return {"id": new_id, "name": body.name, "level": body.level}, 201
 
 
-@app.get("/api/users/<int:user_id>", tags=[tag_users], summary="Recuperar un usuario")
+@app.get("/api/users/<int:user_id>", tags=[tag_users], summary="Consultar un usuario",
+         responses={"200": UserOut, "404": ErrorResponse})
 def api_users_get(path: PathUserId):
     """Devuelve los datos de un usuario concreto por su id."""
     db = get_db()
@@ -439,7 +468,8 @@ def api_users_get(path: PathUserId):
     return {"id": row["id_"], "name": row["name_"], "password": row["password_"], "level": int(row["level_"])}
 
 
-@app.put("/api/users/<int:user_id>", tags=[tag_users], summary="Editar un usuario")
+@app.put("/api/users/<int:user_id>", tags=[tag_users], summary="Editar un usuario",
+         responses={"200": SuccessResponse, "404": ErrorResponse, "409": ErrorResponse, "422": ErrorResponse})
 def api_users_update(path: PathUserId, body: UserIn):
     """
     Modifica los datos de un usuario existente.
@@ -465,7 +495,8 @@ def api_users_update(path: PathUserId, body: UserIn):
     return {"success": True, "message": "Usuario actualizado"}
 
 
-@app.delete("/api/users/<int:user_id>", tags=[tag_users], summary="Eliminar un usuario")
+@app.delete("/api/users/<int:user_id>", tags=[tag_users], summary="Eliminar un usuario",
+            responses={"200": SuccessResponse, "404": ErrorResponse})
 def api_users_delete(path: PathUserId):
     """Elimina un usuario y todas sus relaciones con llaves."""
     db = get_db()
@@ -484,7 +515,8 @@ def api_users_delete(path: PathUserId):
 
 # ── Llaves ────────────────────────────────────────────────────────────────────
 
-@app.get("/api/keys", tags=[tag_keys], summary="Listar todas las llaves")
+@app.get("/api/keys", tags=[tag_keys], summary="Listar todas las llaves",
+         responses={"200": KeyOut})
 def api_keys_list():
     """Devuelve la lista de llaves con posición, estado y quién la tiene actualmente."""
     db = get_db()
@@ -511,7 +543,8 @@ def api_keys_list():
     return result
 
 
-@app.post("/api/keys", tags=[tag_keys], summary="Crear una llave")
+@app.post("/api/keys", tags=[tag_keys], summary="Crear una llave",
+          responses={"201": KeyOut, "409": ErrorResponse, "422": ErrorResponse})
 def api_keys_create(body: KeyIn):
     """
     Crea una nueva llave. Devuelve la llave creada con su id asignado.
@@ -542,7 +575,8 @@ def api_keys_create(body: KeyIn):
     return {"id": new_id, "name": body.name, "pos": pos_to_string(pos_int), "active": body.active, "pub": body.pub}, 201
 
 
-@app.get("/api/keys/<int:key_id>", tags=[tag_keys], summary="Recuperar una llave")
+@app.get("/api/keys/<int:key_id>", tags=[tag_keys], summary="Consultar una llave",
+         responses={"200": KeyDetailOut, "404": ErrorResponse})
 def api_keys_get(path: PathKeyId):
     """Devuelve los datos completos de una llave, incluyendo los usuarios autorizados."""
     db = get_db()
@@ -578,7 +612,8 @@ def api_keys_get(path: PathKeyId):
     }
 
 
-@app.put("/api/keys/<int:key_id>", tags=[tag_keys], summary="Editar una llave")
+@app.put("/api/keys/<int:key_id>", tags=[tag_keys], summary="Editar una llave",
+         responses={"200": SuccessResponse, "404": ErrorResponse, "409": ErrorResponse, "422": ErrorResponse})
 def api_keys_update(path: PathKeyId, body: KeyIn):
     """
     Modifica los datos de una llave existente.
@@ -608,7 +643,8 @@ def api_keys_update(path: PathKeyId, body: KeyIn):
     return {"success": True, "message": "Llave actualizada"}
 
 
-@app.delete("/api/keys/<int:key_id>", tags=[tag_keys], summary="Eliminar una llave")
+@app.delete("/api/keys/<int:key_id>", tags=[tag_keys], summary="Eliminar una llave",
+            responses={"200": SuccessResponse, "404": ErrorResponse})
 def api_keys_delete(path: PathKeyId):
     """Elimina una llave y todas sus relaciones."""
     db = get_db()
@@ -629,7 +665,8 @@ def api_keys_delete(path: PathKeyId):
 
 # ── Historial ─────────────────────────────────────────────────────────────────
 
-@app.get("/api/history", tags=[tag_history], summary="Consultar el historial")
+@app.get("/api/history", tags=[tag_history], summary="Consultar el historial",
+         responses={"200": HistoryEventOut})
 def api_history(query: HistoryQuery):
     """
     Devuelve eventos del historial. Todos los filtros son opcionales y combinables.
