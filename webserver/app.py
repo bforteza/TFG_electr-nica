@@ -118,15 +118,22 @@ class UserOut(BaseModel):
 
 class UserIn(BaseModel):
     """Datos para crear o editar un usuario."""
-    name:     str = Field(...,  description="Nombre del usuario")
-    password: str = Field("",  description="Contraseña numérica (mínimo 5 dígitos)")
+    name:     str = Field(...,  description="Nombre del usuario (mínimo 3 caracteres)")
+    password: str = Field(...,  description="Contraseña numérica (mínimo 3 dígitos, obligatoria)")
     level:    int = Field(0, ge=0, le=2, description="Nivel de acceso (0, 1 o 2)")
+
+    @field_validator("name")
+    @classmethod
+    def name_min_length(cls, v):
+        if len(v) < 3:
+            raise ValueError("El nombre debe tener al menos 3 caracteres")
+        return v
 
     @field_validator("password")
     @classmethod
     def password_min_length(cls, v):
-        if v and len(v) < 5:
-            raise ValueError("La contraseña debe tener al menos 5 dígitos")
+        if len(v) < 3:
+            raise ValueError("La contraseña debe tener al menos 3 dígitos")
         return v
 
 class KeyOut(BaseModel):
@@ -146,13 +153,19 @@ class KeyDetailOut(KeyOut):
 
 class KeyIn(BaseModel):
     """Datos para crear o editar una llave."""
-    name:           str       = Field(...,  description="Nombre de la llave")
+    name:           str       = Field(...,  description="Nombre de la llave (mínimo 3 caracteres)")
     ubi:            str       = Field("",   description="Ubicación física")
     commentary:     str       = Field("",   description="Comentario")
-    pos:            str       = Field("",   description="Posición en armario (ej: A1). Vacío = sin asignar")
     active:         bool      = Field(True, description="True = llave activa")
     pub:            bool      = Field(False,description="True = pública, accesible por todos")
     authorized_ids: list[int] = Field([],   description="IDs de usuarios autorizados (ignorado si pub=True)")
+
+    @field_validator("name")
+    @classmethod
+    def name_min_length(cls, v):
+        if len(v) < 3:
+            raise ValueError("El nombre debe tener al menos 3 caracteres")
+        return v
 
 class HistoryEventOut(BaseModel):
     """Un evento del historial."""
@@ -439,6 +452,10 @@ def api_users_create(body: UserIn):
     """
     db = get_db()
     with db.cursor() as cur:
+        cur.execute("SELECT id_ FROM Person_ WHERE name_=%s", (body.name,))
+        if cur.fetchone():
+            db.close()
+            return {"success": False, "message": "Ya existe un usuario con ese nombre"}, 409
         if body.password:
             cur.execute("SELECT id_ FROM Person_ WHERE password_=%s", (body.password,))
             if cur.fetchone():
@@ -481,6 +498,10 @@ def api_users_update(path: PathUserId, body: UserIn):
         if not cur.fetchone():
             db.close()
             return {"success": False, "message": "Usuario no encontrado"}, 404
+        cur.execute("SELECT id_ FROM Person_ WHERE name_=%s AND id_!=%s", (body.name, path.user_id))
+        if cur.fetchone():
+            db.close()
+            return {"success": False, "message": "Ya existe un usuario con ese nombre"}, 409
         if body.password:
             cur.execute("SELECT id_ FROM Person_ WHERE password_=%s AND id_!=%s", (body.password, path.user_id))
             if cur.fetchone():
@@ -553,7 +574,6 @@ def api_keys_create(body: KeyIn):
     - **pub**: si es True, la llave es accesible por todos (authorized_ids se ignora).
     - **authorized_ids**: lista de ids de usuarios autorizados.
     """
-    pos_int        = pos_from_string(body.pos)
     authorized_ids = [] if body.pub else body.authorized_ids
     db = get_db()
     with db.cursor() as cur:
@@ -563,16 +583,16 @@ def api_keys_create(body: KeyIn):
             return {"success": False, "message": "Ya existe una llave con ese nombre"}, 409
         cur.execute(
             "INSERT INTO Key_ (type_, name_, ubi_, commentary_, pos_, active_, uid_, pub_) "
-            "VALUES ('Key', %s, %s, %s, %s, %s, '', %s)",
-            (body.name, body.ubi, body.commentary, pos_int, int(body.active), int(body.pub)),
+            "VALUES ('Key', %s, %s, %s, 0, %s, '', %s)",
+            (body.name, body.ubi, body.commentary, int(body.active), int(body.pub)),
         )
         new_id = cur.lastrowid
         for pid in authorized_ids:
             cur.execute("INSERT INTO Key_Person_Acces (Key1_, Person2_) VALUES (%s, %s)", (new_id, pid))
-    log_history(db, etype=3, keyid=new_id, keyname=body.name, pos=pos_int)
+    log_history(db, etype=3, keyid=new_id, keyname=body.name, pos=0)
     db.commit()
     db.close()
-    return {"id": new_id, "name": body.name, "pos": pos_to_string(pos_int), "active": body.active, "pub": body.pub}, 201
+    return {"id": new_id, "name": body.name, "pos": "-", "active": body.active, "pub": body.pub}, 201
 
 
 @app.get("/api/keys/<int:key_id>", tags=[tag_keys], summary="Consultar una llave",
@@ -619,7 +639,6 @@ def api_keys_update(path: PathKeyId, body: KeyIn):
     Modifica los datos de una llave existente.
     Pasar todos los campos aunque no cambien.
     """
-    pos_int        = pos_from_string(body.pos)
     authorized_ids = [] if body.pub else body.authorized_ids
     db = get_db()
     with db.cursor() as cur:
@@ -632,8 +651,8 @@ def api_keys_update(path: PathKeyId, body: KeyIn):
             db.close()
             return {"success": False, "message": "Ya existe una llave con ese nombre"}, 409
         cur.execute(
-            "UPDATE Key_ SET name_=%s, ubi_=%s, commentary_=%s, pos_=%s, active_=%s, pub_=%s WHERE id_=%s",
-            (body.name, body.ubi, body.commentary, pos_int, int(body.active), int(body.pub), path.key_id),
+            "UPDATE Key_ SET name_=%s, ubi_=%s, commentary_=%s, active_=%s, pub_=%s WHERE id_=%s",
+            (body.name, body.ubi, body.commentary, int(body.active), int(body.pub), path.key_id),
         )
         cur.execute("DELETE FROM Key_Person_Acces WHERE Key1_=%s", (path.key_id,))
         for pid in authorized_ids:

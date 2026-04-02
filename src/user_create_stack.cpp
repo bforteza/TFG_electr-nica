@@ -160,11 +160,11 @@ void UserCreateStack::OnGenerateButtonClicked() {
     std::string uid = uid_text_view_->get_buffer()->get_text();
 
     // Validaciones comunes a ambos modos.
-    if (username_entry_->get_text_length() < 2) {
+    if (username_entry_->get_text_length() < 3) {
         username_error_label_->set_text(Tr().user_create.error_username_too_short);
         valid = false;
     }
-    if (password_entry_->get_text_length() < 2) {
+    if (password_entry_->get_text_length() < 3) {
         password_error_label_->set_text(Tr().user_create.error_password_too_short);
         valid = false;
     }
