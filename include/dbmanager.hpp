@@ -82,6 +82,8 @@ public:
     litesql::Field<std::string> uid;
     static const litesql::FieldType Level;
     litesql::Field<int> level;
+    static const litesql::FieldType Active;
+    litesql::Field<bool> active;
     static void initValues();
 protected:
     void defaults();

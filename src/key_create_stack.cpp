@@ -117,6 +117,11 @@ void KeyCreateStack::KeyEdit(std::shared_ptr<kdb::Key> key) {
     RefreshLabels();
 }
 
+void KeyCreateStack::RecoverKey(std::shared_ptr<kdb::Key> key) {
+    KeyEdit(key);          // carga datos actuales (Reset() pone recover_mode_=false)
+    recover_mode_ = true;  // activar DESPUÉS
+}
+
 // --- Manejadores de botones ---
 
 void KeyCreateStack::OnGenerateButtonClicked() {
@@ -146,8 +151,14 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         uid_error_label_->set_text(Tr().key_create.error_card_in_use);
         valid = false;
     }
-    // En modo creación, validar también que hay posición seleccionada.
-    if (!edited_key_ && position_ == 0) {
+    //validar que hay posición seleccionada y que no está ocupada.
+    
+    if (position_ == 0) {
+        position_picker_button_->set_label(Tr().key_create.error_position_invalid);
+        valid = false;
+    } else if (edited_key_ && litesql::select<kdb::Key>(*db, kdb::Key::Pos == position_
+                                                && kdb::Key::Active == true
+                                                && kdb::Key::Id != edited_key_->id).count()) {
         position_picker_button_->set_label(Tr().key_create.error_position_invalid);
         valid = false;
     }
@@ -181,6 +192,8 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         edited_key_->uid        = uid;
         edited_key_->pos        = position_;
         edited_key_->pub        = is_public;
+        if (recover_mode_)
+            edited_key_->active = true;
         edited_key_->update();
     }
 }

@@ -42,12 +42,16 @@ public:
     // Señal para ver el historial de la llave seleccionada.
     sigc::signal<void, std::shared_ptr<kdb::Key>> key_history;
 
+    // Señal para iniciar el flujo de recuperación (abre lista de llaves inactivas).
+    sigc::signal<void> key_recover;
+
     // Muestra una lista de llaves. access controla qué botones son visibles.
     void view(std::vector<kdb::Key> keys, int access = 2);
 
-    // Muestra una lista de llaves en modo selección:
-    // oculta botones de edición y muestra el botón "Seleccionar".
-    void select(std::vector<kdb::Key> keys);
+    // Muestra una lista de llaves en modo selección.
+    // multiple=true: selección múltiple con botón "Seleccionar".
+    // multiple=false: selección única, emite al hacer doble clic o pulsar Enter.
+    void select(std::vector<kdb::Key> keys, bool multiple = true);
 
 private:
     // Botón para dar acceso a un usuario sobre la llave seleccionada.
@@ -73,6 +77,9 @@ private:
 
     // Botón para ver el historial de la llave seleccionada.
     Gtk::Button* history_key_button_;
+
+    // Botón para recuperar una llave desactivada.
+    Gtk::Button* recover_key_button_;
 
     // Widget de lista para mostrar las llaves.
     Gtk::TreeView* keys_tree_view_;
@@ -123,6 +130,7 @@ private:
     void OnViewUsersButtonClicked();
     void OnDeleteKeyButtonClicked();
     void OnHistoryKeyButtonClicked();
+    void OnRecoverKeyButtonClicked();
 };
 
 #endif // KEY_VIEW_STACK_H

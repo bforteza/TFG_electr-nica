@@ -77,6 +77,11 @@
     <property name="can-focus">False</property>
     <property name="stock">gtk-delete</property>
   </object>
+  <object class="GtkImage" id="image13">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="stock">gtk-delete</property>
+  </object>
   <object class="GtkImage" id="image9">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -526,22 +531,20 @@
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkScrolledWindow">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="hscrollbar-policy">never</property>
-                        <property name="vscrollbar-policy">never</property>
-                        <property name="propagate-natural-height">True</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">2</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="homogeneous">True</property>
-                            <property name="spacing">7</property>
-                            <property name="margin-start">6</property>
-                            <property name="margin-end">6</property>
+                            <property name="spacing">2</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-end">4</property>
                             <property name="margin-top">4</property>
-                            <property name="margin-bottom">4</property>
                             <child>
                               <object class="GtkButton" id="AddKeyToUserButton">
                                 <property name="label" translatable="yes">Afegir clau</property>
@@ -573,21 +576,6 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="UserEditButton">
-                                <property name="label" translatable="yes">Editar usuari</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
-                                <property name="image">Edit_image</property>
-                                <property name="always-show-image">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkButton" id="ViewKeysOfUserButton">
                                 <property name="label" translatable="yes">Veure claus</property>
                                 <property name="visible">True</property>
@@ -599,7 +587,7 @@
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
-                                <property name="position">3</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                             <child>
@@ -614,7 +602,53 @@
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
-                                <property name="position">4</property>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="homogeneous">True</property>
+                            <property name="spacing">2</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-end">4</property>
+                            <property name="margin-bottom">4</property>
+                            <child>
+                              <object class="GtkButton" id="UserEditButton">
+                                <property name="label" translatable="yes">Editar usuari</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">Edit_image</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="DeleteUserButton">
+                                <property name="label" translatable="yes">Eliminar</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="image">image13</property>
+                                <property name="always-show-image">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
@@ -627,10 +661,28 @@
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
-                                <property name="position">5</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="RecoverUserButton">
+                                <property name="label" translatable="yes">Recuperar</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">3</property>
                               </packing>
                             </child>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>
@@ -1371,6 +1423,19 @@
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="RecoverKeyButton">
+                                <property name="label" translatable="yes">Recuperar</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">4</property>
                               </packing>
                             </child>
                           </object>

@@ -80,7 +80,8 @@ void LoginStack::OnPasswordEntered()
     std::string password = password_entry_->get_text();
     try {
         auto person = std::make_shared<kdb::Person>(
-            litesql::select<kdb::Person>(*db, kdb::Person::Password == password).one());
+            litesql::select<kdb::Person>(*db, kdb::Person::Password == password
+                                             && kdb::Person::Active == true).one());
         nfcman->StopPolling();
         error_label_->set_text("");
         SoundManager::Play(SoundEvent::kLoginOk);
@@ -95,7 +96,8 @@ void LoginStack::OnNfcDetected(const std::string& uid)
 {
     // Comprueba si el UID pertenece a un usuario o a una llave activa.
     // Se usa count() para evitar excepciones si no hay resultados.
-    int person_count = litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).count();
+    int person_count = litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid
+                                                         && kdb::Person::Active == true).count();
     int key_count    = litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid
                                                       && kdb::Key::Active == 1).count();
 
@@ -110,7 +112,8 @@ void LoginStack::OnNfcDetected(const std::string& uid)
         nfcman->StopPolling();
         SoundManager::Play(SoundEvent::kLoginOk);
         user_logged.emit(std::make_shared<kdb::Person>(
-            litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).one()));
+            litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid
+                                             && kdb::Person::Active == true).one()));
     } else {
         nfcman->StopPolling();
         SoundManager::Play(SoundEvent::kKeyReturn);

@@ -147,6 +147,11 @@ void UserCreateStack::SelfEdit(std::shared_ptr<kdb::Person> person) {
     radio_admin_->hide();
 }
 
+void UserCreateStack::RecoverUser(std::shared_ptr<kdb::Person> person) {
+    UserEdit(person);         // carga datos actuales (Reset() pone recover_mode_=false)
+    recover_mode_ = true;     // activar DESPUÉS
+}
+
 // --- Manejadores de botones ---
 
 void UserCreateStack::OnGenerateButtonClicked() {
@@ -207,6 +212,8 @@ void UserCreateStack::OnGenerateButtonClicked() {
         edited_user_->name     = (std::string)username;
         edited_user_->password = (std::string)password;
         edited_user_->level    = radio_admin_->get_active() ? 2 : (radio_level1_->get_active() ? 1 : 0);
+        if (recover_mode_)
+            edited_user_->active = true;
         edited_user_->update();
         if (self_edit_mode_)
             SelfEdit(edited_user_);
@@ -243,6 +250,7 @@ void UserCreateStack::Reset() {
 
     edited_user_    = nullptr;
     self_edit_mode_ = false;
+    recover_mode_   = false;
 
     // Restaurar visibilidad de controles que SelfEdit oculta.
     access_level_label_->show();

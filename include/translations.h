@@ -38,9 +38,13 @@ struct Translations {
         const char* btn_edit;
         const char* btn_view_keys;    // Ver llaves del usuario seleccionado
         const char* btn_select;       // Solo visible en modo selección de usuario
+        const char* btn_delete;
+        const char* btn_recover;
         const char* col_name;
         const char* col_password;
         const char* col_uid;
+        const char* confirm_delete_title;
+        const char* confirm_delete_body;
     } users_view;
 
     // --- UserCreateStack ---
@@ -128,6 +132,7 @@ struct Translations {
         const char* col_public;   // Cabecera de la columna pública/privada
         const char* col_pub_yes;  // Texto de la celda cuando la llave es pública
         const char* col_keeper;
+        const char* btn_recover;
         const char* err_key_in_use;
         const char* err_key_in_cabinet; // No se puede desactivar: la llave está en el armario
         const char* err_user_is_admin;  // No se puede vincular: el usuario es administrador
@@ -167,7 +172,11 @@ inline const Translations kTranslations[] = {
             "Editar usuari",
             "Veure claus",
             "Seleccionar",
+            "Eliminar",
+            "Recuperar",
             "Nom", "Contrasenya", "Uid",
+            "Eliminar usuari",
+            "Aquesta acció desactivarà l'usuari.",
         },
         // user_create
         {
@@ -233,6 +242,7 @@ inline const Translations kTranslations[] = {
             "Seleccionar",
             "Eliminar",
             "Nom", "Ubicació", "Comentaris", "Posició", "Activa", "Pública", "Pública", "Agafada",
+            "Recuperar",
             "Atenció: la clau ja està en ús",
             "Atenció: la clau és a l'armari, no es pot desactivar",
             "Atenció: l'usuari és administrador, té accés a totes les claus",
@@ -270,7 +280,11 @@ inline const Translations kTranslations[] = {
             "Editar usuario",
             "Ver llaves",
             "Seleccionar",
+            "Eliminar",
+            "Recuperar",
             "Nombre", "Contraseña", "Uid",
+            "Eliminar usuario",
+            "Esta acción desactivará al usuario.",
         },
         // user_create
         {
@@ -336,6 +350,7 @@ inline const Translations kTranslations[] = {
             "Seleccionar",
             "Eliminar",
             "Nombre", "Ubicación", "Comentarios", "Posición", "Activa", "Pública", "Pública", "En posesión de",
+            "Recuperar",
             "Atención: la llave ya está en uso",
             "Atención: la llave está en el armario, no se puede desactivar",
             "Atención: el usuario es administrador, tiene acceso a todas las llaves",
@@ -373,7 +388,11 @@ inline const Translations kTranslations[] = {
             "Edit user",
             "View keys",
             "Select",
+            "Delete",
+            "Recover",
             "Name", "Password", "Uid",
+            "Delete user",
+            "This action will deactivate the user.",
         },
         // user_create
         {
@@ -439,6 +458,7 @@ inline const Translations kTranslations[] = {
             "Select",
             "Delete",
             "Name", "Location", "Comments", "Position", "Active", "Public", "Public", "Held by",
+            "Recover",
             "Warning: key already in use",
             "Warning: key is in the cabinet, cannot be deactivated",
             "Warning: user is an administrator, has access to all keys",

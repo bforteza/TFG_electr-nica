@@ -6,6 +6,7 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
+#include <gtkmm/messagedialog.h>
 
 #include "models.h"
 #include "dbmanager.hpp"
@@ -36,13 +37,20 @@ public:
     // Señal para ver el historial del usuario seleccionado.
     sigc::signal<void, std::shared_ptr<kdb::Person>> person_history;
 
+    // Señal para desactivar (eliminar lógico) el usuario seleccionado.
+    sigc::signal<void, std::shared_ptr<kdb::Person>> user_delete;
+
+    // Señal para iniciar el flujo de recuperación (abre lista de usuarios inactivos).
+    sigc::signal<void> user_recover;
+
     // Muestra la lista de usuarios en modo normal.
     // access: nivel del usuario logueado; oculta botones de admin si access < 2.
     void view(std::vector<kdb::Person> users, int access = 2);
 
-    // Muestra la lista de usuarios en modo selección:
-    // oculta botones de edición y muestra el botón "Seleccionar".
-    void select(std::vector<kdb::Person> users);
+    // Muestra la lista de usuarios en modo selección.
+    // multiple=true: selección múltiple con botón "Seleccionar".
+    // multiple=false: selección única, emite al hacer doble clic o pulsar Enter.
+    void select(std::vector<kdb::Person> users, bool multiple = true);
 
 private:
     // Botón para vincular una llave al usuario seleccionado.
@@ -62,6 +70,12 @@ private:
 
     // Botón para ver el historial del usuario seleccionado.
     Gtk::Button* history_person_button_;
+
+    // Botón para desactivar (eliminar lógico) el usuario seleccionado.
+    Gtk::Button* delete_user_button_;
+
+    // Botón para recuperar un usuario desactivado.
+    Gtk::Button* recover_user_button_;
 
     // Widget de lista para mostrar los usuarios.
     Gtk::TreeView* users_tree_view_;
@@ -103,6 +117,8 @@ private:
     void OnEditButtonClicked();
     void OnSelectUserButtonClicked();
     void OnHistoryPersonButtonClicked();
+    void OnDeleteUserButtonClicked();
+    void OnRecoverUserButtonClicked();
 };
 
 #endif // USERS_VIEW_STACK_H

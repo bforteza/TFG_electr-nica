@@ -26,6 +26,10 @@ public:
     // Inicializa el formulario en modo edición con los datos de la llave dada.
     void KeyEdit(std::shared_ptr<kdb::Key> key);
 
+    // Modo recuperación: carga datos de una llave inactiva para validar antes de reactivarla.
+    // Al confirmar, además de guardar los cambios, pone active=true.
+    void RecoverKey(std::shared_ptr<kdb::Key> key);
+
     // Rellena el campo de posición con la posición seleccionada en el picker (1-based).
     void SetPosition(int pos);
 
@@ -73,6 +77,9 @@ private:
 
     // Llave que se está editando actualmente (nullptr en modo creación).
     std::shared_ptr<kdb::Key> edited_key_;
+
+    // true cuando estamos en modo recuperación (llave inactiva que se va a reactivar).
+    bool recover_mode_ = false;
 
     // Usuario que inició la creación; se vincula a la llave al crearla.
     std::shared_ptr<kdb::Person> creator_;

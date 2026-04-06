@@ -154,6 +154,15 @@ private:
     // Desactiva la llave si tiene portador; muestra error si está en el armario.
     void OnKeyDelete(std::shared_ptr<kdb::Key> key);
 
+    // Desactiva (borrado lógico) el usuario seleccionado.
+    void OnUserDelete(std::shared_ptr<kdb::Person> person);
+
+    // Abre la lista de llaves inactivas en modo selección única para reactivar una.
+    void OnKeyRecoverRequested();
+
+    // Abre la lista de usuarios inactivos en modo selección única para reactivar uno.
+    void OnUserRecoverRequested();
+
     // Cierra sesión y vuelve al login.
     void OnQuitButtonClicked();
 

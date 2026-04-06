@@ -74,6 +74,8 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     users_view_stack_.keys_view.connect(sigc::mem_fun(*this, &HomeStack::ShowKeysView));
     users_view_stack_.user_edit.connect(sigc::mem_fun(*this, &HomeStack::OnUserEdit));
     users_view_stack_.person_history.connect(sigc::mem_fun(*this, &HomeStack::OnPersonHistoryRequested));
+    users_view_stack_.user_delete.connect(sigc::mem_fun(*this, &HomeStack::OnUserDelete));
+    users_view_stack_.user_recover.connect(sigc::mem_fun(*this, &HomeStack::OnUserRecoverRequested));
 
     key_view_stack_.key_link.connect(sigc::mem_fun(*this, &HomeStack::OnKeyLinkUser));
     key_view_stack_.key_unlink.connect(sigc::mem_fun(*this, &HomeStack::OnKeyUnlinkUser));
@@ -82,6 +84,7 @@ HomeStack::HomeStack(const Glib::RefPtr<Gtk::Builder>& builder, Window* window)
     key_view_stack_.key_kept.connect(sigc::mem_fun(*this, &HomeStack::OnKeyKept));
     key_view_stack_.key_delete.connect(sigc::mem_fun(*this, &HomeStack::OnKeyDelete));
     key_view_stack_.key_history.connect(sigc::mem_fun(*this, &HomeStack::OnKeyHistoryRequested));
+    key_view_stack_.key_recover.connect(sigc::mem_fun(*this, &HomeStack::OnKeyRecoverRequested));
 
     key_create_stack_.position_select_requested.connect(
         sigc::mem_fun(*this, &HomeStack::OnPositionSelectRequested));
@@ -139,12 +142,21 @@ void HomeStack::OnBackButtonClicked() {
         Logout();
         return;
     }
+    auto current_name = inner_stack_->get_visible_child_name();
     ResetSelectionState();
     if (back_widget_ == nullptr) {
         inner_stack_->set_visible_child("AdminMainStack");
     } else {
         inner_stack_->set_visible_child(*back_widget_);
         back_widget_ = nullptr;
+        // Si back_widget_ apuntaba a la misma vista (caso recuperación: select() sobre
+        // la vista actual), la vista quedó en modo selección → recargarla en modo normal.
+        if (inner_stack_->get_visible_child_name() == current_name) {
+            if (current_name == "ViewKeyStack")
+                OnViewKeysButtonClicked();
+            else if (current_name == "ViewUsersStack")
+                OnViewUsersButtonClicked();
+        }
     }
 }
 
@@ -154,7 +166,8 @@ void HomeStack::OnUserCreateButtonClicked() {
 }
 
 void HomeStack::OnViewUsersButtonClicked() {
-    users_view_stack_.view(litesql::select<kdb::Person>(*db).all());
+    users_view_stack_.view(
+        litesql::select<kdb::Person>(*db, kdb::Person::Active == true).all(), access_);
     inner_stack_->set_visible_child("ViewUsersStack");
 }
 
@@ -389,6 +402,42 @@ void HomeStack::OnPersonHistoryRequested(std::shared_ptr<kdb::Person> person) {
     history_view_stack_.view(person);
     back_widget_ = inner_stack_->get_visible_child();
     inner_stack_->set_visible_child("HistoryViewStack");
+}
+
+void HomeStack::OnUserDelete(std::shared_ptr<kdb::Person> person) {
+    person->active = false;
+    person->update();
+    OnViewUsersButtonClicked();
+}
+
+void HomeStack::OnKeyRecoverRequested() {
+    // Primer paso: se abre la lista de llaves inactivas en selección única.
+    // Cuando se seleccione una, el segundo paso lleva a KeyEdit con recover_mode_.
+    auto inactive = litesql::select<kdb::Key>(*db, kdb::Key::Active == false).all();
+    key_view_stack_.select(inactive, false);
+    back_widget_ = inner_stack_->get_visible_child();
+    key_selected_connection_ = key_view_stack_.key_selected.connect(
+        [this](std::vector<std::shared_ptr<kdb::Key>> keys) {
+            ResetSelectionState();
+            key_create_stack_.RecoverKey(keys.front());
+            inner_stack_->set_visible_child("KeyCreateStack");
+        });
+    inner_stack_->set_visible_child("ViewKeyStack");
+}
+
+void HomeStack::OnUserRecoverRequested() {
+    // Primer paso: se abre la lista de inactivos en selección única.
+    // Cuando se seleccione uno, el segundo paso lleva a UserEdit con recover_mode_.
+    auto inactive = litesql::select<kdb::Person>(*db, kdb::Person::Active == false).all();
+    users_view_stack_.select(inactive, false);
+    back_widget_ = inner_stack_->get_visible_child();
+    user_selected_connection_ = users_view_stack_.user_selected.connect(
+        [this](std::vector<std::shared_ptr<kdb::Person>> persons) {
+            ResetSelectionState();
+            user_create_stack_.RecoverUser(persons.front());
+            inner_stack_->set_visible_child("UserCreateStack");
+        });
+    inner_stack_->set_visible_child("ViewUsersStack");
 }
 
 void HomeStack::OnSlotActivated(int pos, std::shared_ptr<kdb::Key> key) {

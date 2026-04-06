@@ -27,6 +27,10 @@ public:
     // Oculta los radio buttons de nivel y el botón de asignar llaves.
     void SelfEdit(std::shared_ptr<kdb::Person> person);
 
+    // Modo recuperación: carga datos del usuario inactivo para validar antes de reactivar.
+    // Al confirmar, además de guardar los cambios, pone active=true.
+    void RecoverUser(std::shared_ptr<kdb::Person> person);
+
     // Emitida cuando el usuario pulsa "Añadir llave" en modo edición.
     sigc::signal<void, std::shared_ptr<kdb::Person>> user_link_key;
 
@@ -36,6 +40,9 @@ private:
 
     // true cuando estamos en modo SelfEdit (usuario editando su propio perfil).
     bool self_edit_mode_ = false;
+
+    // true cuando estamos en modo recuperación (usuario inactivo que se va a reactivar).
+    bool recover_mode_ = false;
 
     // Campos de entrada del formulario.
     Gtk::Entry* username_entry_;

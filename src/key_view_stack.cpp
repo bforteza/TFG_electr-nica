@@ -50,6 +50,12 @@ KeyViewStack::KeyViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     history_key_button_->signal_clicked().connect(
         sigc::mem_fun(*this, &KeyViewStack::OnHistoryKeyButtonClicked));
 
+    builder->get_widget("RecoverKeyButton", recover_key_button_);
+    if (!recover_key_button_)
+        throw std::runtime_error("No \"RecoverKeyButton\" object in MainWindow.glade");
+    recover_key_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &KeyViewStack::OnRecoverKeyButtonClicked));
+
     builder->get_widget("ViewKeysTree", keys_tree_view_);
     if (!keys_tree_view_)
         throw std::runtime_error("No \"ViewKeysTree\" object in MainWindow.glade");
@@ -108,6 +114,7 @@ void KeyViewStack::RefreshLabels() {
     view_users_button_->set_label(Tr().key_view.btn_view_users);
     delete_key_button_->set_label(Tr().key_view.btn_delete);
     history_key_button_->set_label(Tr().history_view.btn_history_key);
+    recover_key_button_->set_label(Tr().key_view.btn_recover);
 
     name_column_->set_title(Tr().key_view.col_name);
     ubi_column_->set_title(Tr().key_view.col_location);
@@ -129,20 +136,7 @@ void KeyViewStack::view(std::vector<kdb::Key> keys, int access) {
     Refresh();
 }
 
-void KeyViewStack::select(std::vector<kdb::Key> keys) {
-    
-    keys_tree_view_->get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
-    toggle_conn_ = keys_tree_view_->signal_button_press_event().connect([this](GdkEventButton* ev) -> bool {
-        Gtk::TreePath path;
-        Gtk::TreeViewColumn* col;
-        int cx, cy;
-        if (keys_tree_view_->get_path_at_pos((int)ev->x, (int)ev->y, path, col, cx, cy)) {
-            auto sel = keys_tree_view_->get_selection();
-            if (sel->is_selected(path)) sel->unselect(path);
-            else                        sel->select(path);
-        }
-        return true;
-    }, false);
+void KeyViewStack::select(std::vector<kdb::Key> keys, bool multiple) {
     keep_key_button_->hide();
     add_user_button_->hide();
     remove_user_button_->hide();
@@ -150,7 +144,27 @@ void KeyViewStack::select(std::vector<kdb::Key> keys) {
     delete_key_button_->hide();
     view_users_button_->hide();
     history_key_button_->hide();
-    select_key_button_->show();
+    recover_key_button_->hide();
+
+    if (multiple) {
+        keys_tree_view_->get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
+        toggle_conn_ = keys_tree_view_->signal_button_press_event().connect([this](GdkEventButton* ev) -> bool {
+            Gtk::TreePath path;
+            Gtk::TreeViewColumn* col;
+            int cx, cy;
+            if (keys_tree_view_->get_path_at_pos((int)ev->x, (int)ev->y, path, col, cx, cy)) {
+                auto sel = keys_tree_view_->get_selection();
+                if (sel->is_selected(path)) sel->unselect(path);
+                else                        sel->select(path);
+            }
+            return true;
+        }, false);
+        select_key_button_->show();
+    } else {
+        keys_tree_view_->get_selection()->set_mode(Gtk::SELECTION_SINGLE);
+        select_key_button_->show();
+    }
+
     current_keys_ = keys;
     Refresh();
 }
@@ -208,8 +222,8 @@ void KeyViewStack::Configure(int access) {
     delete_key_button_->hide();
     view_users_button_->hide();
     history_key_button_->hide();
+    recover_key_button_->hide();
 
-   
     pos_column_->set_visible(false);
     pub_column_->set_visible(false);
 
@@ -225,8 +239,10 @@ void KeyViewStack::Configure(int access) {
         delete_key_button_->show();
         view_users_button_->show();
     }
-    if (access >= 2)
+    if (access >= 2) {
         history_key_button_->show();
+        recover_key_button_->show();
+    }
     keys_tree_view_->columns_autosize();
 }
 
@@ -284,4 +300,8 @@ void KeyViewStack::OnHistoryKeyButtonClicked() {
     auto key = GetSelectedKey();
     if (key)
         key_history.emit(key);
+}
+
+void KeyViewStack::OnRecoverKeyButtonClicked() {
+    key_recover.emit();
 }

@@ -8,6 +8,7 @@
         <field name="password" type="string"/>
         <field name="uid" type="string"/>
         <field name="level" type="integer" default="0"/>
+        <field name="active" type="boolean" default="true"/>
     </object>
     <object name="Key">
         <field name="name" type="string"/>

@@ -145,21 +145,25 @@ const litesql::FieldType Person::Name("name_",A_field_type_string,table__);
 const litesql::FieldType Person::Password("password_",A_field_type_string,table__);
 const litesql::FieldType Person::Uid("uid_",A_field_type_string,table__);
 const litesql::FieldType Person::Level("level_",A_field_type_integer,table__);
+const litesql::FieldType Person::Active("active_",A_field_type_boolean,table__);
 void Person::initValues() {
 }
 void Person::defaults() {
     id = 0;
     level = 0;
+    active = true;
 }
 Person::Person(const litesql::Database& db)
-     : litesql::Persistent(db), id(Id), type(Type), name(Name), password(Password), uid(Uid), level(Level) {
+     : litesql::Persistent(db), id(Id), type(Type), name(Name), password(Password), uid(Uid), level(Level), active(Active) {
     defaults();
 }
 Person::Person(const litesql::Database& db, const litesql::Record& rec)
-     : litesql::Persistent(db, rec), id(Id), type(Type), name(Name), password(Password), uid(Uid), level(Level) {
+     : litesql::Persistent(db, rec), id(Id), type(Type), name(Name), password(Password), uid(Uid), level(Level), active(Active) {
     defaults();
-    size_t size = (rec.size() > 6) ? 6 : rec.size();
+    size_t size = (rec.size() > 7) ? 7 : rec.size();
     switch(size) {
+    case 7: active = convert<const std::string&, bool>(rec[6]);
+        active.setModified(false);
     case 6: level = convert<const std::string&, int>(rec[5]);
         level.setModified(false);
     case 5: uid = convert<const std::string&, std::string>(rec[4]);
@@ -175,7 +179,7 @@ Person::Person(const litesql::Database& db, const litesql::Record& rec)
     }
 }
 Person::Person(const Person& obj)
-     : litesql::Persistent(obj), id(obj.id), type(obj.type), name(obj.name), password(obj.password), uid(obj.uid), level(obj.level) {
+     : litesql::Persistent(obj), id(obj.id), type(obj.type), name(obj.name), password(obj.password), uid(obj.uid), level(obj.level), active(obj.active) {
 }
 const Person& Person::operator=(const Person& obj) {
     if (this != &obj) {
@@ -185,6 +189,7 @@ const Person& Person::operator=(const Person& obj) {
         password = obj.password;
         uid = obj.uid;
         level = obj.level;
+        active = obj.active;
     }
     litesql::Persistent::operator=(obj);
     return *this;
@@ -217,6 +222,9 @@ std::string Person::insert(litesql::Record& tables, litesql::Records& fieldRecs,
     fields.push_back(level.name());
     values.push_back(level);
     level.setModified(false);
+    fields.push_back(active.name());
+    values.push_back(active);
+    active.setModified(false);
     fieldRecs.push_back(fields);
     valueRecs.push_back(values);
     return litesql::Persistent::insert(tables, fieldRecs, valueRecs, sequence__);
@@ -238,6 +246,7 @@ void Person::addUpdates(Updates& updates) {
     updateField(updates, table__, password);
     updateField(updates, table__, uid);
     updateField(updates, table__, level);
+    updateField(updates, table__, active);
 }
 void Person::addIDUpdates(Updates& updates) {
 }
@@ -248,6 +257,7 @@ void Person::getFieldTypes(std::vector<litesql::FieldType>& ftypes) {
     ftypes.push_back(Password);
     ftypes.push_back(Uid);
     ftypes.push_back(Level);
+    ftypes.push_back(Active);
 }
 void Person::delRecord() {
     deleteFromTable(table__, id);
@@ -297,6 +307,7 @@ std::unique_ptr<Person> Person::upcastCopy() const {
     np->password = password;
     np->uid = uid;
     np->level = level;
+    np->active = active;
     np->inDatabase = inDatabase;
     return unique_ptr<Person>(np);
 }
@@ -308,6 +319,7 @@ std::ostream & operator<<(std::ostream& os, Person o) {
     os << o.password.name() << " = " << o.password << std::endl;
     os << o.uid.name() << " = " << o.uid << std::endl;
     os << o.level.name() << " = " << o.level << std::endl;
+    os << o.active.name() << " = " << o.active << std::endl;
     os << "-------------------------------------" << std::endl;
     return os;
 }
@@ -776,7 +788,7 @@ std::vector<litesql::Database::SchemaItem> DbManager::getSchema() const {
         res.push_back(Database::SchemaItem("Key_seq","sequence",backend->getCreateSequenceSQL("Key_seq")));
         res.push_back(Database::SchemaItem("HistoryEvent_seq","sequence",backend->getCreateSequenceSQL("HistoryEvent_seq")));
     }
-    res.push_back(Database::SchemaItem("Person_","table","CREATE TABLE Person_ (id_ " + rowIdType + ",type_ " + backend->getSQLType(A_field_type_string,"") + "" +",name_ " + backend->getSQLType(A_field_type_string,"") + "" +",password_ " + backend->getSQLType(A_field_type_string,"") + "" +",uid_ " + backend->getSQLType(A_field_type_string,"") + "" +",level_ " + backend->getSQLType(A_field_type_integer,"") + "" +")"));
+    res.push_back(Database::SchemaItem("Person_","table","CREATE TABLE Person_ (id_ " + rowIdType + ",type_ " + backend->getSQLType(A_field_type_string,"") + "" +",name_ " + backend->getSQLType(A_field_type_string,"") + "" +",password_ " + backend->getSQLType(A_field_type_string,"") + "" +",uid_ " + backend->getSQLType(A_field_type_string,"") + "" +",level_ " + backend->getSQLType(A_field_type_integer,"") + "" +",active_ " + backend->getSQLType(A_field_type_boolean,"") + "" +")"));
     res.push_back(Database::SchemaItem("Key_","table","CREATE TABLE Key_ (id_ " + rowIdType + ",type_ " + backend->getSQLType(A_field_type_string,"") + "" +",name_ " + backend->getSQLType(A_field_type_string,"") + "" +",ubi_ " + backend->getSQLType(A_field_type_string,"") + "" +",commentary_ " + backend->getSQLType(A_field_type_string,"") + "" +",pos_ " + backend->getSQLType(A_field_type_integer,"") + "" +",active_ " + backend->getSQLType(A_field_type_boolean,"") + "" +",uid_ " + backend->getSQLType(A_field_type_string,"") + "" +",pub_ " + backend->getSQLType(A_field_type_boolean,"") + "" +")"));
     res.push_back(Database::SchemaItem("HistoryEvent_","table","CREATE TABLE HistoryEvent_ (id_ " + rowIdType + ",type_ " + backend->getSQLType(A_field_type_string,"") + "" +",etype_ " + backend->getSQLType(A_field_type_integer,"") + "" +",timestamp_ " + backend->getSQLType(A_field_type_string,"") + "" +",keyid_ " + backend->getSQLType(A_field_type_integer,"") + "" +",keyname_ " + backend->getSQLType(A_field_type_string,"") + "" +",personid_ " + backend->getSQLType(A_field_type_integer,"") + "" +",personname_ " + backend->getSQLType(A_field_type_string,"") + "" +",pos_ " + backend->getSQLType(A_field_type_integer,"") + "" +")"));
     res.push_back(Database::SchemaItem("Key_Person_Acces","table","CREATE TABLE Key_Person_Acces (Key1_ " + backend->getSQLType(A_field_type_integer,"") + "" +",Person2_ " + backend->getSQLType(A_field_type_integer,"") + "" +")"));

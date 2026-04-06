@@ -39,6 +39,18 @@ UsersViewStack::UsersViewStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     history_person_button_->signal_clicked().connect(
         sigc::mem_fun(*this, &UsersViewStack::OnHistoryPersonButtonClicked));
 
+    builder->get_widget("DeleteUserButton", delete_user_button_);
+    if (!delete_user_button_)
+        throw std::runtime_error("No \"DeleteUserButton\" object in MainWindow.glade");
+    delete_user_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UsersViewStack::OnDeleteUserButtonClicked));
+
+    builder->get_widget("RecoverUserButton", recover_user_button_);
+    if (!recover_user_button_)
+        throw std::runtime_error("No \"RecoverUserButton\" object in MainWindow.glade");
+    recover_user_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &UsersViewStack::OnRecoverUserButtonClicked));
+
     builder->get_widget("ViewUsersTree", users_tree_view_);
     if (!users_tree_view_)
         throw std::runtime_error("No \"ViewUsersTree\" object in MainWindow.glade");
@@ -71,6 +83,8 @@ void UsersViewStack::RefreshLabels() {
     edit_button_->set_label(Tr().users_view.btn_edit);
     view_keys_button_->set_label(Tr().users_view.btn_view_keys);
     history_person_button_->set_label(Tr().history_view.btn_history_person);
+    delete_user_button_->set_label(Tr().users_view.btn_delete);
+    recover_user_button_->set_label(Tr().users_view.btn_recover);
 
     name_column_->set_title(Tr().users_view.col_name);
     password_column_->set_title(Tr().users_view.col_password);
@@ -89,40 +103,52 @@ void UsersViewStack::view(std::vector<kdb::Person> users, int access) {
     view_keys_button_->show();
     select_user_button_->hide();
 
-    // Editar usuario e historial son solo para administradores.
+    // Editar, historial, eliminar y recuperar son solo para administradores.
     if (access >= 2) {
         edit_button_->show();
         history_person_button_->show();
+        delete_user_button_->show();
+        recover_user_button_->show();
     } else {
         edit_button_->hide();
         history_person_button_->hide();
+        delete_user_button_->hide();
+        recover_user_button_->hide();
     }
 
     current_users_ = users;
     Refresh();
 }
 
-void UsersViewStack::select(std::vector<kdb::Person> users) {
-    users_tree_view_->get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
-    toggle_conn_ = users_tree_view_->signal_button_press_event().connect([this](GdkEventButton* ev) -> bool {
-        Gtk::TreePath path;
-        Gtk::TreeViewColumn* col;
-        int cx, cy;
-        if (users_tree_view_->get_path_at_pos((int)ev->x, (int)ev->y, path, col, cx, cy)) {
-            auto sel = users_tree_view_->get_selection();
-            if (sel->is_selected(path)) sel->unselect(path);
-            else                        sel->select(path);
-        }
-        return true;
-    }, false);
+void UsersViewStack::select(std::vector<kdb::Person> users, bool multiple) {
     password_column_->set_visible(false);
     uid_column_->set_visible(false);
-    select_user_button_->show();
     add_key_button_->hide();
     remove_key_button_->hide();
     edit_button_->hide();
     view_keys_button_->hide();
     history_person_button_->hide();
+    delete_user_button_->hide();
+    recover_user_button_->hide();
+
+    if (multiple) {
+        users_tree_view_->get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
+        toggle_conn_ = users_tree_view_->signal_button_press_event().connect([this](GdkEventButton* ev) -> bool {
+            Gtk::TreePath path;
+            Gtk::TreeViewColumn* col;
+            int cx, cy;
+            if (users_tree_view_->get_path_at_pos((int)ev->x, (int)ev->y, path, col, cx, cy)) {
+                auto sel = users_tree_view_->get_selection();
+                if (sel->is_selected(path)) sel->unselect(path);
+                else                        sel->select(path);
+            }
+            return true;
+        }, false);
+        select_user_button_->show();
+    } else {
+        users_tree_view_->get_selection()->set_mode(Gtk::SELECTION_SINGLE);
+        select_user_button_->show();
+    }
 
     current_users_ = users;
     Refresh();
@@ -196,4 +222,20 @@ void UsersViewStack::OnHistoryPersonButtonClicked() {
     auto person = GetSelectedPerson();
     if (person)
         person_history.emit(person);
+}
+
+void UsersViewStack::OnDeleteUserButtonClicked() {
+    auto person = GetSelectedPerson();
+    if (!person) return;
+
+    Gtk::MessageDialog dialog(
+        Glib::ustring(Tr().users_view.confirm_delete_title) + " «" + (Glib::ustring)person->name + "»?",
+        false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_YES_NO, true);
+    dialog.set_secondary_text(Tr().users_view.confirm_delete_body);
+    if (dialog.run() == Gtk::RESPONSE_YES)
+        user_delete.emit(person);
+}
+
+void UsersViewStack::OnRecoverUserButtonClicked() {
+    user_recover.emit();
 }
