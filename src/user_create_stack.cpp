@@ -197,7 +197,12 @@ void UserCreateStack::OnGenerateButtonClicked() {
         valid = false;
     }
 
-    if (!valid) return;
+    if (!valid) {
+        auto ctx = generate_button_->get_style_context();
+        ctx->remove_class("btn-success");
+        ctx->add_class("btn-error");
+        return;
+    }
 
     if (!edited_user_) {
         kdb::Person new_person(*db);
@@ -220,6 +225,10 @@ void UserCreateStack::OnGenerateButtonClicked() {
         else
             UserEdit(edited_user_);
     }
+
+    auto ctx = generate_button_->get_style_context();
+    ctx->remove_class("btn-error");
+    ctx->add_class("btn-success");
 }
 
 void UserCreateStack::OnAddUidButtonClicked() {
@@ -251,6 +260,10 @@ void UserCreateStack::Reset() {
     edited_user_    = nullptr;
     self_edit_mode_ = false;
     recover_mode_   = false;
+
+    auto ctx = generate_button_->get_style_context();
+    ctx->remove_class("btn-success");
+    ctx->remove_class("btn-error");
 
     // Restaurar visibilidad de controles que SelfEdit oculta.
     access_level_label_->show();

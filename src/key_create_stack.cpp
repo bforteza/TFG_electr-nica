@@ -162,8 +162,14 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         position_picker_button_->set_label(Tr().key_create.error_position_invalid);
         valid = false;
     }
+    
 
-    if (!valid) return;
+    if (!valid) {
+        auto ctx = generate_button_->get_style_context();
+        ctx->remove_class("btn-success");
+        ctx->add_class("btn-error");
+        return;
+    }
 
     bool is_public = public_check_button_->get_active();
 
@@ -184,7 +190,7 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             creator_->keys().link(*key_ptr);
         }
         creator_->keepkeys().link(*key_ptr);
-        KeyEdit(key_ptr);
+        KeyEdit(key_ptr);  // llama a Reset(), que limpia las clases CSS
     } else {
         edited_key_->name       = name;
         edited_key_->ubi        = (std::string)ubi_entry_->get_text();
@@ -196,6 +202,10 @@ void KeyCreateStack::OnGenerateButtonClicked() {
             edited_key_->active = true;
         edited_key_->update();
     }
+
+    auto ctx = generate_button_->get_style_context();
+    ctx->remove_class("btn-error");
+    ctx->add_class("btn-success");
 }
 
 void KeyCreateStack::OnAddUserButtonClicked() {
@@ -231,8 +241,13 @@ void KeyCreateStack::Reset() {
     name_error_label_->set_text("");
     uid_error_label_->set_text("");
 
-    position_   = 0;
-    edited_key_ = nullptr;
-    creator_    = nullptr;
+    position_     = 0;
+    edited_key_   = nullptr;
+    creator_      = nullptr;
+    recover_mode_ = false;
+
+    auto ctx = generate_button_->get_style_context();
+    ctx->remove_class("btn-success");
+    ctx->remove_class("btn-error");
     public_check_button_->set_active(false);
 }

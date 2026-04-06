@@ -169,3 +169,17 @@ button.slot-free {
     background-color: #707070;
     color: white;
 }
+
+/* Botón de confirmar: éxito (verde) */
+button.btn-success {
+    background-image: none;
+    background-color: #75c178;
+    color: white;
+}
+
+/* Botón de confirmar: error de validación (rojo) */
+button.btn-error {
+    background-image: none;
+    background-color: #e2726a;
+    color: white;
+}
