@@ -18,7 +18,7 @@ Sistema de gestión de llaves físicas para una empresa, corriendo en Raspberry 
 - `Window` → ventana principal que contiene todos los stacks
 
 ## Modelos de Base de Datos (LiteSQL, MariaDB)
-**Person**: id, type, name, password, uid (NFC UID), a1 (bool), a2 (bool)
+**Person**: id, type, name, password, uid (NFC UID), a1 (bool), a2 (bool), **active (bool, default true)**
 **Key**: id, type, name, ubi (ubicación física), commentary, pos (int, hueco armario), active (bool), uid (NFC UID), **pub (bool, default false)**
 **HistoryEvent**: etype, timestamp, keyid, keyname, personid, personname, pos
 
@@ -47,7 +47,7 @@ Una llave marcada como `pub=true` es accesible por **todos los usuarios** sin ne
 - `globals.h`: instancias globales `db` (DbSchema*) y `nfcman` (unique_ptr<NfcManager>), `PosToString(int pos)` y `PosFromString(string)` para conversión posición↔string (A1-D8)
 - `models.h`: `ModelColumns` (usuarios), `KeyModelColumns` (llaves) y `HistoryModelColumns` (historial) para Gtk::TreeView
 - `sound_manager.h/cpp`: clase estática SoundManager (libcanberra-gtk3), ver sección Sonido
-- `history_logger.h/cpp`: funciones estáticas `history::LogPickup`, `LogReturn`, `LogKeyDeactivated`, `LogAdminOpen` etc. Escribe en tabla History vía SQL directo.
+- `history_logger.h/cpp`: funciones estáticas `history::LogPickup`, `LogReturn`, `LogKeyCreated(creator, key)`, `LogKeyDeactivated`, `LogAdminOpen` etc. Escribe en tabla History vía SQL directo. `creator` puede ser `nullptr` (p.ej. en reactivación de llaves).
 
 ## SolenoidPanel — Cuatro Modos
 - **PICKUP**: abre el solenoide de la llave `key` pasada, muestra cuenta atrás, vuelve a HomeStack al terminar
@@ -81,7 +81,9 @@ KeyCreateStack::signal_position_select_requested
 
 ## Selección Múltiple Táctil (KeyViewStack / UsersViewStack)
 Sin Ctrl disponible en pantalla táctil, se usa un `button-press-event` handler que simula Ctrl permanente:
-- En `select()`: `set_mode(SELECTION_MULTIPLE)` + conectar handler en `toggle_conn_` que por cada tap togglea la selección de la fila (select si no estaba, unselect si estaba). `return true` consume el evento para que GTK no sobreescriba la selección.
+- `select(vector, bool multiple=true)`:
+  - `multiple=true`: `set_mode(SELECTION_MULTIPLE)` + conectar handler en `toggle_conn_` que por cada tap togglea la selección de la fila. `return true` consume el evento.
+  - `multiple=false`: `set_mode(SELECTION_SINGLE)`, sin handler extra. Se usa en flujo de recuperación.
 - En `view()`: `toggle_conn_.disconnect()` + `set_mode(SELECTION_SINGLE)`.
 - `GetSelectedKeys()` / `GetSelectedPersons()` usan `get_selection()->get_selected_rows()`.
 
@@ -178,6 +180,66 @@ Al insertar en `Person_` o `Key_` siempre incluir `type_='Person'` / `type_='Key
 - RF-04: Historial de acciones ✓ implementado (history_logger + HistoryViewStack)
 - RF-05: Interfaz de gestión remota ✓ implementado (webserver Flask en ./webserver/)
 - RF-06: Múltiples idiomas ✓ implementado — Catalán, Español, Inglés completos en `translations.h`
+
+## Borrado Lógico y Recuperación (soft-delete)
+Tanto llaves como usuarios usan `active` para "borrado lógico" (nunca se eliminan de la BD).
+
+### Usuarios
+- `Person.active` (bool, default true). `OnViewUsersButtonClicked` filtra `kdb::Person::Active == true`.
+- **Desactivar**: `UsersViewStack` emite `user_delete` → `HomeStack::OnUserDelete`: `person->active = false; update(); reload`.
+- Botón con diálogo de confirmación (`Gtk::MessageDialog`) antes de emitir la señal.
+
+### Llaves
+- `Key.active` ya existía. Desactivación ya implementada vía `OnKeyDelete`.
+
+### Flujo de Recuperación (reactivar entidad inactiva)
+Botón "Recuperar" en `KeyViewStack` / `UsersViewStack` emite `key_recover` / `user_recover`.
+`HomeStack` gestiona el flujo en dos pasos:
+
+```
+1. OnKeyRecoverRequested() / OnUserRecoverRequested()
+   → consulta inactivos (Active == false)
+   → llama select(inactive, false)  ← selección única
+   → guarda back_widget_, conecta señal key_selected/user_selected
+   → navega a ViewKeyStack / ViewUsersStack
+
+2. Lambda en key_selected / user_selected:
+   → ResetSelectionState()
+   → key_create_stack_.RecoverKey(key) / user_create_stack_.RecoverUser(person)
+   → navega a KeyCreateStack / UserCreateStack
+```
+
+`RecoverKey(key)` / `RecoverUser(person)`: llama a `KeyEdit`/`UserEdit` (hace Reset, carga datos) y luego activa `recover_mode_ = true`.
+Al confirmar en `OnGenerateButtonClicked`: si `recover_mode_`, pone `active = true` antes de `update()`. Para llaves también registra `history::LogKeyCreated(nullptr, key)`.
+
+### Corrección Back desde flujo de recuperación
+`OnBackButtonClicked` detecta si el visible child no cambia tras navegar (caso recuperación: `back_widget_` apunta a la vista actual). En ese caso recarga la vista en modo normal (`OnViewKeysButtonClicked` / `OnViewUsersButtonClicked`).
+
+## Feedback Visual del Botón Confirmar (KeyCreateStack / UserCreateStack)
+El botón `generate_button_` cambia de color según el resultado de la última acción:
+- **Rojo** (`btn-error`): validación fallida.
+- **Verde** (`btn-success`): guardado con éxito.
+- **Neutro**: al entrar a la pantalla (Reset() elimina ambas clases).
+
+Las clases CSS están definidas en `ui/style.css`:
+```css
+button.btn-success { background-image: none; background-color: #4CAF50; color: white; }
+button.btn-error   { background-image: none; background-color: #F44336; color: white; }
+```
+
+## Validación de Posición Ocupada (KeyCreateStack)
+En `OnGenerateButtonClicked`, además de comprobar `position_ == 0`, se verifica que no haya otra llave activa en esa posición (en **todos los modos**: creación, edición y recuperación):
+```cpp
+else if (litesql::select<kdb::Key>(*db, kdb::Key::Pos == position_
+                                        && kdb::Key::Active == true
+                                        && kdb::Key::Id != exclude_id).count())
+```
+`exclude_id = edited_key_ ? (int)edited_key_->id : 0`. En creación, `exclude_id=0` (ninguna llave excluida).
+
+## Layout de Botones UsersViewStack (dos filas)
+Igual que `KeyViewStack`: `GtkBox` vertical con dos `GtkBox` horizontales (`homogeneous=true`, `spacing=2`):
+- Fila 1: AddKeyToUserButton, RemoveKeyToUserButton, ViewKeysOfUserButton, SelectUserButton
+- Fila 2: UserEditButton, DeleteUserButton, HistoryPersonButton, RecoverUserButton
 
 ## Partes Pendientes de Implementar
 1. **Devolución de llaves por NFC**: modo RETURN definido en SolenoidPanel y `OnKeyLogged` en Window, pero flujo no probado (sin hardware NFC disponible actualmente).
