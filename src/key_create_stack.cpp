@@ -201,6 +201,8 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         if (recover_mode_)
             edited_key_->active = true;
         edited_key_->update();
+        if (recover_mode_)
+            history::LogKeyCreated(nullptr, edited_key_);
     }
 
     auto ctx = generate_button_->get_style_context();
