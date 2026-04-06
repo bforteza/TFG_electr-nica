@@ -165,18 +165,32 @@ Al insertar en `Person_` o `Key_` siempre incluir `type_='Person'` / `type_='Key
 ## Hardware del Sistema
 - **Raspberry Pi 4** (2GB RAM) como unidad central
 - **PN532** lector NFC por I2C
-- **XL9535** expansor de puertos I2C + módulo de 16 relés con optoacopladores
+- **XL9535** expansor de puertos I2C + módulo de 16 relés con optoacopladores (compatible PCA9535, mismos registros)
 - **Armario**: 4 filas × 8 columnas = 32 posiciones
-- **Circuito solenoides**: matriz con diodos — controla 32 solenoides con 4+8=12 relés
+- **Circuito solenoides**: matriz con diodos — controla 32 solenoides con 4+8=12 relés + 1 relé cerradura de acceso
   - Solenoide desactivado = pasador cae = llave bloqueada (lógica inversa)
-  - Para abrir: activar relé de fila LUEGO relé de columna; para cerrar: desactivar fila primero
+  - Para abrir: activar fila + columna simultáneamente; para cerrar: desactivar fila primero → delay → desactivar columna (diodo flyback)
+  - Restricción hardware: solo un solenoide activo simultáneamente (`active_pos_` en I2cController)
 - **Pantalla táctil** conectada por USB (sin teclado físico para usuario normal)
 - **Teclado numérico** (usuario normal): passwords deben ser numéricas
+
+## Control Hardware I2C (I2cController)
+Archivos: `include/i2c_controller.h`, `src/i2c_controller.cpp`, `include/hardware_config.h`
+
+- Accede al XL9535 vía Linux i2c-dev (`/dev/i2c-1`, ioctl + write). Sin dependencias extra.
+- **Secuencia segura de Init()**: primero escribe 0x00 en registros output (0x02/0x03), luego 0x00 en config (0x06/0x07) → evita activación involuntaria de relés al arrancar.
+- **WriteState(uint16_t)**: escribe los 16 bits en una sola transacción I2C: `{0x02, port0, port1}` (auto-incremento de registro).
+- **Activate(Position)**: calcula row_pin=kRowPins[(pos-1)/8], col_pin=kColPins[(pos-1)%8] → activa ambos a la vez. Ignorado si ya hay posición activa.
+- **Deactivate()**: fila off → sleep(kRelayOffDelayMs) → columna off → active_pos_=N0.
+- **OpenDoor() / CloseDoor()**: relé independiente (kDoorPin). Se llama desde SolenoidPanel al entrar en PICKUP/RETURN/ADMIN, con cierre automático a los 2s via `Glib::signal_timeout().connect_once`.
+- **RunRelayTest(callback)**: cicla los 16 pines uno a uno para verificar GPIOs.
+- Configuración centralizada en `hardware_config.h`: kI2cBus, kI2cAddress, kRelayOffDelayMs, kRowPins, kColPins, kDoorPin.
+- Global: `inline std::unique_ptr<I2cController> hw_ctrl` declarado en `i2c_controller.h`. Inicializado en `Application::on_startup()`.
 
 ## Requisitos Funcionales del TFG (estado)
 - RF-01: Identificación NFC/password ✓ implementado
 - RF-02: Verificación de permisos ✓ implementado
-- RF-03: Control hardware (solenoides) — SolenoidPanel implementado en UI, falta I2C real
+- RF-03: Control hardware (solenoides) ✓ implementado — I2cController vía Linux i2c-dev, XL9535, SolenoidPanel integrado
 - RF-04: Historial de acciones ✓ implementado (history_logger + HistoryViewStack)
 - RF-05: Interfaz de gestión remota ✓ implementado (webserver Flask en ./webserver/)
 - RF-06: Múltiples idiomas ✓ implementado — Catalán, Español, Inglés completos en `translations.h`
@@ -243,7 +257,7 @@ Igual que `KeyViewStack`: `GtkBox` vertical con dos `GtkBox` horizontales (`homo
 
 ## Partes Pendientes de Implementar
 1. **Devolución de llaves por NFC**: modo RETURN definido en SolenoidPanel y `OnKeyLogged` en Window, pero flujo no probado (sin hardware NFC disponible actualmente).
-2. **Control I2C real**: SolenoidPanel activa/desactiva solenoides en UI, pero la escritura a XL9535 por I2C no está implementada.
+2. **Ajuste pin mapping**: `kRowPins` y `kColPins` en `hardware_config.h` deben verificarse contra el cableado real de la PCB antes del despliegue en Raspberry Pi.
 
 ## Posibles Bugs/Issues Conocidos
 *(Vacío — reportar aquí los que se detecten)*
