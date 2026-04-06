@@ -28,6 +28,7 @@ SRCS := main.cpp \
         src/key_view_stack.cpp \
         src/login_stack.cpp \
         src/nfc_manager.cpp \
+        src/i2c_controller.cpp \
         src/solenoid_panel.cpp \
         src/user_create_stack.cpp \
         src/users_view_stack.cpp \

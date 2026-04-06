@@ -48,6 +48,9 @@
 			<Add library="/usr/lib/aarch64-linux-gnu/libmysqlclient.so" />
 			<Add library="/lib/libnfc.so" />
 		</Linker>
+		<Unit filename="include/hardware_config.h" />
+		<Unit filename="include/i2c_controller.h" />
+		<Unit filename="src/i2c_controller.cpp" />
 		<Unit filename="include/home_stack.h" />
 		<Unit filename="include/globals.h" />
 		<Unit filename="include/login_stack.h" />

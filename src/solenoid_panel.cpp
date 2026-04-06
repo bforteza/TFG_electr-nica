@@ -1,6 +1,7 @@
 #include "solenoid_panel.h"
 #include "window.h"
 #include "globals.h"
+#include "i2c_controller.h"
 #include "translations.h"
 #include <litesql.hpp>
 #include <stdexcept>
@@ -106,6 +107,9 @@ void SolenoidPanel::Setup(std::shared_ptr<kdb::Key> key, Mode mode) {
             countdown_ = kTimeoutSeconds;
             countdown_label_->set_text(std::string("⏱ ") + std::to_string(countdown_) + "s");
             countdown_label_->show();
+            if (key) hw_ctrl->Activate(static_cast<Position>((int)key->pos));
+            hw_ctrl->OpenDoor();
+            Glib::signal_timeout().connect_once([]{ hw_ctrl->CloseDoor(); }, 2000);
             StartTimer();
             break;
         }
@@ -118,6 +122,9 @@ void SolenoidPanel::Setup(std::shared_ptr<kdb::Key> key, Mode mode) {
             countdown_ = kTimeoutSeconds;
             countdown_label_->set_text(std::string("⏱ ") + std::to_string(countdown_) + "s");
             countdown_label_->show();
+            if (key) hw_ctrl->Activate(static_cast<Position>((int)key->pos));
+            hw_ctrl->OpenDoor();
+            Glib::signal_timeout().connect_once([]{ hw_ctrl->CloseDoor(); }, 2000);
             StartTimer();
             break;
         }
@@ -126,6 +133,8 @@ void SolenoidPanel::Setup(std::shared_ptr<kdb::Key> key, Mode mode) {
             repeat_button_->hide();
             action_button_->hide();
             countdown_label_->set_text("");
+            hw_ctrl->OpenDoor();
+            Glib::signal_timeout().connect_once([]{ hw_ctrl->CloseDoor(); }, 2000);
             break;
         case Mode::SELECT:
             key_info_label_->set_text(Tr().solenoid.lbl_select_title);
@@ -187,6 +196,7 @@ bool SolenoidPanel::OnTimerTick() {
     --countdown_;
     countdown_label_->set_text(std::string("⏱ ") + std::to_string(countdown_) + "s");
     if (countdown_ <= 0) {
+        hw_ctrl->Deactivate();
         signal_logout.emit();
         return false;
     }
@@ -197,6 +207,7 @@ bool SolenoidPanel::OnTimerTick() {
 
 void SolenoidPanel::OnBackButtonClicked() {
     StopTimer();
+    hw_ctrl->Deactivate();
     if (current_mode_ == Mode::RETURN)
         signal_logout.emit();
     else
@@ -204,9 +215,9 @@ void SolenoidPanel::OnBackButtonClicked() {
 }
 
 void SolenoidPanel::OnRepeatButtonClicked() {
-    // Re-activa el solenoide y resetea el temporizador.
-    // TODO: llamar a I2cController::Activate((int)current_key_->pos)
     if (current_key_) {
+        hw_ctrl->OpenDoor();
+        Glib::signal_timeout().connect_once([]{ hw_ctrl->CloseDoor(); }, 2000);
         countdown_ = kTimeoutSeconds;
         countdown_label_->set_text(std::string("⏱ ") + std::to_string(countdown_) + "s");
     }
@@ -237,7 +248,7 @@ void SolenoidPanel::OnSlotButtonClicked(int idx) {
 
     // Desactiva siempre el slot actual si hay alguno activo.
     if (active_admin_slot_ >= 0) {
-        // TODO: I2cController::Deactivate(active_admin_slot_ + 1)
+        hw_ctrl->Deactivate();
         auto ctx = slot_buttons_[active_admin_slot_]->get_style_context();
         ctx->remove_class("slot-target");
         ctx->add_class(IsOccupied(active_admin_slot_) ? "slot-occupied" : "slot-free");
@@ -249,7 +260,7 @@ void SolenoidPanel::OnSlotButtonClicked(int idx) {
         key_info_label_->set_text(Tr().solenoid.lbl_admin_title);
     } else {
         // Slot diferente: activa el nuevo.
-        // TODO: I2cController::Activate(idx + 1)
+        hw_ctrl->Activate(static_cast<Position>(idx + 1));
         auto ctx = slot_buttons_[idx]->get_style_context();
         ctx->remove_class("slot-occupied");
         ctx->remove_class("slot-free");

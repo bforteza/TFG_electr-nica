@@ -1,5 +1,6 @@
 #include "application.h"
 #include "globals.h"
+#include "i2c_controller.h"
 #include "litesql.hpp"
 #include <iostream>
 #include <gtkmm/cssprovider.h>
@@ -57,6 +58,10 @@ void Application::on_startup() {
     }
 
     nfcman = std::make_unique<NfcManager>();
+
+    hw_ctrl = std::make_unique<I2cController>();
+    if (!hw_ctrl->Init())
+        std::cerr << "Hardware warning: no se pudo inicializar el XL9535 (I2C)" << std::endl;
 
     // Carga la hoja de estilos global (fuentes, tamaños para pantalla táctil).
     // Para ajustar tamaños edita ui/style.css — ver comentarios en ese archivo.
