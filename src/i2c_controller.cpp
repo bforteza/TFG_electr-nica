@@ -26,6 +26,18 @@ static bool WriteReg(int fd, uint8_t reg, uint8_t value) {
     return write(fd, buf, 2) == 2;
 }
 
+// Reintenta la escritura hasta kI2cRetries veces con un delay entre intentos.
+static bool WriteRegRetry(int fd, uint8_t reg, uint8_t value) {
+    for (int i = 0; i < kI2cRetries; ++i) {
+        if (WriteReg(fd, reg, value))
+            return true;
+        std::this_thread::sleep_for(std::chrono::milliseconds(kI2cRetryDelayMs));
+    }
+    std::cerr << "I2C error: fallo reg=0x" << std::hex << (int)reg
+              << " tras " << std::dec << kI2cRetries << " intentos" << std::endl;
+    return false;
+}
+
 bool I2cController::Init() {
     std::string dev = "/dev/i2c-" + std::to_string(kI2cBus);
     fd_ = open(dev.c_str(), O_RDWR);
@@ -38,14 +50,25 @@ bool I2cController::Init() {
         return false;
     }
 
+    // Warmup: el primer write tras ioctl falla en algunos drivers, se ignora.
+    WriteReg(fd_, kRegOutputPort0, 0x00);
+
+    // Configurar todos los pines como output (ignoramos error — algunos
+    // clones del XL9535 no permiten escribir estos registros pero arrancan
+    // en modo output por defecto).
+    WriteRegRetry(fd_, kRegConfigPort0, 0x00);
+    WriteRegRetry(fd_, kRegConfigPort1, 0x00);
+
+    // Pre-set outputs a LOW.
+    WriteRegRetry(fd_, kRegOutputPort0, 0x00);
+    WriteRegRetry(fd_, kRegOutputPort1, 0x00);
+
     return true;
 }
 
 void I2cController::WriteState(uint16_t state) {
-    if (!WriteReg(fd_, kRegOutputPort0, static_cast<uint8_t>(state & 0xFF)))
-        std::cerr << "I2C error: fallo escritura port0" << std::endl;
-    if (!WriteReg(fd_, kRegOutputPort1, static_cast<uint8_t>(state >> 8)))
-        std::cerr << "I2C error: fallo escritura port1" << std::endl;
+    WriteRegRetry(fd_, kRegOutputPort0, static_cast<uint8_t>(state & 0xFF));
+    WriteRegRetry(fd_, kRegOutputPort1, static_cast<uint8_t>(state >> 8));
 }
 
 uint16_t I2cController::DoorBit() const {

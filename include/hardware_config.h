@@ -11,6 +11,8 @@ constexpr uint8_t kI2cAddress      = 0x20;  // XL9535 (A0=A1=A2=GND)
 // --- Timing ---
 constexpr int kRelayOffDelayMs     = 50;    // delay al cerrar (protección flyback)
 constexpr int kRelayTestDwellMs    = 200;   // tiempo activo por relé durante el test
+constexpr int kI2cRetries          = 3;     // reintentos por escritura I2C
+constexpr int kI2cRetryDelayMs     = 5;     // delay entre reintentos (ms)
 
 // --- Asignación de pines XL9535 (0–15) ---
 // Ajustar según el cableado real de la PCB.
