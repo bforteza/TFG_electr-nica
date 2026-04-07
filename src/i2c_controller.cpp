@@ -34,8 +34,11 @@ bool I2cController::Init() {
     // Secuencia segura de arranque:
     // 1. Pre-set output registers a 0x00 (todos LOW) mientras los pines
     //    siguen siendo inputs → ningún relé se activa al cambiar de modo.
-    uint8_t buf_out[3] = {kRegOutputPort0, 0x00, 0x00};
-    if (write(fd_, buf_out, 3) != 3)
+    uint8_t buf_out0[2] = {kRegOutputPort0, 0x00};
+    if (write(fd_, buf_out0, 2) != 2)
+        return false;
+    uint8_t buf_out1[2] = {kRegOutputPort1, 0x00};
+    if (write(fd_, buf_out1, 2) != 2)
         return false;
 
     // 2. Configurar todos los pines como output.

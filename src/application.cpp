@@ -47,7 +47,7 @@ void Application::on_startup() {
     // Inicializa la base de datos. Si falla, termina la aplicación.
     try {
         // TODO: mover credenciales a un fichero de configuración externo.
-        db = std::make_unique<kdb::DbManager>("mysql", "user=usuario;password=CAMBIAR;database=miBaseDeDatos");
+        db = std::make_unique<kdb::DbManager>("mysql", "user=KEYSISTEM;password=KeySistem;database=miBaseDeDatos");
         if (db->needsUpgrade())
             db->upgrade();
         db->verbose = false;

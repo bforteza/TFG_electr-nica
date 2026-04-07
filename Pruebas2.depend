@@ -131,7 +131,7 @@
 	<glib/gversionmacros.h>
 	<time.h>
 
-1744465936 /usr/lib/aarch64-linux-gnu/glib-2.0/include/glibconfig.h
+1765808978 /usr/lib/aarch64-linux-gnu/glib-2.0/include/glibconfig.h
 	<glib/gmacros.h>
 	<limits.h>
 	<float.h>
@@ -177,7 +177,7 @@
 	<sys/select.h>
 	<signal.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/sys/select.h
+1759927798 /usr/include/aarch64-linux-gnu/sys/select.h
 	<features.h>
 	<bits/types.h>
 	<bits/select.h>
@@ -187,45 +187,45 @@
 	<bits/types/struct_timespec.h>
 	<bits/select2.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/types.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/types.h
 	<features.h>
 	<bits/wordsize.h>
 	<bits/timesize.h>
 	<bits/typesizes.h>
 	<bits/time64.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/wordsize.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/wordsize.h
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/timesize.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/timesize.h
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/typesizes.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/typesizes.h
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/time64.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/time64.h
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/select.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/select.h
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/types/sigset_t.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/types/sigset_t.h
 	<bits/types/__sigset_t.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/types/__sigset_t.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/types/__sigset_t.h
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/types/time_t.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/types/time_t.h
 	<bits/types.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/types/struct_timeval.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/types/struct_timeval.h
 	<bits/types.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/types/struct_timespec.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/types/struct_timespec.h
 	<bits/types.h>
 	<bits/endian.h>
 	<bits/types/time_t.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/endian.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/endian.h
 	<bits/endianness.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/endianness.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/endianness.h
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/select2.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/select2.h
 
 1677160467 /usr/include/glib-2.0/glib/gbase64.h
 	<glib/gtypes.h>
@@ -480,7 +480,7 @@
 	<sys/types.h>
 	<pthread.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/sys/types.h
+1759927798 /usr/include/aarch64-linux-gnu/sys/types.h
 	<features.h>
 	<bits/types.h>
 	<bits/types/clock_t.h>
@@ -493,35 +493,35 @@
 	<sys/select.h>
 	<bits/pthreadtypes.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/types/clock_t.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/types/clock_t.h
 	<bits/types.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/types/clockid_t.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/types/clockid_t.h
 	<bits/types.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/types/timer_t.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/types/timer_t.h
 	<bits/types.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/stdint-intn.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/stdint-intn.h
 	<bits/types.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/pthreadtypes.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/pthreadtypes.h
 	<bits/thread-shared-types.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/thread-shared-types.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/thread-shared-types.h
 	<bits/pthreadtypes-arch.h>
 	<bits/atomic_wide_counter.h>
 	<bits/struct_mutex.h>
 	<bits/struct_rwlock.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/pthreadtypes-arch.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/pthreadtypes-arch.h
 	<bits/endian.h>
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/atomic_wide_counter.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/atomic_wide_counter.h
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/struct_mutex.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/struct_mutex.h
 
-1750147244 /usr/include/aarch64-linux-gnu/bits/struct_rwlock.h
+1759927798 /usr/include/aarch64-linux-gnu/bits/struct_rwlock.h
 
 1677160467 /usr/include/glib-2.0/glib/glib-autocleanups.h
 
@@ -822,7 +822,7 @@
 1677160467 /usr/include/glib-2.0/gobject/genums.h
 	<gobject/gtype.h>
 
-1744465936 /usr/include/glib-2.0/gobject/glib-enumtypes.h
+1765808978 /usr/include/glib-2.0/gobject/glib-enumtypes.h
 	<glib-object.h>
 
 1677160467 /usr/include/glib-2.0/gobject/gparamspecs.h
@@ -2040,7 +2040,7 @@
 1677160467 /usr/include/glib-2.0/gio/gsocketaddress.h
 	<gio/giotypes.h>
 
-1744465936 /usr/include/glib-2.0/gio/gioenumtypes.h
+1765808978 /usr/include/glib-2.0/gio/gioenumtypes.h
 	<glib-object.h>
 
 1677160467 /usr/include/glib-2.0/gio/giomodule.h
@@ -2406,7 +2406,7 @@
 	<glib.h>
 	<gdk-pixbuf/gdk-pixbuf-features.h>
 
-1750366374 /usr/include/gdk-pixbuf-2.0/gdk-pixbuf/gdk-pixbuf-features.h
+1761183957 /usr/include/gdk-pixbuf-2.0/gdk-pixbuf/gdk-pixbuf-features.h
 	<glib.h>
 
 1666716808 /usr/include/gdk-pixbuf-2.0/gdk-pixbuf/gdk-pixbuf-core.h
@@ -2440,7 +2440,7 @@
 	<gdk-pixbuf/gdk-pixbuf-animation.h>
 	<gdk-pixbuf/gdk-pixbuf-io.h>
 
-1750366374 /usr/include/gdk-pixbuf-2.0/gdk-pixbuf/gdk-pixbuf-enum-types.h
+1761183957 /usr/include/gdk-pixbuf-2.0/gdk-pixbuf/gdk-pixbuf-enum-types.h
 	<glib-object.h>
 	<gdk-pixbuf/gdk-pixbuf-macros.h>
 
@@ -8117,4 +8117,380 @@
 
 1759916891 source:/home/admin/Desktop/Pruebas2_04_09/src/NfcManager.cpp
 	"NfcManager.h"
+
+1775550266 source:/home/admin/Desktop/proyecto/src/dbmanager.cpp
+	"dbmanager.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/dbmanager.hpp
+	"litesql.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql.hpp
+	"litesql/types.hpp"
+	"litesql/datetime.hpp"
+	"litesql/except.hpp"
+	"litesql/cursor.hpp"
+	"litesql/database.hpp"
+	"litesql/expr.hpp"
+	"litesql/selectquery.hpp"
+	"litesql/datasource.hpp"
+	"litesql/persistent.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/types.hpp
+	<string>
+	<vector>
+	"litesql/utils.hpp"
+	"litesql/except.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/utils.hpp
+	<assert.h>
+	"litesql/string.hpp"
+	"litesql/split.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/string.hpp
+	<string>
+	<sstream>
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/split.hpp
+	<string>
+	<vector>
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/except.hpp
+	<iostream>
+	<string>
+	<exception>
+	"litesql/utils.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/datetime.hpp
+	"field.hpp"
+	<time.h>
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/field.hpp
+	<iostream>
+	<vector>
+	<utility>
+	<string>
+	"litesql/string.hpp"
+	"litesql/commontypes.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/commontypes.h
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/cursor.hpp
+	<stdio.h>
+	"litesql/types.hpp"
+	"litesql/backend.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/backend.hpp
+	<memory>
+	"litesql/types.hpp"
+	"litesql/commontypes.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/database.hpp
+	<string>
+	<set>
+	"litesql/types.hpp"
+	"litesql/expr.hpp"
+	"litesql/backend.hpp"
+	"litesql/cursor.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/expr.hpp
+	<string>
+	<utility>
+	"litesql/utils.hpp"
+	"litesql/field.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/selectquery.hpp
+	"litesql/utils.hpp"
+	"litesql/expr.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/datasource.hpp
+	<set>
+	<string>
+	"litesql/database.hpp"
+	"litesql/selectquery.hpp"
+	"litesql/expr.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/persistent.hpp
+	<memory>
+	<string>
+	<vector>
+	<functional>
+	<map>
+	"litesql/utils.hpp"
+	"litesql/database.hpp"
+	"litesql/cursor.hpp"
+	"litesql/expr.hpp"
+	"litesql/selectquery.hpp"
+	"litesql/relation.hpp"
+	"litesql/operations.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/relation.hpp
+	<vector>
+	<string>
+
+1775550266 /home/admin/Desktop/proyecto/include/litesql/operations.hpp
+	"litesql/datasource.hpp"
+
+1775550266 source:/home/admin/Desktop/proyecto/main.cpp
+	"application.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/application.h
+	<gtkmm/application.h>
+	"window.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/window.h
+	<gtkmm/applicationwindow.h>
+	<gtkmm/builder.h>
+	<gtkmm/stack.h>
+	<glibmm/main.h>
+	<sigc++/connection.h>
+	"home_stack.h"
+	"login_stack.h"
+	"solenoid_panel.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/home_stack.h
+	<gtkmm/builder.h>
+	<gtkmm/button.h>
+	<gtkmm/stack.h>
+	<gtkmm/label.h>
+	<sigc++/signal.h>
+	"users_view_stack.h"
+	"user_create_stack.h"
+	"key_create_stack.h"
+	"key_view_stack.h"
+	"history_view_stack.h"
+	"solenoid_panel.h"
+	"dbmanager.hpp"
+	"translations.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/users_view_stack.h
+	<gtkmm/treemodelsort.h>
+	<gtkmm/liststore.h>
+	<gtkmm/treeview.h>
+	<gtkmm/builder.h>
+	<gtkmm/button.h>
+	<gtkmm/messagedialog.h>
+	"models.h"
+	"dbmanager.hpp"
+	"translations.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/models.h
+	<gtkmm/treemodel.h>
+	<glibmm/ustring.h>
+	<string>
+
+1775550266 /home/admin/Desktop/proyecto/include/translations.h
+
+1775550266 /home/admin/Desktop/proyecto/include/user_create_stack.h
+	<gtkmm/builder.h>
+	<gtkmm/entry.h>
+	<gtkmm/button.h>
+	<gtkmm/label.h>
+	<gtkmm/textview.h>
+	<gtkmm/radiobutton.h>
+	"dbmanager.hpp"
+	"translations.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/key_create_stack.h
+	<gtkmm/builder.h>
+	<gtkmm/entry.h>
+	<gtkmm/button.h>
+	<gtkmm/checkbutton.h>
+	<gtkmm/label.h>
+	<gtkmm/textview.h>
+	<sigc++/signal.h>
+	<string>
+	"dbmanager.hpp"
+	"translations.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/key_view_stack.h
+	<gtkmm/treemodelsort.h>
+	<gtkmm/liststore.h>
+	<gtkmm/treeview.h>
+	<gtkmm/builder.h>
+	<gtkmm/button.h>
+	<gtkmm/messagedialog.h>
+	"models.h"
+	"dbmanager.hpp"
+	"translations.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/history_view_stack.h
+	<gtkmm/builder.h>
+	<gtkmm/treeview.h>
+	<gtkmm/treemodelsort.h>
+	<gtkmm/liststore.h>
+	<gtkmm/label.h>
+	"dbmanager.hpp"
+	"models.h"
+	"translations.h"
+
+1775550266 /home/admin/Desktop/proyecto/include/solenoid_panel.h
+	<array>
+	<memory>
+	<gtkmm/builder.h>
+	<gtkmm/button.h>
+	<gtkmm/box.h>
+	<gtkmm/grid.h>
+	<gtkmm/label.h>
+	<glibmm/main.h>
+	"dbmanager.hpp"
+
+1775550266 /home/admin/Desktop/proyecto/include/login_stack.h
+	<gtkmm/builder.h>
+	<gtkmm/button.h>
+	<gtkmm/entry.h>
+	<gtkmm/label.h>
+	<string>
+	"dbmanager.hpp"
+	"translations.h"
+
+1775552818 source:/home/admin/Desktop/proyecto/src/application.cpp
+	"application.h"
+	"globals.h"
+	"i2c_controller.h"
+	"litesql.hpp"
+	<iostream>
+	<gtkmm/cssprovider.h>
+	<gtkmm/settings.h>
+	<gtkmm/stylecontext.h>
+	<gdkmm/screen.h>
+
+1775550266 /home/admin/Desktop/proyecto/include/globals.h
+	"dbmanager.hpp"
+	"nfc_manager.h"
+	<sigc++/signal.h>
+	<string>
+
+1775550266 /home/admin/Desktop/proyecto/include/nfc_manager.h
+	"config.h"
+	<chrono>
+	<thread>
+	<atomic>
+	<functional>
+	<string>
+	<nfc/nfc.h>
+	<glibmm/dispatcher.h>
+
+1775550266 /home/admin/Desktop/proyecto/include/i2c_controller.h
+	"globals.h"
+	<functional>
+	<memory>
+
+1775550266 source:/home/admin/Desktop/proyecto/src/globals.cpp
+	"globals.h"
+
+1775550266 source:/home/admin/Desktop/proyecto/src/history_logger.cpp
+	"history_logger.h"
+	"globals.h"
+	<chrono>
+	<iomanip>
+	<sstream>
+
+1775550266 /home/admin/Desktop/proyecto/include/history_logger.h
+	<memory>
+	"dbmanager.hpp"
+
+1775550266 source:/home/admin/Desktop/proyecto/src/history_view_stack.cpp
+	"history_view_stack.h"
+	"globals.h"
+	"history_logger.h"
+	<litesql/selectquery.hpp>
+	<algorithm>
+
+1775550266 source:/home/admin/Desktop/proyecto/src/home_stack.cpp
+	"home_stack.h"
+	"window.h"
+	"globals.h"
+	"history_logger.h"
+	<gtkmm/messagedialog.h>
+
+1775550266 source:/home/admin/Desktop/proyecto/src/i2c_controller.cpp
+	"i2c_controller.h"
+	"hardware_config.h"
+	<fcntl.h>
+	<linux/i2c-dev.h>
+	<sys/ioctl.h>
+	<unistd.h>
+	<chrono>
+	<cstdint>
+	<string>
+	<thread>
+
+1775550266 /home/admin/Desktop/proyecto/include/hardware_config.h
+	<array>
+	<cstdint>
+
+1759927798 /usr/include/aarch64-linux-gnu/sys/ioctl.h
+	<features.h>
+	<bits/ioctls.h>
+	<bits/ioctl-types.h>
+	<sys/ttydefaults.h>
+
+1759927798 /usr/include/aarch64-linux-gnu/bits/ioctls.h
+	<asm/ioctls.h>
+
+1773246198 /usr/include/aarch64-linux-gnu/asm/ioctls.h
+	<asm-generic/ioctls.h>
+
+1759927798 /usr/include/aarch64-linux-gnu/bits/ioctl-types.h
+	<asm/ioctls.h>
+
+1759927798 /usr/include/aarch64-linux-gnu/sys/ttydefaults.h
+
+1775550266 source:/home/admin/Desktop/proyecto/src/key_create_stack.cpp
+	"key_create_stack.h"
+	"dbmanager.hpp"
+	<litesql/selectquery.hpp>
+	"globals.h"
+	"history_logger.h"
+	<string>
+
+1775550266 source:/home/admin/Desktop/proyecto/src/key_view_stack.cpp
+	"key_view_stack.h"
+	"globals.h"
+
+1775550266 source:/home/admin/Desktop/proyecto/src/login_stack.cpp
+	"login_stack.h"
+	"globals.h"
+	"translations.h"
+	"sound_manager.h"
+	<sigc++/adaptors/bind.h>
+
+1775550266 /home/admin/Desktop/proyecto/include/sound_manager.h
+	<gtkmm.h>
+	<canberra-gtk.h>
+
+1775550266 source:/home/admin/Desktop/proyecto/src/nfc_manager.cpp
+	"nfc_manager.h"
+	<iostream>
+	<iomanip>
+	<sstream>
+
+1775550266 source:/home/admin/Desktop/proyecto/src/solenoid_panel.cpp
+	"solenoid_panel.h"
+	"window.h"
+	"globals.h"
+	"i2c_controller.h"
+	"translations.h"
+	<litesql.hpp>
+	<stdexcept>
+
+1775550266 source:/home/admin/Desktop/proyecto/src/sound_manager.cpp
+	"sound_manager.h"
+
+1775550266 source:/home/admin/Desktop/proyecto/src/user_create_stack.cpp
+	"user_create_stack.h"
+	"dbmanager.hpp"
+	<litesql/selectquery.hpp>
+	"globals.h"
+	<string>
+
+1775550266 source:/home/admin/Desktop/proyecto/src/users_view_stack.cpp
+	"users_view_stack.h"
+	"globals.h"
+
+1775550266 source:/home/admin/Desktop/proyecto/src/window.cpp
+	"window.h"
+	"sound_manager.h"
+	"history_logger.h"
+	<gdk/gdkkeysyms.h>
 
