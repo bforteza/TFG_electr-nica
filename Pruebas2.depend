@@ -8343,7 +8343,7 @@
 	"dbmanager.hpp"
 	"translations.h"
 
-1775552818 source:/home/admin/Desktop/proyecto/src/application.cpp
+1775569293 source:/home/admin/Desktop/proyecto/src/application.cpp
 	"application.h"
 	"globals.h"
 	"i2c_controller.h"
@@ -8370,7 +8370,7 @@
 	<nfc/nfc.h>
 	<glibmm/dispatcher.h>
 
-1775550266 /home/admin/Desktop/proyecto/include/i2c_controller.h
+1775568698 /home/admin/Desktop/proyecto/include/i2c_controller.h
 	"globals.h"
 	<functional>
 	<memory>
@@ -8403,7 +8403,7 @@
 	"history_logger.h"
 	<gtkmm/messagedialog.h>
 
-1775550266 source:/home/admin/Desktop/proyecto/src/i2c_controller.cpp
+1775572360 source:/home/admin/Desktop/proyecto/src/i2c_controller.cpp
 	"i2c_controller.h"
 	"hardware_config.h"
 	<fcntl.h>
@@ -8412,10 +8412,11 @@
 	<unistd.h>
 	<chrono>
 	<cstdint>
+	<iostream>
 	<string>
 	<thread>
 
-1775550266 /home/admin/Desktop/proyecto/include/hardware_config.h
+1775574658 /home/admin/Desktop/proyecto/include/hardware_config.h
 	<array>
 	<cstdint>
 
@@ -8465,7 +8466,7 @@
 	<iomanip>
 	<sstream>
 
-1775550266 source:/home/admin/Desktop/proyecto/src/solenoid_panel.cpp
+1775570324 source:/home/admin/Desktop/proyecto/src/solenoid_panel.cpp
 	"solenoid_panel.h"
 	"window.h"
 	"globals.h"
@@ -8488,7 +8489,7 @@
 	"users_view_stack.h"
 	"globals.h"
 
-1775550266 source:/home/admin/Desktop/proyecto/src/window.cpp
+1775574658 source:/home/admin/Desktop/proyecto/src/window.cpp
 	"window.h"
 	"sound_manager.h"
 	"history_logger.h"

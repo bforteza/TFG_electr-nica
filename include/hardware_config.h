@@ -17,7 +17,7 @@ constexpr int kI2cRetryDelayMs     = 5;     // delay entre reintentos (ms)
 // --- Asignación de pines XL9535 (0–15) ---
 // Ajustar según el cableado real de la PCB.
 constexpr std::array<int, 4> kRowPins = {9, 10, 11, 12};              // filas A, B, C, D
-constexpr std::array<int, 8> kColPins = {4, 3, 2, 1, 0, 7, 6, 5}; // columnas 1–8
+constexpr std::array<int, 8> kColPins = {4, 3, 2, 1, 0, 15, 14, 13}; // columnas 1–8
 constexpr int kDoorPin               = 8;  // relé cerradura de acceso
 
 // --- Registros del XL9535 (compatible PCA9535) ---
