@@ -38,6 +38,10 @@ bool I2cController::Init() {
         return false;
     }
 
+    // Escritura de calentamiento — el primer write tras ioctl puede fallar
+    // en algunos drivers Linux; se ignora el resultado intencionalmente.
+    WriteReg(fd_, kRegOutputPort0, 0x00);
+
     // Pre-set output registers a 0x00 (todos LOW).
     // El XL9535 arranca en modo output por defecto.
     if (!WriteReg(fd_, kRegOutputPort0, 0x00)) return false;
