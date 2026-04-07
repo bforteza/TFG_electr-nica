@@ -34,11 +34,12 @@ std::string NfcManager::NfcDetect(int timeout_ms) {
     if (!device_) return "";
     auto start_time = std::chrono::steady_clock::now();
     nfc_target target;
-    nfc_modulation mod[] = {{.nmt = NMT_ISO14443A, .nbr = NBR_106}};
+    nfc_modulation mod = {.nmt = NMT_ISO14443A, .nbr = NBR_106};
 
     while (true) {
-        int res = nfc_initiator_poll_target(device_, mod, 1, 2, 2, &target);
-        if (res) {
+        // uiPollNr=1, uiPeriod=1 → cada llamada bloquea ~150ms, granularidad fina.
+        int res = nfc_initiator_poll_target(device_, &mod, 1, 1, 1, &target);
+        if (res > 0) {
             std::ostringstream oss;
             oss << std::hex << std::uppercase << std::setfill('0');
             for (size_t i = 0; i < target.nti.nai.szUidLen; i++)
@@ -49,19 +50,26 @@ std::string NfcManager::NfcDetect(int timeout_ms) {
             std::chrono::steady_clock::now() - start_time).count();
         if (elapsed >= timeout_ms)
             return "";
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
 void NfcManager::PollLoop() {
+    nfc_modulation mod = {.nmt = NMT_ISO14443A, .nbr = NBR_106};
+    nfc_target target;
+
     while (polling_) {
-        std::string detected = NfcDetect(1);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        if (!detected.empty()) {
-            uid = detected;
+        // Cada llamada bloquea ~150ms si no hay tarjeta → latencia constante y predecible.
+        int res = nfc_initiator_poll_target(device_, &mod, 1, 1, 1, &target);
+        if (!polling_) break;
+        if (res > 0) {
+            std::ostringstream oss;
+            oss << std::hex << std::uppercase << std::setfill('0');
+            for (size_t i = 0; i < target.nti.nai.szUidLen; i++)
+                oss << std::setw(2) << (int)target.nti.nai.abtUid[i];
+            uid = oss.str();
             dispatcher.emit();
-            // Pausa extra para evitar detecciones repetidas de la misma tarjeta.
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            // Anti-repeat: esperar antes de volver a detectar la misma tarjeta.
+            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
         }
     }
 }
@@ -74,5 +82,6 @@ void NfcManager::StartPolling() {
 
 void NfcManager::StopPolling() {
     polling_ = false;
-    if (worker_.joinable()) worker_.detach();
+    if (device_) nfc_abort_command(device_);  // desbloquea poll_target si está esperando
+    if (worker_.joinable()) worker_.join();
 }

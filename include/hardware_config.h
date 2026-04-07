@@ -15,8 +15,8 @@ constexpr int kI2cRetries          = 5;     // reintentos por escritura I2C
 constexpr int kI2cRetryDelayMs     = 8;     // delay entre reintentos (ms)
 constexpr int kDoorOpenMs          = 200;   // tiempo puerta abierta (ms)
 constexpr int kDoorWaitMs          = 300;   // espera entre puerta y solenoide (ms)
-constexpr int kPickupSolenoidMs    = 3000;  // tiempo solenoide en PICKUP (ms)
-constexpr int kReturnSolenoidMs    = 2000;  // tiempo solenoide en RETURN (ms)
+constexpr int kPickupSolenoidMs    = 5000;  // tiempo solenoide en PICKUP (ms)
+constexpr int kReturnSolenoidMs    = 3500;  // tiempo solenoide en RETURN (ms)
 constexpr int kRepeatWaitSecs      = 10;    // segundos de espera para repetir
 
 // --- Asignación de pines XL9535 (0–15) ---
