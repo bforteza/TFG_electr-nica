@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <thread>
 
@@ -46,8 +47,10 @@ bool I2cController::Init() {
 }
 
 void I2cController::WriteState(uint16_t state) {
-    WriteReg(fd_, kRegOutputPort0, static_cast<uint8_t>(state & 0xFF));
-    WriteReg(fd_, kRegOutputPort1, static_cast<uint8_t>(state >> 8));
+    if (!WriteReg(fd_, kRegOutputPort0, static_cast<uint8_t>(state & 0xFF)))
+        std::cerr << "I2C error: fallo escritura port0" << std::endl;
+    if (!WriteReg(fd_, kRegOutputPort1, static_cast<uint8_t>(state >> 8)))
+        std::cerr << "I2C error: fallo escritura port1" << std::endl;
 }
 
 uint16_t I2cController::DoorBit() const {
