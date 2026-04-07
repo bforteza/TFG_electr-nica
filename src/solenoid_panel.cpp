@@ -225,6 +225,7 @@ void SolenoidPanel::OnRepeatButtonClicked() {
 
 void SolenoidPanel::OnActionButtonClicked() {
     // "Coger otra llave": vuelve al HomeStack manteniendo el estado.
+    hw_ctrl->Deactivate();
     StopTimer();
     signal_go_home.emit();
 }
