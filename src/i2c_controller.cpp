@@ -16,6 +16,7 @@ I2cController::I2cController()
 {}
 
 I2cController::~I2cController() {
+    Deactivate();
     if (fd_ >= 0)
         close(fd_);
 }
