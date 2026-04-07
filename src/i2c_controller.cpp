@@ -19,6 +19,12 @@ I2cController::~I2cController() {
         close(fd_);
 }
 
+// Escribe un único registro de 8 bits al XL9535.
+static bool WriteReg(int fd, uint8_t reg, uint8_t value) {
+    uint8_t buf[2] = {reg, value};
+    return write(fd, buf, 2) == 2;
+}
+
 bool I2cController::Init() {
     std::string dev = "/dev/i2c-" + std::to_string(kI2cBus);
     fd_ = open(dev.c_str(), O_RDWR);
@@ -31,31 +37,20 @@ bool I2cController::Init() {
         return false;
     }
 
-    // Secuencia segura de arranque:
-    // 1. Pre-set output registers a 0x00 (todos LOW) mientras los pines
-    //    siguen siendo inputs → ningún relé se activa al cambiar de modo.
-    uint8_t buf_out0[2] = {kRegOutputPort0, 0x00};
-    if (write(fd_, buf_out0, 2) != 2)
-        return false;
-    uint8_t buf_out1[2] = {kRegOutputPort1, 0x00};
-    if (write(fd_, buf_out1, 2) != 2)
-        return false;
+    // Pre-set output registers a 0x00 (todos LOW).
+    if (!WriteReg(fd_, kRegOutputPort0, 0x00)) return false;
+    if (!WriteReg(fd_, kRegOutputPort1, 0x00)) return false;
 
-    // 2. Configurar todos los pines como output.
-    uint8_t buf_cfg[3] = {kRegConfigPort0, 0x00, 0x00};
-    if (write(fd_, buf_cfg, 3) != 3)
-        return false;
+    // Configurar todos los pines como output.
+    if (!WriteReg(fd_, kRegConfigPort0, 0x00)) return false;
+    if (!WriteReg(fd_, kRegConfigPort1, 0x00)) return false;
 
     return true;
 }
 
 void I2cController::WriteState(uint16_t state) {
-    uint8_t buf[3] = {
-        kRegOutputPort0,
-        static_cast<uint8_t>(state & 0xFF),
-        static_cast<uint8_t>(state >> 8)
-    };
-    write(fd_, buf, 3);
+    WriteReg(fd_, kRegOutputPort0, static_cast<uint8_t>(state & 0xFF));
+    WriteReg(fd_, kRegOutputPort1, static_cast<uint8_t>(state >> 8));
 }
 
 uint16_t I2cController::DoorBit() const {
