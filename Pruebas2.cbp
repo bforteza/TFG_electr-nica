@@ -51,21 +51,25 @@
 			<Add option="-li2c" />
 			<Add option="-lpthread" />
 		</Linker>
-		<Unit filename="include/hardware_config.h" />
-		<Unit filename="include/i2c_controller.h" />
-		<Unit filename="include/home_stack.h" />
+		<Unit filename="include/application.h" />
+		<Unit filename="include/dbmanager.hpp" />
 		<Unit filename="include/globals.h" />
-		<Unit filename="include/login_stack.h" />
+		<Unit filename="include/hardware_config.h" />
+		<Unit filename="include/history_logger.h" />
+		<Unit filename="include/history_view_stack.h" />
+		<Unit filename="include/home_stack.h" />
+		<Unit filename="include/i2c_controller.h" />
 		<Unit filename="include/key_create_stack.h" />
-		<Unit filename="include/solenoid_panel.h" />
 		<Unit filename="include/key_view_stack.h" />
+		<Unit filename="include/login_stack.h" />
 		<Unit filename="include/models.h" />
-		<Unit filename="include/nfc_utils.h" />
 		<Unit filename="include/nfc_manager.h" />
+		<Unit filename="include/nfc_utils.h" />
+		<Unit filename="include/solenoid_panel.h" />
+		<Unit filename="include/sound_manager.h" />
+		<Unit filename="include/translations.h" />
 		<Unit filename="include/user_create_stack.h" />
 		<Unit filename="include/users_view_stack.h" />
-		<Unit filename="include/application.h" />
-		<Unit filename="include/db_schema.hpp" />
 		<Unit filename="include/window.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/application.cpp" />
@@ -84,7 +88,6 @@
 		<Unit filename="src/user_create_stack.cpp" />
 		<Unit filename="src/users_view_stack.cpp" />
 		<Unit filename="src/window.cpp" />
-		<Unit filename="src/db_schema.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
