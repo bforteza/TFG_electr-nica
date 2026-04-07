@@ -58,8 +58,9 @@ void NfcManager::PollLoop() {
     nfc_target target;
 
     while (polling_) {
-        // Cada llamada bloquea ~150ms si no hay tarjeta → latencia constante y predecible.
-        int res = nfc_initiator_poll_target(device_, &mod, 1, 1, 1, &target);
+        // uiPollNr=255 → el PN532 hace polling continuo en hardware hasta detectar
+        // una tarjeta. Latencia mínima (~RF field response time), sin overhead de software.
+        int res = nfc_initiator_poll_target(device_, &mod, 1, 255, 1, &target);
         if (!polling_) break;
         if (res > 0) {
             std::ostringstream oss;
