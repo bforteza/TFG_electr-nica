@@ -54,7 +54,8 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
         gtk_main_do_event(ev);
     }, this, nullptr);
     set_decorated(false);
-    resize(1024, 600);
+    fullscreen();
+    //resize(1024, 600);
 }
 
 Window::~Window() {}
