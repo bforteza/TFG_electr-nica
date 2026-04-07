@@ -13,11 +13,11 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="`pkg-config gtkmm-3.0 --cflags`" />
+					<Add option="`pkg-config gtkmm-3.0 libcanberra-gtk3 --cflags`" />
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
-					<Add option="`pkg-config gtkmm-3.0 --libs`" />
+					<Add option="`pkg-config gtkmm-3.0 libcanberra-gtk3 --libs`" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -27,30 +27,32 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="`pkg-config gtkmm-3.0 libcanberra-gtk3 --cflags`" />
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
+					<Add option="`pkg-config gtkmm-3.0 libcanberra-gtk3 --libs`" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
-			<Add directory="/usr/include/mysql" />
+			<Add option="-std=c++17" />
+			<Add directory="/usr/include/mariadb" />
 		</Compiler>
 		<Linker>
-			<Add option="`pkg-config gtkmm-3.0 --libs`" />
 			<Add library="/usr/local/lib/liblitesql-util.so" />
 			<Add library="/usr/local/lib/liblitesql-util.a" />
 			<Add library="/usr/local/lib/liblitesql.so" />
 			<Add library="/usr/local/lib/liblitesql.a" />
 			<Add library="/usr/lib/aarch64-linux-gnu/libmysqlclient.so" />
 			<Add library="/lib/libnfc.so" />
+			<Add option="-li2c" />
+			<Add option="-lpthread" />
 		</Linker>
 		<Unit filename="include/hardware_config.h" />
 		<Unit filename="include/i2c_controller.h" />
-		<Unit filename="src/i2c_controller.cpp" />
 		<Unit filename="include/home_stack.h" />
 		<Unit filename="include/globals.h" />
 		<Unit filename="include/login_stack.h" />
@@ -66,18 +68,23 @@
 		<Unit filename="include/db_schema.hpp" />
 		<Unit filename="include/window.h" />
 		<Unit filename="main.cpp" />
-		<Unit filename="src/home_stack.cpp" />
+		<Unit filename="src/application.cpp" />
+		<Unit filename="src/dbmanager.cpp" />
 		<Unit filename="src/globals.cpp" />
-		<Unit filename="src/login_stack.cpp" />
+		<Unit filename="src/history_logger.cpp" />
+		<Unit filename="src/history_view_stack.cpp" />
+		<Unit filename="src/home_stack.cpp" />
+		<Unit filename="src/i2c_controller.cpp" />
 		<Unit filename="src/key_create_stack.cpp" />
-		<Unit filename="src/solenoid_panel.cpp" />
 		<Unit filename="src/key_view_stack.cpp" />
+		<Unit filename="src/login_stack.cpp" />
 		<Unit filename="src/nfc_manager.cpp" />
+		<Unit filename="src/solenoid_panel.cpp" />
+		<Unit filename="src/sound_manager.cpp" />
 		<Unit filename="src/user_create_stack.cpp" />
 		<Unit filename="src/users_view_stack.cpp" />
-		<Unit filename="src/application.cpp" />
-		<Unit filename="src/db_schema.cpp" />
 		<Unit filename="src/window.cpp" />
+		<Unit filename="src/db_schema.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
