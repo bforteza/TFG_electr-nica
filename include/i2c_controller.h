@@ -37,7 +37,7 @@ public:
     // Recorre los 16 pines del XL9535 uno a uno activando y desactivando cada relé.
     // on_step(relay_idx) se llama justo antes de activar el relé relay_idx (0–15).
     // Bloquea hasta completar el ciclo. Solo para uso en modo administrador.
-    void RunRelayTest(std::function<void(int relay_idx)> on_step);
+    void RunRelayTest();
 
 private:
     int      fd_;          // file descriptor de /dev/i2c-X

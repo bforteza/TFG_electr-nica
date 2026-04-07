@@ -102,9 +102,8 @@ void I2cController::CloseDoor() {
     WriteState(state);
 }
 
-void I2cController::RunRelayTest(std::function<void(int)> on_step) {
+void I2cController::RunRelayTest() {
     for (int pin = 0; pin < 16; ++pin) {
-        on_step(pin);
         WriteState(1u << pin);
         std::this_thread::sleep_for(std::chrono::milliseconds(kRelayTestDwellMs));
         WriteState(0u);
