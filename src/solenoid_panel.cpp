@@ -2,6 +2,7 @@
 #include "window.h"
 #include "globals.h"
 #include "i2c_controller.h"
+#include "hardware_config.h"
 #include "translations.h"
 #include <litesql.hpp>
 #include <stdexcept>
@@ -102,30 +103,20 @@ void SolenoidPanel::Setup(std::shared_ptr<kdb::Key> key, Mode mode) {
             key_info_label_->set_text(name + " — " + pos_str);
             repeat_button_->set_label(Tr().solenoid.btn_repeat);
             action_button_->set_label(Tr().solenoid.btn_take_another);
-            repeat_button_->show();
-            action_button_->show();
-            countdown_ = kTimeoutSeconds;
-            countdown_label_->set_text(std::string("⏱ ") + std::to_string(countdown_) + "s");
-            countdown_label_->show();
-            if (key) hw_ctrl->Activate(static_cast<Position>((int)key->pos));
-            hw_ctrl->OpenDoor();
-            Glib::signal_timeout().connect_once([]{ hw_ctrl->CloseDoor(); }, 2000);
-            StartTimer();
+            repeat_button_->hide();
+            action_button_->hide();
+            countdown_label_->set_text("");
+            StartOpenSequence(kPickupSolenoidMs);
             break;
         }
         case Mode::RETURN: {
             std::string pos_str = key ? PosToString((int)key->pos) : "?";
             key_info_label_->set_text(Tr().solenoid.lbl_return + pos_str);
             repeat_button_->set_label(Tr().solenoid.btn_repeat);
-            repeat_button_->show();
+            repeat_button_->hide();
             action_button_->hide();
-            countdown_ = kTimeoutSeconds;
-            countdown_label_->set_text(std::string("⏱ ") + std::to_string(countdown_) + "s");
-            countdown_label_->show();
-            if (key) hw_ctrl->Activate(static_cast<Position>((int)key->pos));
-            hw_ctrl->OpenDoor();
-            Glib::signal_timeout().connect_once([]{ hw_ctrl->CloseDoor(); }, 2000);
-            StartTimer();
+            countdown_label_->set_text("");
+            StartOpenSequence(kReturnSolenoidMs);
             break;
         }
         case Mode::ADMIN:
@@ -203,6 +194,45 @@ bool SolenoidPanel::OnTimerTick() {
     return true;
 }
 
+// --- Secuencia de apertura ---
+
+void SolenoidPanel::StartOpenSequence(int solenoid_ms) {
+    StopTimer();
+    hw_ctrl->Deactivate();
+
+    key_info_label_->set_text(Tr().solenoid.lbl_opening_door);
+
+    // t=0: abrir puerta
+    hw_ctrl->OpenDoor();
+
+    // t=kDoorOpenMs: cerrar puerta
+    Glib::signal_timeout().connect_once([]{ hw_ctrl->CloseDoor(); }, kDoorOpenMs);
+
+    // t=kDoorOpenMs+kDoorWaitMs: abrir solenoide + actualizar label
+    Glib::signal_timeout().connect_once([this]{
+        if (current_key_)
+            hw_ctrl->Activate(static_cast<Position>((int)current_key_->pos));
+        key_info_label_->set_text(Tr().solenoid.lbl_opening_lock);
+    }, kDoorOpenMs + kDoorWaitMs);
+
+    // t=kDoorOpenMs+kDoorWaitMs+solenoid_ms: cerrar solenoide + iniciar espera
+    int close_at = kDoorOpenMs + kDoorWaitMs + solenoid_ms;
+    Glib::signal_timeout().connect_once([this]{
+        hw_ctrl->Deactivate();
+        std::string msg = (current_mode_ == Mode::PICKUP)
+            ? Tr().solenoid.lbl_pickup_ready
+            : Tr().solenoid.lbl_return_ready;
+        key_info_label_->set_text(msg);
+        countdown_ = kRepeatWaitSecs;
+        countdown_label_->set_text(std::string("⏱ ") + std::to_string(countdown_) + "s");
+        countdown_label_->show();
+        repeat_button_->show();
+        if (current_mode_ == Mode::PICKUP)
+            action_button_->show();
+        StartTimer();
+    }, close_at);
+}
+
 // --- Manejadores de botones ---
 
 void SolenoidPanel::OnBackButtonClicked() {
@@ -216,10 +246,8 @@ void SolenoidPanel::OnBackButtonClicked() {
 
 void SolenoidPanel::OnRepeatButtonClicked() {
     if (current_key_) {
-        hw_ctrl->OpenDoor();
-        Glib::signal_timeout().connect_once([]{ hw_ctrl->CloseDoor(); }, 2000);
-        countdown_ = kTimeoutSeconds;
-        countdown_label_->set_text(std::string("⏱ ") + std::to_string(countdown_) + "s");
+        int solenoid_ms = (current_mode_ == Mode::PICKUP) ? kPickupSolenoidMs : kReturnSolenoidMs;
+        StartOpenSequence(solenoid_ms);
     }
 }
 

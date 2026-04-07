@@ -93,7 +93,6 @@ void I2cController::Deactivate() {
         return;
 
     int idx     = static_cast<int>(active_pos_) - 1;
-    int row_pin = kRowPins[idx / 8];
     int col_pin = kColPins[idx % 8];
 
     WriteState(DoorBit() | (1u << col_pin));

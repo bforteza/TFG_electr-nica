@@ -44,7 +44,7 @@ public:
 private:
     static constexpr int kRows           = 4;
     static constexpr int kCols           = 8;
-    static constexpr int kTimeoutSeconds = 20;
+    static constexpr int kTimeoutSeconds = 20;  // timeout total en pantalla (logout)
 
     Window* window_;
     Mode    current_mode_;
@@ -81,6 +81,10 @@ private:
     void StartTimer();
     void StopTimer();
     bool OnTimerTick();   // Devuelve false para detener el timer.
+
+    // Ejecuta la secuencia puerta→solenoide→espera para PICKUP y RETURN.
+    // solenoid_ms: tiempo que permanece el solenoide activo.
+    void StartOpenSequence(int solenoid_ms);
 
     void OnBackButtonClicked();
     void OnRepeatButtonClicked();

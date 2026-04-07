@@ -97,6 +97,10 @@ struct Translations {
         const char* lbl_activated;     // Prefijo "Activado: " (modo admin)
         const char* lbl_admin_title;   // Título panel admin
         const char* lbl_select_title;  // Título modo selección de posición
+        const char* lbl_opening_door;  // "Abriendo puerta..."
+        const char* lbl_opening_lock;  // "Abriendo posición..."
+        const char* lbl_pickup_ready;  // "Puedes retirar la llave"
+        const char* lbl_return_ready;  // "Puedes depositar la llave"
     } solenoid;
 
     // --- HistoryViewStack ---
@@ -224,6 +228,10 @@ inline const Translations kTranslations[] = {
             "Activat: ",
             "Panel de control",
             "Tria una posició lliure",
+            "Obrint porta...",
+            "Obrint posició...",
+            "Ja pots retirar la clau",
+            "Ja pots dipositar la clau",
         },
         // history_view
         {
@@ -332,6 +340,10 @@ inline const Translations kTranslations[] = {
             "Activado: ",
             "Panel de control",
             "Elige una posición libre",
+            "Abriendo puerta...",
+            "Abriendo posición...",
+            "Ya puedes retirar la llave",
+            "Ya puedes depositar la llave",
         },
         // history_view
         {
@@ -440,6 +452,10 @@ inline const Translations kTranslations[] = {
             "Activated: ",
             "Control panel",
             "Choose a free position",
+            "Opening door...",
+            "Opening position...",
+            "You can now take the key",
+            "You can now deposit the key",
         },
         // history_view
         {
