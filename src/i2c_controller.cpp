@@ -38,12 +38,9 @@ bool I2cController::Init() {
     }
 
     // Pre-set output registers a 0x00 (todos LOW).
+    // El XL9535 arranca en modo output por defecto.
     if (!WriteReg(fd_, kRegOutputPort0, 0x00)) return false;
     if (!WriteReg(fd_, kRegOutputPort1, 0x00)) return false;
-
-    // Configurar todos los pines como output.
-    if (!WriteReg(fd_, kRegConfigPort0, 0x00)) return false;
-    if (!WriteReg(fd_, kRegConfigPort1, 0x00)) return false;
 
     return true;
 }
