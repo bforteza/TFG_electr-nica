@@ -69,8 +69,9 @@ void NfcManager::PollLoop() {
                 oss << std::setw(2) << (int)target.nti.nai.abtUid[i];
             uid = oss.str();
             dispatcher.emit();
-            // Anti-repeat: esperar antes de volver a detectar la misma tarjeta.
-            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+            // Anti-repeat interruptible: sale antes si StopPolling pone polling_=false.
+            for (int i = 0; i < 15 && polling_; i++)
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 }
