@@ -26,6 +26,7 @@ NfcManager::NfcManager() : context_(nullptr), device_(nullptr), polling_(false) 
 }
 
 NfcManager::~NfcManager() {
+    StopPolling();
     if (device_)  nfc_close(device_);
     if (context_) nfc_exit(context_);
 }

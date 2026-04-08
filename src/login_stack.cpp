@@ -3,6 +3,7 @@
 #include "translations.h"
 #include "sound_manager.h"
 #include <sigc++/adaptors/bind.h>
+#include <glibmm/spawn.h>
 
 LoginStack::LoginStack(const Glib::RefPtr<Gtk::Builder>& builder)
 {
@@ -46,6 +47,18 @@ LoginStack::LoginStack(const Glib::RefPtr<Gtk::Builder>& builder)
     lang_en_button_->signal_clicked().connect(
         sigc::bind(sigc::mem_fun(*this, &LoginStack::OnLangSelected), Language::kEnglish));
 
+    builder->get_widget("ShutdownButton", shutdown_button_);
+    if (!shutdown_button_)
+        throw std::runtime_error("No \"ShutdownButton\" object in MainWindow.glade");
+    shutdown_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &LoginStack::OnShutdownClicked));
+
+    builder->get_widget("RebootButton", reboot_button_);
+    if (!reboot_button_)
+        throw std::runtime_error("No \"RebootButton\" object in MainWindow.glade");
+    reboot_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &LoginStack::OnRebootClicked));
+
     // Suscribe RefreshLabels a la señal global de cambio de idioma.
     language_changed.connect(sigc::mem_fun(*this, &LoginStack::RefreshLabels));
 
@@ -67,6 +80,8 @@ void LoginStack::RefreshLabels()
 {
     title_label_->set_text(Tr().login.title);
     desc_label_->set_text(Tr().login.description);
+    shutdown_button_->set_label(Tr().login.btn_shutdown);
+    reboot_button_->set_label(Tr().login.btn_reboot);
 }
 
 void LoginStack::OnLangSelected(Language lang)
@@ -90,6 +105,24 @@ void LoginStack::OnPasswordEntered()
         error_label_->set_text(Tr().login.error_invalid_credentials);
         SoundManager::Play(SoundEvent::kLoginError);
     }
+}
+
+void LoginStack::OnShutdownClicked()
+{
+    Gtk::MessageDialog dlg(Tr().login.btn_shutdown, false,
+                           Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+    dlg.set_secondary_text(Tr().login.confirm_shutdown);
+    if (dlg.run() == Gtk::RESPONSE_YES)
+        Glib::spawn_command_line_async("systemctl poweroff");
+}
+
+void LoginStack::OnRebootClicked()
+{
+    Gtk::MessageDialog dlg(Tr().login.btn_reboot, false,
+                           Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+    dlg.set_secondary_text(Tr().login.confirm_reboot);
+    if (dlg.run() == Gtk::RESPONSE_YES)
+        Glib::spawn_command_line_async("systemctl reboot");
 }
 
 void LoginStack::OnNfcDetected(const std::string& uid)

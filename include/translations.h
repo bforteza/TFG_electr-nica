@@ -18,6 +18,10 @@ struct Translations {
         const char* error_device_not_found;
         const char* error_duplicate_uid;
         const char* error_invalid_credentials;
+        const char* btn_shutdown;
+        const char* btn_reboot;
+        const char* confirm_shutdown;
+        const char* confirm_reboot;
     } login;
 
     // --- HomeStack ---
@@ -158,6 +162,10 @@ inline const Translations kTranslations[] = {
             "Atenció: dispositiu no reconegut",
             "ERROR: dos dispositius amb el mateix uid, contacta amb l'administrador",
             "Atenció: credencials no identificades",
+            "Apagar",
+            "Reiniciar",
+            "Segur que vols apagar el sistema?",
+            "Segur que vols reiniciar el sistema?",
         },
         // home
         {
@@ -230,8 +238,8 @@ inline const Translations kTranslations[] = {
             "Tria una posició lliure",
             "Obrint porta...",
             "Obrint posició...",
-            "Ja pots retirar la clau",
-            "Ja pots dipositar la clau",
+            "Ja has retirat la clau?",
+            "Ja has dipositat la clau?",
         },
         // history_view
         {
@@ -270,6 +278,10 @@ inline const Translations kTranslations[] = {
             "Atención: dispositivo no reconocido",
             "ERROR: dos dispositivos con el mismo uid, contacta con el administrador",
             "Atención: credenciales no identificadas",
+            "Apagar",
+            "Reiniciar",
+            "¿Seguro que quieres apagar el sistema?",
+            "¿Seguro que quieres reiniciar el sistema?",
         },
         // home
         {
@@ -342,8 +354,8 @@ inline const Translations kTranslations[] = {
             "Elige una posición libre",
             "Abriendo puerta...",
             "Abriendo posición...",
-            "Ya puedes retirar la llave",
-            "Ya puedes depositar la llave",
+            "¿has retirado la llave?",
+            "¿has depositado la llave?",
         },
         // history_view
         {
@@ -382,6 +394,10 @@ inline const Translations kTranslations[] = {
             "Warning: device not recognized",
             "ERROR: two devices share the same uid, contact the administrator",
             "Warning: invalid credentials",
+            "Shut down",
+            "Reboot",
+            "Are you sure you want to shut down?",
+            "Are you sure you want to reboot?",
         },
         // home
         {
@@ -454,8 +470,8 @@ inline const Translations kTranslations[] = {
             "Choose a free position",
             "Opening door...",
             "Opening position...",
-            "You can now take the key",
-            "You can now deposit the key",
+            "Have you taken the key?",
+            "Have you deposited the key?",
         },
         // history_view
         {

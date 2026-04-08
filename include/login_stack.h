@@ -5,6 +5,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
+#include <gtkmm/messagedialog.h>
 #include <string>
 #include "dbmanager.hpp"
 #include "translations.h"
@@ -44,6 +45,10 @@ private:
     Gtk::Button* lang_es_button_;
     Gtk::Button* lang_en_button_;
 
+    // Botones de control del sistema.
+    Gtk::Button* shutdown_button_;
+    Gtk::Button* reboot_button_;
+
     // Actualiza los textos de la pantalla al idioma activo.
     void RefreshLabels();
 
@@ -55,6 +60,12 @@ private:
 
     // Cambia el idioma activo y notifica a todos los stacks.
     void OnLangSelected(Language lang);
+
+    // Muestra confirmación y apaga el sistema.
+    void OnShutdownClicked();
+
+    // Muestra confirmación y reinicia el sistema.
+    void OnRebootClicked();
 };
 
 #endif // LOGIN_STACK_H
