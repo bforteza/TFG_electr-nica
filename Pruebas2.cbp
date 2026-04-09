@@ -42,12 +42,10 @@
 			<Add directory="/usr/include/mariadb" />
 		</Compiler>
 		<Linker>
-			<Add library="/usr/local/lib/liblitesql-util.so" />
-			<Add library="/usr/local/lib/liblitesql-util.a" />
-			<Add library="/usr/local/lib/liblitesql.so" />
-			<Add library="/usr/local/lib/liblitesql.a" />
+			<Add library="/usr/local/lib/static/liblitesql-util.a" />
+			<Add library="/usr/local/lib/static/liblitesql.a" />
 			<Add library="/usr/lib/aarch64-linux-gnu/libmysqlclient.so" />
-			<Add library="/lib/libnfc.so" />
+			<Add option="-lnfc" />
 			<Add option="-li2c" />
 			<Add option="-lpthread" />
 		</Linker>

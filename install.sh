@@ -80,6 +80,8 @@ sudo apt-get install -y \
     python3-gi-cairo \
     gir1.2-gtk-3.0 \
     libgtk-3-0 \
+    libcanberra-gtk3-dev \
+    libi2c-dev \
     python3-venv
 
 log "Dependencias instaladas"
