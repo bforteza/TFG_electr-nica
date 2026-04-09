@@ -59,6 +59,7 @@
 		<Unit filename="include/history_view_stack.h" />
 		<Unit filename="include/home_stack.h" />
 		<Unit filename="include/i2c_controller.h" />
+		<Unit filename="include/keyboard_helper.h" />
 		<Unit filename="include/key_create_stack.h" />
 		<Unit filename="include/key_view_stack.h" />
 		<Unit filename="include/login_stack.h" />

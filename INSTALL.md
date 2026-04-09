@@ -6,6 +6,8 @@ Válida para **Debian 12 (Bookworm)** en x86_64 (PC de desarrollo) y aarch64 (Ra
 
 ## 1. Dependencias del sistema
 
+### Aplicación principal (C++ / GTK)
+
 ```bash
 sudo apt-get update
 sudo apt-get install -y \
@@ -17,6 +19,27 @@ sudo apt-get install -y \
     libsqlite3-dev \
     mariadb-server \
     git
+```
+
+### Teclado virtual (`keyboard/keyboard.py`)
+
+```bash
+sudo apt-get install -y \
+    python3-gi \
+    python3-gi-cairo \
+    gir1.2-gtk-3.0 \
+    libgtk-3-0
+```
+
+Verificar la instalación:
+```bash
+python3 -c "import gi; gi.require_version('Gtk','3.0'); from gi.repository import Gtk; print('OK')"
+```
+
+### Servidor web (`webserver/`)
+
+```bash
+sudo apt-get install -y python3-venv
 ```
 
 ---
@@ -154,6 +177,76 @@ Verificar que las rutas del `.cbp` apunten a las librerías instaladas:
 - `/usr/local/lib/liblitesql-util.a`
 - `/usr/lib/aarch64-linux-gnu/libmysqlclient.so`
 - `/lib/libnfc.so` o `/usr/lib/aarch64-linux-gnu/libnfc.so`
+
+### Despliegue del teclado virtual junto al binario
+
+La aplicación lanza el teclado virtual como subproceso buscando `./keyboard/keyboard.py`
+**relativo al directorio desde donde se ejecuta el binario**.
+
+**En PC (Makefile):** el symlink se crea automáticamente con cada `make`:
+```
+bin/Debug/keyboard → ../../keyboard   (creado por el Makefile)
+```
+No hay que hacer nada extra.
+
+**En Raspberry Pi (Code::Blocks):** Code::Blocks no ejecuta pasos post-build,
+así que hay que hacer el enlace (o la copia) una sola vez a mano:
+
+```bash
+# Opción A — symlink (recomendado en desarrollo: los cambios en keyboard/ se reflejan al instante)
+ln -sfn ../../keyboard bin/Debug/keyboard
+
+# Opción B — copia directa (más simple para despliegue final)
+cp -r keyboard bin/Debug/keyboard
+```
+
+> Si se usa la copia y se modifica `keyboard.py` o `keyboard.css`,
+> hay que repetir la copia manualmente.
+
+---
+
+## 5. Configurar el servidor web
+
+El servidor web es un proceso Python independiente que accede a la misma base de datos MariaDB y expone un panel HTML y una API REST en el puerto 5000.
+
+### 5.1 Crear el entorno virtual e instalar dependencias
+
+```bash
+cd webserver
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+`requirements.txt` instala:
+- `flask-openapi3[swagger]>=4.0` — framework web + Swagger UI en `/openapi/`
+- `pymysql>=1.1` — conector MariaDB
+
+### 5.2 Configurar credenciales
+
+Editar `webserver/config.py` y ajustar los datos de conexión a MariaDB:
+
+```python
+DB_HOST = "localhost"
+DB_USER = "usuario"
+DB_PASSWORD = "CAMBIAR"
+DB_NAME = "miBaseDeDatos"
+```
+
+### 5.3 Arrancar el servidor
+
+```bash
+cd webserver
+source venv/bin/activate
+python app.py        # escucha en 0.0.0.0:5000
+```
+
+Interfaces disponibles una vez arrancado:
+- Panel HTML: `http://<IP>:5000/`
+- API REST JSON: `http://<IP>:5000/api/`
+- Swagger UI: `http://<IP>:5000/openapi/`
+
+Para parar: `Ctrl+C` o `kill <PID>`.
 
 ---
 

@@ -45,6 +45,7 @@ $(TARGET): $(OBJS)
 	mkdir -p bin/Debug
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 	ln -sfn ../../ui bin/Debug/ui
+	ln -sfn ../../keyboard bin/Debug/keyboard
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@

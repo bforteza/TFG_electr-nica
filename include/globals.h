@@ -10,6 +10,10 @@
 // Cada stack se suscribe en su constructor para refrescar sus textos de UI.
 inline sigc::signal<void> language_changed;
 
+// Señal global emitida al abrir/cerrar el teclado virtual (true=abierto, false=cerrado).
+// Window la escucha para parar/reanudar el timer de inactividad.
+inline sigc::signal<void, bool> keyboard_open_changed;
+
 // Instancia de la base de datos activa. Se inicializa en Application::on_startup()
 // y se usa en todos los stacks para consultar y modificar registros.
 inline std::unique_ptr<kdb::DbManager> db;

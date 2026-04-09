@@ -1,7 +1,7 @@
 {
     "makefile.launchConfigurations": [
         {
-            "cwd": "/home/tomeu/Desktop/Proyecto/TFG_electr-nica",
+            "cwd": "/home/tomeu/Desktop/Proyecto/TFG_electr-nica/bin/Debug",
             "binaryPath": "/home/tomeu/Desktop/Proyecto/TFG_electr-nica/bin/Debug/Pruebas2",
             "binaryArgs": [],
             "env": {

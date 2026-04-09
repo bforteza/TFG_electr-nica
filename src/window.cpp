@@ -1,6 +1,7 @@
 #include "window.h"
 #include "sound_manager.h"
 #include "history_logger.h"
+#include "globals.h"
 #include <gdk/gdkkeysyms.h>
 
 // Ruta al archivo de interfaz gráfica, relativa al directorio de trabajo.
@@ -38,6 +39,12 @@ Window::Window(Gtk::ApplicationWindow::BaseObjectType* cobject,
         sigc::mem_fun(*this, &Window::OnPositionSelected));
     solenoid_panel_.signal_slot_activated.connect(
         sigc::mem_fun(home_stack_, &HomeStack::OnSlotActivated));
+
+    // Pausa/reanuda el timer de inactividad mientras el teclado virtual está abierto.
+    keyboard_open_changed.connect([this](bool is_open) {
+        if (is_open) StopInactivityTimer();
+        else         ResetInactivityTimer();
+    });
 
     login_stack_.Start();
 

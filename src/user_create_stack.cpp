@@ -1,4 +1,5 @@
 #include "user_create_stack.h"
+#include "keyboard_helper.h"
 #include "dbmanager.hpp"
 #include <litesql/selectquery.hpp>
 #include "globals.h"
@@ -86,6 +87,17 @@ UserCreateStack::UserCreateStack(const Glib::RefPtr<Gtk::Builder>& builder) {
     builder->get_widget("UserUidText", uid_text_view_);
     if (!uid_text_view_)
         throw std::runtime_error("No \"UserUidText\" object in MainWindow.glade");
+
+    // Abre el teclado virtual cuando el usuario pulsa/toca el campo de nombre.
+    // Los campos de contraseña son numéricos y no necesitan teclado virtual.
+    // Se usa button_press_event (no focus_in_event) para evitar que se dispare
+    // automáticamente al navegar a esta vista.
+    username_entry_->signal_button_press_event().connect([this](GdkEventButton*) -> bool {
+        std::string result = OpenKeyboard(Tr().user_create.lbl_username,
+                                          username_entry_->get_text().raw());
+        if (!result.empty()) username_entry_->set_text(result);
+        return true;
+    }, false);
 
     // Suscribe RefreshLabels al cambio de idioma global.
     language_changed.connect(sigc::mem_fun(*this, &UserCreateStack::RefreshLabels));
