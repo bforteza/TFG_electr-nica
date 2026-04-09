@@ -201,7 +201,7 @@ EOF
 
     # ── Compilar ──
     info "Compilando LiteSQL (esto puede tardar varios minutos en la Raspberry Pi)..."
-    rm -rf build && mkdir build && cd build
+    sudo rm -rf build && mkdir build && cd build
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/local \
