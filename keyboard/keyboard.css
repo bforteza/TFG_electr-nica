@@ -1,0 +1,145 @@
+/* =============================================================
+ * Estilos teclado virtual — Armario de Llaves
+ * =============================================================
+ *
+ * AJUSTE DE TAMAÑOS:
+ *   Pantallas de referencia:
+ *     7" 800×480  → key-font: 18px, entry-font: 20px, row-height: 52px
+ *     7" 1024×600 → key-font: 20px, entry-font: 22px, row-height: 58px
+ * ============================================================= */
+
+
+/* --- Fondo general ----------------------------------------- */
+
+window {
+    /* [AJUSTAR] Color de fondo de la ventana */
+    background-color: #f4f8fb;
+}
+
+
+/* --- Campo de texto ---------------------------------------- */
+
+entry {
+    /* [AJUSTAR] Tamaño del texto introducido */
+    font-size: 32px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+
+/* --- Teclas normales --------------------------------------- */
+
+.key {
+    background-image: none;
+    background-color: #deedf7;
+    border: 1px solid #b0cfe6;
+    border-radius: 6px;
+    /* [AJUSTAR] Altura mínima de cada tecla */
+    min-height: 52px;
+}
+
+.key:active {
+    background-color: #b8d4e8;
+    box-shadow: none;
+}
+
+.key label {
+    /* [AJUSTAR] Tamaño del texto de las teclas */
+    font-size: 26px;
+    font-weight: 500;
+    color: #1a1a2e;
+}
+
+
+/* --- Tecla Shift ------------------------------------------ */
+
+.key-shift label {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1a1a2e;
+}
+
+.shift-on {
+    background-image: none;
+    background-color: #75c178;
+    border-color: #4a9e4d;
+}
+
+.shift-on label {
+    color: white;
+}
+
+.shift-lock {
+    background-image: none;
+    background-color: #2196f3;
+    border-color: #1565c0;
+}
+
+.shift-lock label {
+    color: white;
+}
+
+
+/* --- Tecla acento muerto (dead key) ----------------------- */
+
+.key-dead label {
+    font-size: 22px;
+    font-weight: bold;
+    color: #555;
+}
+
+.dead-active {
+    background-image: none;
+    background-color: #ffe082;
+    border-color: #f9a825;
+}
+
+.dead-active label {
+    color: #333;
+}
+
+
+/* --- Borrar todo ------------------------------------------ */
+
+.key-clear {
+    background-image: none;
+    background-color: #e2726a;
+    border-color: #c0392b;
+}
+
+.key-clear:active {
+    background-color: #c0392b;
+}
+
+.key-clear label {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+}
+
+
+/* --- Intro ------------------------------------------------ */
+
+.key-enter {
+    background-image: none;
+    background-color: #75c178;
+    border-color: #4a9e4d;
+}
+
+.key-enter:active {
+    background-color: #4a9e4d;
+}
+
+.key-enter label {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+}
+
+
+/* --- Barra espaciadora ------------------------------------ */
+
+.key-space label {
+    font-size: 18px;
+    color: #1a1a2e;
+}
