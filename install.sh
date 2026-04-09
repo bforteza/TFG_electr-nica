@@ -208,9 +208,11 @@ EOF
         -Wno-dev \
         -DLITESQL_WITH_DOCS=OFF \
         -DLITESQL_WITH_TESTS=OFF \
-        2>&1 | grep -E "(error:|warning:|CMake)" | head -20 || true
+        -DLITESQL_WITH_EXAMPLES=OFF
 
-    make -j"$(nproc)"
+    # Solo compilamos las librerías necesarias, omitiendo los tests
+    # (los tests intentan enlazar litesql_mysql, nombre incompatible con nuestro parche)
+    make -j"$(nproc)" litesql litesql-util litesql_backend_mysql
     sudo make install
     sudo /sbin/ldconfig
     log "LiteSQL ${LITESQL_VERSION} instalado en /usr/local"
