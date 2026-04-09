@@ -99,9 +99,13 @@ if [ -d "$INSTALL_DIR/.git" ]; then
     git -C "$INSTALL_DIR" pull
 else
     info "Clonando repositorio en $INSTALL_DIR..."
-    git clone "$REPO_URL" "$INSTALL_DIR"
+    git clone "$REPO_URL" "$INSTALL_DIR" \
+        || die "No se pudo clonar el repositorio. Comprueba la conexión y que la URL sea correcta."
     log "Repositorio clonado"
 fi
+
+[ -d "$INSTALL_DIR/webserver" ] \
+    || die "El directorio webserver no existe en $INSTALL_DIR. El clone puede haber fallado."
 
 # ── 3. Compilar LiteSQL desde fuente ─────────────────────────────────────────
 # Saltar si ya está instalado
