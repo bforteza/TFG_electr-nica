@@ -1,7 +1,7 @@
 DB_CONFIG = {
-    "host":   "localhost",
-    "user":   "usuario",
-    "password": "CAMBIAR",
+    "host":     "localhost",
+    "user":     "KEYSISTEM",
+    "password": "KeySistem",
     "database": "miBaseDeDatos",
-    "charset": "utf8mb4",
+    "charset":  "utf8mb4",
 }

@@ -148,13 +148,13 @@ sudo systemctl enable mariadb
 
 sudo mariadb -e "
 CREATE DATABASE IF NOT EXISTS miBaseDeDatos CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS 'usuario'@'localhost' IDENTIFIED BY 'CAMBIAR';
-GRANT ALL PRIVILEGES ON miBaseDeDatos.* TO 'usuario'@'localhost';
+CREATE USER IF NOT EXISTS 'KEYSISTEM'@'localhost' IDENTIFIED BY 'KeySistem';
+GRANT ALL PRIVILEGES ON miBaseDeDatos.* TO 'KEYSISTEM'@'localhost';
 FLUSH PRIVILEGES;
 "
 ```
 
-> **TODO**: La contraseña está en `main.cpp`. Moverla a un fichero de configuración externo antes de desplegar en producción.
+> Las credenciales están en `src/application.cpp`. Cambiarlas antes de desplegar en producción.
 
 ---
 
