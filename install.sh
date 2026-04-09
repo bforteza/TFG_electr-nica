@@ -109,9 +109,9 @@ fi
 
 # ── 3. Compilar LiteSQL desde fuente ─────────────────────────────────────────
 # Saltar si ya está instalado
-if [ -f /usr/local/lib/liblitesql.so ] || [ -f /usr/local/lib/liblitesql.a ]; then
-    warn "LiteSQL ya parece estar instalado en /usr/local/lib — saltando compilación."
-    warn "Si quieres reinstalar, borra /usr/local/lib/liblitesql* y vuelve a ejecutar."
+if find /usr/local -name "liblitesql*" 2>/dev/null | grep -q liblitesql; then
+    warn "LiteSQL ya está instalado — saltando compilación."
+    warn "Para reinstalar: sudo find /usr/local -name 'liblitesql*' -delete && sudo ldconfig"
 else
     info "Preparando LiteSQL ${LITESQL_VERSION}..."
     mkdir -p "$LITESQL_BUILD_DIR"
