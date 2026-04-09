@@ -125,6 +125,10 @@ else
     tar xzf "$LITESQL_TAR"
     cd "litesql-src-${LITESQL_VERSION}"
 
+    # ── Parche 0: eliminar tests del build (enlazan litesql_mysql, nombre obsoleto) ──
+    info "Aplicando parche 0 — eliminando tests del CMakeLists.txt raíz..."
+    sed -i '/add_subdirectory.*test/Id' CMakeLists.txt
+
     # ── Parche 1: CMakeLists.txt del backend MySQL ──
     info "Aplicando parche 1 — CMakeLists.txt..."
     python3 - <<'PYEOF'
@@ -197,7 +201,7 @@ EOF
 
     # ── Compilar ──
     info "Compilando LiteSQL (esto puede tardar varios minutos en la Raspberry Pi)..."
-    mkdir -p build && cd build
+    rm -rf build && mkdir build && cd build
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/local \
