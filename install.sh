@@ -125,12 +125,11 @@ else
     tar xzf "$LITESQL_TAR"
     cd "litesql-src-${LITESQL_VERSION}"
 
-    # ── Parche 0: corregir nombre de librería en los tests ──
-    # Los tests enlazan contra litesql_mysql (nombre antiguo).
-    # Nuestro parche genera litesql_backend_mysql, así que actualizamos los tests.
-    info "Aplicando parche 0 — corrigiendo nombre de librería en los tests..."
-    find src/tests -name "CMakeLists.txt" \
-        -exec sed -i 's/litesql_mysql/litesql_backend_mysql/g' {} \;
+    # ── Parche 0: corregir BACKEND_LIBRARIES en el CMakeLists.txt raíz ──
+    # El root CMakeLists.txt añade 'litesql_mysql' a BACKEND_LIBRARIES, pero nuestro
+    # parche de la librería crea 'litesql_backend_mysql'. Hay que sincronizar el nombre.
+    info "Aplicando parche 0 — corrigiendo BACKEND_LIBRARIES en CMakeLists.txt raíz..."
+    sed -i 's/APPEND BACKEND_LIBRARIES litesql_mysql/APPEND BACKEND_LIBRARIES litesql_backend_mysql/' CMakeLists.txt
 
     # ── Parche 1: CMakeLists.txt del backend MySQL ──
     info "Aplicando parche 1 — CMakeLists.txt..."
@@ -217,11 +216,8 @@ EOF
         -DLITESQL_WITH_TESTS=OFF \
         -DLITESQL_WITH_EXAMPLES=OFF
 
-    # cmake --build garantiza compilar SOLO el target indicado y sus dependencias.
-    # litesql_backend_mysql depende de litesql y litesql-util, que se compilan solos.
-    # Los tests nunca se tocan.
-    cmake --build . --target litesql_backend_mysql -- -j"$(nproc)"
-    sudo cmake --install . --prefix /usr/local
+    make -j"$(nproc)"
+    sudo make install
     sudo /sbin/ldconfig
     log "LiteSQL ${LITESQL_VERSION} instalado en /usr/local"
 fi
