@@ -125,9 +125,12 @@ else
     tar xzf "$LITESQL_TAR"
     cd "litesql-src-${LITESQL_VERSION}"
 
-    # ── Parche 0: eliminar tests del build (enlazan litesql_mysql, nombre obsoleto) ──
-    info "Aplicando parche 0 — eliminando tests del CMakeLists.txt raíz..."
-    sed -i '/add_subdirectory.*test/Id' CMakeLists.txt
+    # ── Parche 0: corregir nombre de librería en los tests ──
+    # Los tests enlazan contra litesql_mysql (nombre antiguo).
+    # Nuestro parche genera litesql_backend_mysql, así que actualizamos los tests.
+    info "Aplicando parche 0 — corrigiendo nombre de librería en los tests..."
+    find src/tests -name "CMakeLists.txt" \
+        -exec sed -i 's/litesql_mysql/litesql_backend_mysql/g' {} \;
 
     # ── Parche 1: CMakeLists.txt del backend MySQL ──
     info "Aplicando parche 1 — CMakeLists.txt..."
