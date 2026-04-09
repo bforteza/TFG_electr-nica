@@ -217,10 +217,11 @@ EOF
         -DLITESQL_WITH_TESTS=OFF \
         -DLITESQL_WITH_EXAMPLES=OFF
 
-    # Solo compilamos las librerías necesarias, omitiendo los tests
-    # (los tests intentan enlazar litesql_mysql, nombre incompatible con nuestro parche)
-    make -j"$(nproc)" litesql litesql-util litesql_backend_mysql
-    sudo make install
+    # cmake --build garantiza compilar SOLO el target indicado y sus dependencias.
+    # litesql_backend_mysql depende de litesql y litesql-util, que se compilan solos.
+    # Los tests nunca se tocan.
+    cmake --build . --target litesql_backend_mysql -- -j"$(nproc)"
+    sudo cmake --install . --prefix /usr/local
     sudo /sbin/ldconfig
     log "LiteSQL ${LITESQL_VERSION} instalado en /usr/local"
 fi
