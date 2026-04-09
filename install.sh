@@ -98,8 +98,8 @@ if [ -d "$INSTALL_DIR/.git" ]; then
     warn "Repositorio ya existe en $INSTALL_DIR — actualizando con git pull..."
     git -C "$INSTALL_DIR" pull
 else
-    info "Clonando repositorio en $INSTALL_DIR..."
-    git clone "$REPO_URL" "$INSTALL_DIR" \
+    info "Clonando repositorio (rama Implementacion) en $INSTALL_DIR..."
+    git clone -b Implementacion "$REPO_URL" "$INSTALL_DIR" \
         || die "No se pudo clonar el repositorio. Comprueba la conexión y que la URL sea correcta."
     log "Repositorio clonado"
 fi
