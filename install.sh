@@ -264,10 +264,12 @@ PYEOF
 log "Servidor web configurado (venv en webserver/venv/)"
 
 # ── 6. Symlink del teclado virtual ────────────────────────────────────────────
-info "Creando symlink del teclado virtual para Code::Blocks..."
+info "Creando symlinks de recursos para bin/Debug/..."
 mkdir -p "$INSTALL_DIR/bin/Debug"
 ln -sfn "../../keyboard" "$INSTALL_DIR/bin/Debug/keyboard"
-log "Symlink creado: bin/Debug/keyboard → ../../keyboard"
+ln -sfn "../../ui"       "$INSTALL_DIR/bin/Debug/ui"
+log "Symlinks creados: bin/Debug/keyboard → ../../keyboard"
+log "                  bin/Debug/ui       → ../../ui"
 
 # ── 8. Servicio systemd del webserver ────────────────────────────────────────
 info "Instalando servicio systemd del webserver..."
