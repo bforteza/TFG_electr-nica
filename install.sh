@@ -269,6 +269,80 @@ mkdir -p "$INSTALL_DIR/bin/Debug"
 ln -sfn "../../keyboard" "$INSTALL_DIR/bin/Debug/keyboard"
 log "Symlink creado: bin/Debug/keyboard → ../../keyboard"
 
+# ── 8. Servicio systemd del webserver ────────────────────────────────────────
+info "Instalando servicio systemd del webserver..."
+
+CURRENT_USER=$(whoami)
+SERVICE_DEST="/etc/systemd/system/armario-webserver.service"
+
+sed \
+    -e "s|__USER__|${CURRENT_USER}|g" \
+    -e "s|__INSTALL_DIR__|${INSTALL_DIR}|g" \
+    "$INSTALL_DIR/scripts/armario-webserver.service" \
+    | sudo tee "$SERVICE_DEST" > /dev/null
+
+sudo systemctl daemon-reload
+sudo systemctl enable armario-webserver.service
+sudo systemctl start armario-webserver.service
+
+log "Servicio armario-webserver instalado y arrancado (puerto 5000)"
+
+# ── 9. Raspi Connect ─────────────────────────────────────────────────────────
+if apt-cache show rpi-connect &>/dev/null; then
+    info "Instalando Raspi Connect..."
+    sudo apt-get install -y rpi-connect
+
+    # Habilitar linger: el servicio de usuario arranca aunque no haya sesión activa
+    sudo loginctl enable-linger "$CURRENT_USER"
+
+    # Habilitar e iniciar el servicio de usuario
+    systemctl --user enable rpi-connect
+    systemctl --user start rpi-connect || true
+
+    # Instalar servicio de actualización automática al arrancar
+    sudo cp "$INSTALL_DIR/scripts/rpi-connect-update.service" \
+        /etc/systemd/system/rpi-connect-update.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable rpi-connect-update.service
+
+    log "Raspi Connect instalado y habilitado"
+    warn "PENDIENTE: ejecuta 'rpi-connect signin' para vincular este dispositivo a tu cuenta."
+else
+    warn "rpi-connect no disponible en apt — omitiendo (¿no es Raspberry Pi OS oficial?)."
+fi
+
+# ── 10. Autoarranque de la app ────────────────────────────────────────────────
+info "Configurando autoarranque de la app..."
+
+# Instalar el wrapper de arranque (sustituye __INSTALL_DIR__ por el path real)
+KIOSK_SCRIPT="/usr/local/bin/armario-kiosk-session.sh"
+sed "s|__INSTALL_DIR__|${INSTALL_DIR}|g" \
+    "$INSTALL_DIR/scripts/kiosk-session.sh" \
+    | sudo tee "$KIOSK_SCRIPT" > /dev/null
+sudo chmod +x "$KIOSK_SCRIPT"
+
+# Añadir al autostart de LXDE/Pi OS (se ejecuta al iniciar sesión gráfica)
+mkdir -p "$HOME/.config/autostart"
+cp "$INSTALL_DIR/scripts/armario-kiosk.desktop" \
+    "$HOME/.config/autostart/armario-kiosk.desktop"
+
+# Configurar lightdm: autologin al escritorio por defecto
+sudo apt-get install -y lightdm
+sudo mkdir -p /etc/lightdm/lightdm.conf.d
+sudo tee /etc/lightdm/lightdm.conf.d/50-armario-autologin.conf > /dev/null << EOF
+[Seat:*]
+autologin-user=${CURRENT_USER}
+autologin-user-timeout=0
+EOF
+
+# Arranque gráfico por defecto
+sudo systemctl enable lightdm
+sudo systemctl set-default graphical.target
+
+log "Autoarranque configurado — activo en el próximo reinicio"
+warn "Mantenimiento local: pulsa ESC en la app para volver al escritorio"
+warn "Para relanzar la app: reinicia la Pi o ejecuta armario-kiosk-session.sh"
+
 # ── 7. Resumen ────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
@@ -278,14 +352,22 @@ echo ""
 echo -e "  Repositorio clonado en:  ${CYAN}${INSTALL_DIR}${NC}"
 echo -e "  Base de datos:           ${CYAN}${DB_NAME}${NC}  (user: ${DB_USER})"
 echo ""
+echo -e "  ${YELLOW}Raspi Connect — paso manual obligatorio:${NC}"
+echo    "    rpi-connect signin"
+echo    "    (vincula este dispositivo a tu cuenta Raspberry Pi)"
+echo ""
 echo -e "  ${YELLOW}Para compilar el proyecto:${NC}"
 echo    "    Abrir Code::Blocks con: ${INSTALL_DIR}/Pruebas2.cbp"
-echo    "    Build → Build"
+echo    "    Build → Build  (luego: sudo reboot para activar el kiosko)"
 echo ""
-echo -e "  ${YELLOW}Para arrancar el servidor web:${NC}"
-echo    "    cd ${INSTALL_DIR}/webserver"
-echo    "    source venv/bin/activate"
-echo    "    python app.py"
+echo -e "  ${YELLOW}Modo mantenimiento:${NC}"
+echo    "    Local:  pulsa ESC en la app → vuelves al escritorio"
+echo    "    Remoto: Raspi Connect / SSH → pkill Pruebas2"
+echo    "    Para relanzar la app: sudo reboot"
+echo ""
+echo -e "  ${YELLOW}Servidor web (arranca automáticamente como servicio):${NC}"
+echo    "    Estado:   sudo systemctl status armario-webserver"
+echo    "    Logs:     sudo journalctl -u armario-webserver -f"
 echo    "    → Panel:   http://localhost:5000/"
 echo    "    → Swagger: http://localhost:5000/openapi/"
 echo ""

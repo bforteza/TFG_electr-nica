@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Armario Kiosk
+Comment=Arranque automático del Armario de Llaves Inteligente
+Exec=/usr/local/bin/armario-kiosk-session.sh
+Type=Application
+X-GNOME-Autostart-enabled=true

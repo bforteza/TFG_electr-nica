@@ -1,0 +1,31 @@
+# =============================================================================
+#  armario-webserver.service — Armario de Llaves Inteligente
+#
+#  Plantilla de servicio systemd para el webserver Flask.
+#  Los marcadores __USER__ e __INSTALL_DIR__ son sustituidos por install.sh.
+#
+#  Instalación manual (si no se usa install.sh):
+#    sed -e "s|__USER__|pi|g" \
+#        -e "s|__INSTALL_DIR__|/home/pi/TFG_electr-nica|g" \
+#        scripts/armario-webserver.service \
+#        | sudo tee /etc/systemd/system/armario-webserver.service
+#    sudo systemctl daemon-reload
+#    sudo systemctl enable --now armario-webserver.service
+# =============================================================================
+[Unit]
+Description=Armario de Llaves — Webserver Flask
+After=network.target mariadb.service
+Requires=mariadb.service
+
+[Service]
+Type=simple
+User=__USER__
+WorkingDirectory=__INSTALL_DIR__/webserver
+ExecStart=__INSTALL_DIR__/webserver/venv/bin/python app.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

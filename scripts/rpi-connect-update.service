@@ -1,0 +1,28 @@
+# =============================================================================
+#  rpi-connect-update.service — Armario de Llaves Inteligente
+#
+#  Servicio oneshot que comprueba y aplica actualizaciones de Raspi Connect
+#  en cada arranque, una vez que hay red disponible.
+#
+#  Si no hay actualización disponible, el servicio termina en segundos
+#  sin ningún efecto. Si hay actualización, la instala; rpi-connect usará
+#  la nueva versión en el siguiente reinicio del servicio (o tras reboot).
+#
+#  Instalación manual:
+#    sudo cp scripts/rpi-connect-update.service /etc/systemd/system/
+#    sudo systemctl daemon-reload
+#    sudo systemctl enable rpi-connect-update.service
+# =============================================================================
+[Unit]
+Description=Actualización automática de Raspi Connect
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'apt-get update -qq && apt-get install --only-upgrade -y rpi-connect'
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
