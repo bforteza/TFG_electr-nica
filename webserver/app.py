@@ -117,6 +117,10 @@ class UserOut(BaseModel):
     level:  int  = Field(description="0=básico · 1=gestión llaves · 2=admin")
     active: bool
 
+class UserDetailOut(UserOut):
+    """Datos completos de un usuario, incluyendo contraseña."""
+    password: str
+
 class UserIn(BaseModel):
     """Datos para crear o editar un usuario."""
     name:     str  = Field(...,   description="Nombre del usuario (mínimo 3 caracteres)")
@@ -475,7 +479,7 @@ def api_users_create(body: UserIn):
 
 
 @app.get("/api/users/<int:user_id>", tags=[tag_users], summary="Consultar un usuario",
-         responses={"200": UserOut, "404": ErrorResponse})
+         responses={"200": UserDetailOut, "404": ErrorResponse})
 def api_users_get(path: PathUserId):
     """Devuelve todos los campos de un usuario: id, nombre, contraseña, nivel y estado."""
     db = get_db()
@@ -501,23 +505,34 @@ def api_users_update(path: PathUserId, body: UserIn):
     """
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id_ FROM Person_ WHERE id_=%s", (path.user_id,))
-        if not cur.fetchone():
+        cur.execute("SELECT active_ FROM Person_ WHERE id_=%s", (path.user_id,))
+        existing = cur.fetchone()
+        if not existing:
             db.close()
             return {"success": False, "message": "Usuario no encontrado"}, 404
+    with db.cursor() as cur:
         cur.execute("SELECT id_ FROM Person_ WHERE name_=%s AND id_!=%s", (body.name, path.user_id))
         if cur.fetchone():
             db.close()
             return {"success": False, "message": "Ya existe un usuario con ese nombre"}, 409
-        if body.password:
+    if body.password:
+        with db.cursor() as cur:
             cur.execute("SELECT id_ FROM Person_ WHERE password_=%s AND id_!=%s", (body.password, path.user_id))
             if cur.fetchone():
                 db.close()
                 return {"success": False, "message": "La contraseña ya está en uso"}, 409
-        cur.execute(
-            "UPDATE Person_ SET name_=%s, password_=%s, level_=%s, active_=%s WHERE id_=%s",
-            (body.name, body.password, body.level, int(body.active), path.user_id),
-        )
+    reactivating = (not existing["active_"]) and body.active
+    with db.cursor() as cur:
+        if reactivating:
+            cur.execute(
+                "UPDATE Person_ SET name_=%s, password_=%s, level_=%s, active_=%s, uid_='' WHERE id_=%s",
+                (body.name, body.password, body.level, int(body.active), path.user_id),
+            )
+        else:
+            cur.execute(
+                "UPDATE Person_ SET name_=%s, password_=%s, level_=%s, active_=%s WHERE id_=%s",
+                (body.name, body.password, body.level, int(body.active), path.user_id),
+            )
     db.commit()
     db.close()
     return {"success": True, "message": "Usuario actualizado"}
