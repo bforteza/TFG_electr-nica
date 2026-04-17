@@ -112,15 +112,17 @@ app.jinja_env.globals.update(
 
 class UserOut(BaseModel):
     """Datos de un usuario devueltos por la API."""
-    id:    int
-    name:  str
-    level: int = Field(description="0=básico · 1=gestión llaves · 2=admin")
+    id:     int
+    name:   str
+    level:  int  = Field(description="0=básico · 1=gestión llaves · 2=admin")
+    active: bool
 
 class UserIn(BaseModel):
     """Datos para crear o editar un usuario."""
-    name:     str = Field(...,  description="Nombre del usuario (mínimo 3 caracteres)")
-    password: str = Field(...,  description="Contraseña numérica (mínimo 3 dígitos, obligatoria)")
-    level:    int = Field(0, ge=0, le=2, description="Nivel de acceso (0, 1 o 2)")
+    name:     str  = Field(...,   description="Nombre del usuario (mínimo 3 caracteres)")
+    password: str  = Field(...,   description="Contraseña numérica (mínimo 3 dígitos, obligatoria)")
+    level:    int  = Field(0, ge=0, le=2, description="Nivel de acceso (0, 1 o 2)")
+    active:   bool = Field(True,  description="False = usuario desactivado")
 
     @field_validator("name")
     @classmethod
@@ -431,24 +433,25 @@ def history_list():
 @app.get("/api/users", tags=[tag_users], summary="Listar todos los usuarios",
          responses={"200": UserOut})
 def api_users_list():
-    """Devuelve la lista completa de usuarios con id, nombre y nivel de acceso."""
+    """Lista todos los usuarios con id, nombre, nivel de acceso y estado activo."""
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id_, name_, level_ FROM Person_ ORDER BY name_")
+        cur.execute("SELECT id_, name_, level_, active_ FROM Person_ ORDER BY name_")
         rows = cur.fetchall()
     db.close()
-    return [{"id": r["id_"], "name": r["name_"], "level": int(r["level_"])} for r in rows]
+    return [{"id": r["id_"], "name": r["name_"], "level": int(r["level_"]), "active": bool(r["active_"])} for r in rows]
 
 
 @app.post("/api/users", tags=[tag_users], summary="Crear un usuario",
           responses={"201": UserOut, "409": ErrorResponse, "422": ErrorResponse})
 def api_users_create(body: UserIn):
     """
-    Crea un nuevo usuario. Devuelve el usuario creado con su id asignado.
+    Crea un nuevo usuario. Devuelve el registro completo con el id asignado.
 
-    - **name**: obligatorio
-    - **password**: contraseña numérica, mínimo 5 dígitos, debe ser única
-    - **level**: 0=básico, 1=gestión llaves, 2=administrador completo
+    - **name**: obligatorio, mínimo 3 caracteres, único
+    - **password**: mínimo 3 dígitos, debe ser única en el sistema
+    - **level**: 0 = básico · 1 = gestión de llaves · 2 = administrador
+    - **active**: False = usuario desactivado (por defecto True)
     """
     db = get_db()
     with db.cursor() as cur:
@@ -474,23 +477,27 @@ def api_users_create(body: UserIn):
 @app.get("/api/users/<int:user_id>", tags=[tag_users], summary="Consultar un usuario",
          responses={"200": UserOut, "404": ErrorResponse})
 def api_users_get(path: PathUserId):
-    """Devuelve los datos de un usuario concreto por su id."""
+    """Devuelve todos los campos de un usuario: id, nombre, contraseña, nivel y estado."""
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id_, name_, password_, level_ FROM Person_ WHERE id_=%s", (path.user_id,))
+        cur.execute("SELECT id_, name_, password_, level_, active_ FROM Person_ WHERE id_=%s", (path.user_id,))
         row = cur.fetchone()
     db.close()
     if not row:
         return {"success": False, "message": "Usuario no encontrado"}, 404
-    return {"id": row["id_"], "name": row["name_"], "password": row["password_"], "level": int(row["level_"])}
+    return {"id": row["id_"], "name": row["name_"], "password": row["password_"], "level": int(row["level_"]), "active": bool(row["active_"])}
 
 
 @app.put("/api/users/<int:user_id>", tags=[tag_users], summary="Editar un usuario",
          responses={"200": SuccessResponse, "404": ErrorResponse, "409": ErrorResponse, "422": ErrorResponse})
 def api_users_update(path: PathUserId, body: UserIn):
     """
-    Modifica los datos de un usuario existente.
-    Pasar todos los campos aunque no cambien (reemplaza el registro completo).
+    Reemplaza todos los datos de un usuario existente.
+
+    - **name**: obligatorio, mínimo 3 caracteres, único
+    - **password**: mínimo 3 dígitos, debe ser única en el sistema
+    - **level**: 0 = básico · 1 = gestión de llaves · 2 = administrador
+    - **active**: False = desactiva el usuario
     """
     db = get_db()
     with db.cursor() as cur:
@@ -508,30 +515,12 @@ def api_users_update(path: PathUserId, body: UserIn):
                 db.close()
                 return {"success": False, "message": "La contraseña ya está en uso"}, 409
         cur.execute(
-            "UPDATE Person_ SET name_=%s, password_=%s, level_=%s WHERE id_=%s",
-            (body.name, body.password, body.level, path.user_id),
+            "UPDATE Person_ SET name_=%s, password_=%s, level_=%s, active_=%s WHERE id_=%s",
+            (body.name, body.password, body.level, int(body.active), path.user_id),
         )
     db.commit()
     db.close()
     return {"success": True, "message": "Usuario actualizado"}
-
-
-@app.delete("/api/users/<int:user_id>", tags=[tag_users], summary="Eliminar un usuario",
-            responses={"200": SuccessResponse, "404": ErrorResponse})
-def api_users_delete(path: PathUserId):
-    """Elimina un usuario y todas sus relaciones con llaves."""
-    db = get_db()
-    with db.cursor() as cur:
-        cur.execute("SELECT id_ FROM Person_ WHERE id_=%s", (path.user_id,))
-        if not cur.fetchone():
-            db.close()
-            return {"success": False, "message": "Usuario no encontrado"}, 404
-        cur.execute("DELETE FROM Key_Person_Acces WHERE Person2_=%s", (path.user_id,))
-        cur.execute("DELETE FROM Key_Person_Keep  WHERE Person2_=%s", (path.user_id,))
-        cur.execute("DELETE FROM Person_ WHERE id_=%s", (path.user_id,))
-    db.commit()
-    db.close()
-    return {"success": True, "message": "Usuario eliminado"}
 
 
 # ── Llaves ────────────────────────────────────────────────────────────────────
