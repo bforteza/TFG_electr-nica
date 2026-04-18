@@ -1,0 +1,26 @@
+2026-04-18 19:51:21 [INFO ] [APP    ] APPLICATION START
+2026-04-18 19:51:21 [INFO ] [DB     ] Connection OK
+2026-04-18 19:51:21 [ERROR] [NFC    ] no se ha encontrado dispositivo NFC
+2026-04-18 19:51:21 [ERROR] [I2C    ] Init failed: no se pudo abrir /dev/i2c
+2026-04-18 19:51:33 [INFO ] [APP    ] APPLICATION STOP: ESC (maintenance)
+2026-04-18 19:52:04 [INFO ] [WEB    ] Network OK
+2026-04-18 19:52:04 [INFO ] [WEB    ] SERVER START
+2026-04-18 19:52:13 [INFO ] [WEB    ] SERVER STOP
+2026-04-18 19:52:37 [INFO ] [APP    ] APPLICATION START
+2026-04-18 19:52:37 [INFO ] [DB     ] Connection OK
+2026-04-18 19:52:37 [ERROR] [NFC    ] no se ha encontrado dispositivo NFC
+2026-04-18 19:52:37 [ERROR] [I2C    ] Init failed: no se pudo abrir /dev/i2c
+2026-04-18 19:52:42 [ERROR] [I2C    ] WriteReg failed: reg=0x2 tras 5 intentos
+2026-04-18 19:52:42 [ERROR] [I2C    ] WriteReg failed: reg=0x3 tras 5 intentos
+2026-04-18 19:52:44 [ERROR] [I2C    ] WriteReg failed: reg=0x2 tras 5 intentos
+2026-04-18 19:52:44 [ERROR] [I2C    ] WriteReg failed: reg=0x3 tras 5 intentos
+2026-04-18 19:52:44 [ERROR] [I2C    ] WriteReg failed: reg=0x2 tras 5 intentos
+2026-04-18 19:52:44 [ERROR] [I2C    ] WriteReg failed: reg=0x3 tras 5 intentos
+2026-04-18 19:52:45 [ERROR] [I2C    ] WriteReg failed: reg=0x2 tras 5 intentos
+2026-04-18 19:52:45 [ERROR] [I2C    ] WriteReg failed: reg=0x3 tras 5 intentos
+2026-04-18 19:52:45 [ERROR] [I2C    ] WriteReg failed: reg=0x2 tras 5 intentos
+2026-04-18 19:52:45 [ERROR] [I2C    ] WriteReg failed: reg=0x3 tras 5 intentos
+2026-04-18 19:53:07 [ERROR] [I2C    ] WriteReg failed: reg=0x2 tras 5 intentos
+2026-04-18 19:53:07 [ERROR] [I2C    ] WriteReg failed: reg=0x3 tras 5 intentos
+2026-04-18 19:53:09 [ERROR] [I2C    ] WriteReg failed: reg=0x2 tras 5 intentos
+2026-04-18 19:53:09 [ERROR] [I2C    ] WriteReg failed: reg=0x3 tras 5 intentos

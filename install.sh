@@ -263,13 +263,17 @@ DB_CONFIG = {
 PYEOF
 log "Servidor web configurado (venv en webserver/venv/)"
 
-# ── 6. Symlink del teclado virtual ────────────────────────────────────────────
+# ── 6. Symlink del teclado virtual y directorio de logs ───────────────────────
 info "Creando symlinks de recursos para bin/Debug/..."
 mkdir -p "$INSTALL_DIR/bin/Debug"
 ln -sfn "../../keyboard" "$INSTALL_DIR/bin/Debug/keyboard"
 ln -sfn "../../ui"       "$INSTALL_DIR/bin/Debug/ui"
 log "Symlinks creados: bin/Debug/keyboard → ../../keyboard"
 log "                  bin/Debug/ui       → ../../ui"
+
+info "Creando directorio de logs..."
+mkdir -p "$INSTALL_DIR/logs"
+log "Directorio de logs: $INSTALL_DIR/logs/"
 
 # ── 8. Servicio systemd del webserver ────────────────────────────────────────
 info "Instalando servicio systemd del webserver..."

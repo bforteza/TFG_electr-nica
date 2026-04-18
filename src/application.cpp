@@ -1,8 +1,10 @@
 #include "application.h"
+#include "app_logger.h"
 #include "globals.h"
 #include "i2c_controller.h"
 #include "litesql.hpp"
 #include <iostream>
+#include <sstream>
 #include <gtkmm/cssprovider.h>
 #include <gtkmm/settings.h>
 #include <gtkmm/stylecontext.h>
@@ -38,6 +40,8 @@ void Application::on_activate() {
 }
 
 void Application::on_startup() {
+    AppLogger::Init();
+
     Gtk::Application::on_startup();
 
     // Tema GTK — cambiar "Arc" por el tema instalado en el sistema.
@@ -51,8 +55,11 @@ void Application::on_startup() {
         if (db->needsUpgrade())
             db->upgrade();
         db->verbose = false;
+        AppLogger::Info("DB", "Connection OK");
     } catch (litesql::Except& e) {
-        std::cerr << "DB error: " << e << std::endl;
+        std::ostringstream oss;
+        oss << e;
+        AppLogger::Error("DB", "Connection error: " + oss.str());
         quit();
         return;
     }
@@ -61,7 +68,9 @@ void Application::on_startup() {
 
     hw_ctrl = std::make_unique<I2cController>();
     if (!hw_ctrl->Init())
-        std::cerr << "Hardware warning: no se pudo inicializar el XL9535 (I2C)" << std::endl;
+        AppLogger::Error("I2C", "Init failed: no se pudo abrir /dev/i2c");
+    else
+        AppLogger::Info("I2C", "Init OK");
 
     // Carga la hoja de estilos global (fuentes, tamaños para pantalla táctil).
     // Para ajustar tamaños edita ui/style.css — ver comentarios en ese archivo.

@@ -1,28 +1,28 @@
 #include "nfc_manager.h"
-#include <iostream>
+#include "app_logger.h"
 #include <iomanip>
 #include <sstream>
 
 NfcManager::NfcManager() : context_(nullptr), device_(nullptr), polling_(false) {
     nfc_init(&context_);
     if (!context_) {
-        std::cerr << "NfcManager: no se pudo inicializar libnfc\n";
+        AppLogger::Error("NFC", "no se pudo inicializar libnfc");
         return;
     }
     device_ = nfc_open(context_, nullptr);
     if (!device_) {
-        std::cerr << "NfcManager: no se ha encontrado dispositivo NFC\n";
+        AppLogger::Error("NFC", "no se ha encontrado dispositivo NFC");
         return;
     }
     if (nfc_initiator_init(device_) < 0) {
-        std::cerr << "NfcManager: no se pudo inicializar el dispositivo\n";
+        AppLogger::Error("NFC", "no se pudo inicializar el dispositivo");
         nfc_close(device_);
         nfc_exit(context_);
         device_  = nullptr;
         context_ = nullptr;
         return;
     }
-    std::cout << "NfcManager: lector NFC inicializado correctamente\n";
+    AppLogger::Info("NFC", "lector NFC inicializado correctamente");
 }
 
 NfcManager::~NfcManager() {

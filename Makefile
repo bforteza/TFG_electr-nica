@@ -17,6 +17,7 @@ LDFLAGS  := $(shell pkg-config gtkmm-3.0 libcanberra-gtk3 --libs) \
             -lpthread
 
 SRCS := main.cpp \
+        src/app_logger.cpp \
         src/application.cpp \
         src/sound_manager.cpp \
         src/dbmanager.cpp \

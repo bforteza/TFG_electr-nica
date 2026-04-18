@@ -1,4 +1,5 @@
 #include "i2c_controller.h"
+#include "app_logger.h"
 #include "hardware_config.h"
 
 #include <fcntl.h>
@@ -7,7 +8,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <cstdint>
-#include <iostream>
+#include <sstream>
 #include <string>
 #include <thread>
 
@@ -34,8 +35,10 @@ static bool WriteRegRetry(int fd, uint8_t reg, uint8_t value) {
             return true;
         std::this_thread::sleep_for(std::chrono::milliseconds(kI2cRetryDelayMs));
     }
-    std::cerr << "I2C error: fallo reg=0x" << std::hex << (int)reg
-              << " tras " << std::dec << kI2cRetries << " intentos" << std::endl;
+    std::ostringstream oss;
+    oss << "WriteReg failed: reg=0x" << std::hex << (int)reg
+        << " tras " << std::dec << kI2cRetries << " intentos";
+    AppLogger::Error("I2C", oss.str());
     return false;
 }
 

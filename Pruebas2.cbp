@@ -49,6 +49,7 @@
 			<Add option="-li2c" />
 			<Add option="-lpthread" />
 		</Linker>
+		<Unit filename="include/app_logger.h" />
 		<Unit filename="include/application.h" />
 		<Unit filename="include/dbmanager.hpp" />
 		<Unit filename="include/globals.h" />
@@ -71,6 +72,7 @@
 		<Unit filename="include/users_view_stack.h" />
 		<Unit filename="include/window.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="src/app_logger.cpp" />
 		<Unit filename="src/application.cpp" />
 		<Unit filename="src/dbmanager.cpp" />
 		<Unit filename="src/globals.cpp" />

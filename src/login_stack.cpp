@@ -1,4 +1,5 @@
 #include "login_stack.h"
+#include "app_logger.h"
 #include "globals.h"
 #include "translations.h"
 #include "sound_manager.h"
@@ -113,8 +114,10 @@ void LoginStack::OnShutdownClicked()
     Gtk::MessageDialog dlg(Tr().login.btn_shutdown, false,
                            Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
     dlg.set_secondary_text(Tr().login.confirm_shutdown);
-    if (dlg.run() == Gtk::RESPONSE_YES)
+    if (dlg.run() == Gtk::RESPONSE_YES) {
+        AppLogger::Shutdown(AppLogger::ShutdownReason::kShutdown);
         Glib::spawn_command_line_async("systemctl poweroff");
+    }
 }
 
 void LoginStack::OnRebootClicked()
@@ -122,8 +125,10 @@ void LoginStack::OnRebootClicked()
     Gtk::MessageDialog dlg(Tr().login.btn_reboot, false,
                            Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
     dlg.set_secondary_text(Tr().login.confirm_reboot);
-    if (dlg.run() == Gtk::RESPONSE_YES)
+    if (dlg.run() == Gtk::RESPONSE_YES) {
+        AppLogger::Shutdown(AppLogger::ShutdownReason::kReboot);
         Glib::spawn_command_line_async("systemctl reboot");
+    }
 }
 
 void LoginStack::OnNfcDetected(const std::string& uid)

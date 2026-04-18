@@ -255,6 +255,28 @@ Igual que `KeyViewStack`: `GtkBox` vertical con dos `GtkBox` horizontales (`homo
 - Fila 1: AddKeyToUserButton, RemoveKeyToUserButton, ViewKeysOfUserButton, SelectUserButton
 - Fila 2: UserEditButton, DeleteUserButton, HistoryPersonButton, RecoverUserButton
 
+## Sistema de Log Persistente (AppLogger)
+
+Archivos: `include/app_logger.h`, `src/app_logger.cpp`, `webserver/logger.py`
+Log en: `~/TFG_electr-nica/logs/armario.log` (relativo al ejecutable: `../../logs/armario.log`)
+
+### C++ — AppLogger (clase estática, thread-safe)
+- `AppLogger::Init()` — llamar al inicio de `Application::on_startup()`. Crea el directorio `logs/` si no existe, abre el archivo en modo append, registra `APPLICATION START`. Si la última línea no contiene `APPLICATION STOP`, registra aviso de crash previo.
+- `AppLogger::Shutdown(ShutdownReason)` — registra `APPLICATION STOP: <motivo>` y cierra el stream. Razones: `kEsc` (ESC en `window.cpp`), `kShutdown` (`login_stack.cpp:OnShutdownClicked`), `kReboot` (`login_stack.cpp:OnRebootClicked`).
+- `AppLogger::Info(source, msg)` / `AppLogger::Error(source, msg)` — thread-safe via mutex. Fuentes: `"APP"`, `"DB"`, `"I2C"`, `"NFC"`.
+- **Rotación**: cuando `armario.log` supera 5 MB, se renombra a `armario.log.bak` y se abre uno nuevo. Solo hay un backup.
+
+### Python — logger.py (webserver)
+- `logger.setup()` — llamar antes de `app.run()`. Configura `WatchedFileHandler` (detecta rotaciones del C++) sobre el mismo `armario.log`. Comprueba estado de red al arrancar, lanza hilo daemon `net-monitor`.
+- `logger.info(source, msg)` / `logger.error(source, msg)` — escribe al mismo archivo. Fuente: `"WEB"`.
+- **Hilo net-monitor**: cada 30 s lee `/sys/class/net/<iface>/operstate`. Solo loguea en transiciones UP→DOWN o DOWN→UP.
+
+### Formato de línea
+```
+YYYY-MM-DD HH:MM:SS [LEVEL] [SOURCE ] mensaje
+```
+`LEVEL`: `INFO ` / `ERROR` / `WARN ` (5 chars). `SOURCE`: 7 chars con padding. Ver `docs/log_reference.md` para catálogo completo de mensajes.
+
 ## Partes Pendientes de Implementar
 1. **Devolución de llaves por NFC**: modo RETURN definido en SolenoidPanel y `OnKeyLogged` en Window, pero flujo no probado (sin hardware NFC disponible actualmente).
 2. **Ajuste pin mapping**: `kRowPins` y `kColPins` en `hardware_config.h` deben verificarse contra el cableado real de la PCB antes del despliegue en Raspberry Pi.

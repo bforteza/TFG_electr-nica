@@ -1,4 +1,5 @@
 #include "window.h"
+#include "app_logger.h"
 #include "sound_manager.h"
 #include "history_logger.h"
 #include "globals.h"
@@ -99,6 +100,7 @@ void Window::StopInactivityTimer() {
 bool Window::on_key_press_event(GdkEventKey* event) {
     ResetInactivityTimer();
     if (event->keyval == GDK_KEY_Escape) {
+        AppLogger::Shutdown(AppLogger::ShutdownReason::kEsc);
         get_application()->quit();
         return true;
     }

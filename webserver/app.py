@@ -1,9 +1,12 @@
+import atexit
 from flask import render_template, request, redirect, url_for, jsonify
 from flask_openapi3 import OpenAPI, Info, Tag
+import pymysql
 import pymysql.cursors
 from config import DB_CONFIG
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
+import logger as syslog
 
 # ─── APP ──────────────────────────────────────────────────────────────────────
 
@@ -61,7 +64,11 @@ ALL_POSITIONS = [
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
 
 def get_db():
-    return pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
+    try:
+        return pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
+    except pymysql.err.OperationalError as e:
+        syslog.error('WEB', f'DB connection error: {e}')
+        raise
 
 
 def pos_to_string(pos):
@@ -577,4 +584,7 @@ def api_history(query: HistoryQuery):
 
 
 if __name__ == "__main__":
+    syslog.setup()
+    syslog.info('WEB', 'SERVER START')
+    atexit.register(lambda: syslog.info('WEB', 'SERVER STOP'))
     app.run(host="0.0.0.0", port=5000, debug=False)
