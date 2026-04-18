@@ -29,8 +29,8 @@ webserver/
   requirements.txt
   templates/
     base.html
-    users/list.html  users/form.html
-    keys/list.html   keys/form.html
+    users/list.html
+    keys/list.html
     history/list.html
 ```
 
@@ -136,18 +136,30 @@ Reutilizar el mismo cursor sin vaciarlo puede hacer que el segundo `fetchone()` 
 
 ## Rutas HTML
 
+Panel de **solo consulta** (sin formularios de creación/edición/eliminación).
+
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/` | Redirige a `/users` |
-| GET | `/users` | Lista usuarios |
-| GET/POST | `/users/new` | Crear usuario |
-| GET/POST | `/users/<id>/edit` | Editar usuario |
-| POST | `/users/<id>/delete` | Eliminar usuario + relaciones |
-| GET | `/keys` | Lista llaves con keeper |
-| GET/POST | `/keys/new` | Crear llave |
-| GET/POST | `/keys/<id>/edit` | Editar llave |
-| POST | `/keys/<id>/delete` | Eliminar llave + relaciones |
+| GET | `/users` | Lista todos los usuarios (ID, nombre, nivel, estado) |
+| GET | `/keys` | Lista llaves activas (ID, pos, nombre, ubicación, acceso, posesión) |
 | GET | `/history` | Historial (filtros: key_id, person_id, etype) |
+
+### Columnas `/users`
+ID · Nombre · Nivel de acceso (badge 0/1/2) · Estado (Activo / Inactivo)
+
+### Columnas `/keys`
+Solo muestra llaves con `active_=1`. Columnas: ID · Posición · Nombre · Ubicación · Acceso (badge "Pública" si `pub_=1`, o badges con nombres de usuarios autorizados) · En posesión de (nombre o "En armario").
+
+**Archivos de plantilla:**
+```
+templates/
+  base.html
+  users/list.html
+  keys/list.html
+  history/list.html
+```
+(`users/form.html` y `keys/form.html` eliminados — ya no hay CRUD en HTML)
 
 ---
 
