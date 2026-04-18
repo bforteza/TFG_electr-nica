@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, jsonify
 from flask_openapi3 import OpenAPI, Info, Tag
 import pymysql.cursors
 from config import DB_CONFIG
@@ -215,86 +215,20 @@ def index():
 def users_list():
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id_, name_, password_, uid_, level_ FROM Person_ ORDER BY name_")
+        cur.execute("SELECT id_, name_, level_, active_ FROM Person_ ORDER BY name_")
         users = cur.fetchall()
     db.close()
-    for u in users:
-        u["access"] = int(u["level_"])
     return render_template("users/list.html", users=users)
 
-@app.route("/users/new", methods=["GET", "POST"])
-def users_new():
-    if request.method == "POST":
-        name     = request.form["name"].strip()
-        password = request.form["password"].strip()
-        uid      = request.form["uid"].strip()
-        level    = int(request.form.get("level", 0))
-        if not name:
-            flash("El nombre es obligatorio.", "danger")
-            return render_template("users/form.html", user=None, action="new")
-        db = get_db()
-        with db.cursor() as cur:
-            cur.execute(
-                "INSERT INTO Person_ (type_, name_, password_, uid_, level_) "
-                "VALUES ('Person', %s, %s, %s, %s)",
-                (name, password, uid, level),
-            )
-        db.commit()
-        db.close()
-        flash(f'Usuario "{name}" creado.', "success")
-        return redirect(url_for("users_list"))
-    return render_template("users/form.html", user=None, action="new")
-
-@app.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
-def users_edit(user_id):
-    db = get_db()
-    if request.method == "POST":
-        name     = request.form["name"].strip()
-        password = request.form["password"].strip()
-        uid      = request.form["uid"].strip()
-        level    = int(request.form.get("level", 0))
-        with db.cursor() as cur:
-            cur.execute(
-                "UPDATE Person_ SET name_=%s, password_=%s, uid_=%s, level_=%s WHERE id_=%s",
-                (name, password, uid, level, user_id),
-            )
-        db.commit()
-        db.close()
-        flash("Usuario actualizado.", "success")
-        return redirect(url_for("users_list"))
-    with db.cursor() as cur:
-        cur.execute("SELECT id_, name_, password_, uid_, level_ FROM Person_ WHERE id_=%s", (user_id,))
-        user = cur.fetchone()
-    db.close()
-    if not user:
-        flash("Usuario no encontrado.", "danger")
-        return redirect(url_for("users_list"))
-    return render_template("users/form.html", user=user, action="edit")
-
-@app.route("/users/<int:user_id>/delete", methods=["POST"])
-def users_delete(user_id):
-    db = get_db()
-    with db.cursor() as cur:
-        cur.execute("SELECT name_ FROM Person_ WHERE id_=%s", (user_id,))
-        user = cur.fetchone()
-        if user:
-            cur.execute("DELETE FROM Key_Person_Acces WHERE Person2_=%s", (user_id,))
-            cur.execute("DELETE FROM Key_Person_Keep  WHERE Person2_=%s", (user_id,))
-            cur.execute("DELETE FROM Person_ WHERE id_=%s", (user_id,))
-            db.commit()
-            flash(f'Usuario "{user["name_"]}" eliminado.', "success")
-        else:
-            flash("Usuario no encontrado.", "danger")
-    db.close()
-    return redirect(url_for("users_list"))
 
 @app.route("/keys")
 def keys_list():
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id_, name_, ubi_, commentary_, pos_, active_, uid_, pub_ FROM Key_ ORDER BY pos_")
+        cur.execute("SELECT id_, name_, ubi_, pos_, pub_ FROM Key_ WHERE active_=1 ORDER BY pos_")
         keys = cur.fetchall()
-        for k in keys:
+    for k in keys:
+        with db.cursor() as cur:
             cur.execute(
                 "SELECT p.name_ FROM Person_ p "
                 "JOIN Key_Person_Keep kk ON p.id_ = kk.Person2_ WHERE kk.Key1_ = %s",
@@ -302,103 +236,16 @@ def keys_list():
             )
             keeper = cur.fetchone()
             k["keeper"] = keeper["name_"] if keeper else None
+        with db.cursor() as cur:
+            cur.execute(
+                "SELECT p.name_ FROM Person_ p "
+                "JOIN Key_Person_Acces ka ON p.id_ = ka.Person2_ WHERE ka.Key1_ = %s ORDER BY p.name_",
+                (k["id_"],),
+            )
+            k["authorized"] = [r["name_"] for r in cur.fetchall()]
     db.close()
     return render_template("keys/list.html", keys=keys)
 
-@app.route("/keys/new", methods=["GET", "POST"])
-def keys_new():
-    db = get_db()
-    with db.cursor() as cur:
-        cur.execute("SELECT id_, name_ FROM Person_ ORDER BY name_")
-        persons = cur.fetchall()
-        cur.execute("SELECT pos_ FROM Key_ WHERE pos_ >= 0")
-        taken_pos = {row["pos_"] for row in cur.fetchall()}
-    if request.method == "POST":
-        name           = request.form["name"].strip()
-        ubi            = request.form["ubi"].strip()
-        commentary     = request.form["commentary"].strip()
-        pos            = pos_from_string(request.form.get("pos", ""))
-        active         = 1 if request.form.get("active") else 0
-        pub            = 1 if request.form.get("pub") else 0
-        uid            = request.form["uid"].strip()
-        authorized_ids = [] if pub else request.form.getlist("authorized")
-        if not name:
-            flash("El nombre es obligatorio.", "danger")
-            db.close()
-            return render_template("keys/form.html", key=None, persons=persons, authorized_ids=[], taken_pos=taken_pos, action="new")
-        with db.cursor() as cur:
-            cur.execute(
-                "INSERT INTO Key_ (type_, name_, ubi_, commentary_, pos_, active_, uid_, pub_) "
-                "VALUES ('Key', %s, %s, %s, %s, %s, %s, %s)",
-                (name, ubi, commentary, pos, active, uid, pub),
-            )
-            key_id = cur.lastrowid
-            for pid in authorized_ids:
-                cur.execute("INSERT INTO Key_Person_Acces (Key1_, Person2_) VALUES (%s, %s)", (key_id, pid))
-        db.commit()
-        db.close()
-        flash(f'Llave "{name}" creada.', "success")
-        return redirect(url_for("keys_list"))
-    db.close()
-    return render_template("keys/form.html", key=None, persons=persons, authorized_ids=[], taken_pos=taken_pos, action="new")
-
-@app.route("/keys/<int:key_id>/edit", methods=["GET", "POST"])
-def keys_edit(key_id):
-    db = get_db()
-    with db.cursor() as cur:
-        cur.execute("SELECT id_, name_, ubi_, commentary_, pos_, active_, uid_, pub_ FROM Key_ WHERE id_=%s", (key_id,))
-        key = cur.fetchone()
-    if not key:
-        db.close()
-        flash("Llave no encontrada.", "danger")
-        return redirect(url_for("keys_list"))
-    if request.method == "POST":
-        name           = request.form["name"].strip()
-        ubi            = request.form["ubi"].strip()
-        commentary     = request.form["commentary"].strip()
-        pos            = pos_from_string(request.form.get("pos", ""))
-        active         = 1 if request.form.get("active") else 0
-        pub            = 1 if request.form.get("pub") else 0
-        uid            = request.form["uid"].strip()
-        authorized_ids = [] if pub else [int(x) for x in request.form.getlist("authorized")]
-        with db.cursor() as cur:
-            cur.execute(
-                "UPDATE Key_ SET name_=%s, ubi_=%s, commentary_=%s, pos_=%s, active_=%s, uid_=%s, pub_=%s WHERE id_=%s",
-                (name, ubi, commentary, pos, active, uid, pub, key_id),
-            )
-            cur.execute("DELETE FROM Key_Person_Acces WHERE Key1_=%s", (key_id,))
-            for pid in authorized_ids:
-                cur.execute("INSERT INTO Key_Person_Acces (Key1_, Person2_) VALUES (%s, %s)", (key_id, pid))
-        db.commit()
-        db.close()
-        flash("Llave actualizada.", "success")
-        return redirect(url_for("keys_list"))
-    with db.cursor() as cur:
-        cur.execute("SELECT id_, name_ FROM Person_ ORDER BY name_")
-        persons = cur.fetchall()
-        cur.execute("SELECT Person2_ FROM Key_Person_Acces WHERE Key1_=%s", (key_id,))
-        authorized_ids = [row["Person2_"] for row in cur.fetchall()]
-        cur.execute("SELECT pos_ FROM Key_ WHERE pos_ >= 0 AND id_ != %s", (key_id,))
-        taken_pos = {row["pos_"] for row in cur.fetchall()}
-    db.close()
-    return render_template("keys/form.html", key=key, persons=persons, authorized_ids=authorized_ids, taken_pos=taken_pos, action="edit")
-
-@app.route("/keys/<int:key_id>/delete", methods=["POST"])
-def keys_delete(key_id):
-    db = get_db()
-    with db.cursor() as cur:
-        cur.execute("SELECT name_ FROM Key_ WHERE id_=%s", (key_id,))
-        key = cur.fetchone()
-        if key:
-            cur.execute("DELETE FROM Key_Person_Acces WHERE Key1_=%s", (key_id,))
-            cur.execute("DELETE FROM Key_Person_Keep  WHERE Key1_=%s", (key_id,))
-            cur.execute("DELETE FROM Key_ WHERE id_=%s", (key_id,))
-            db.commit()
-            flash(f'Llave "{key["name_"]}" eliminada.', "success")
-        else:
-            flash("Llave no encontrada.", "danger")
-    db.close()
-    return redirect(url_for("keys_list"))
 
 @app.route("/history")
 def history_list():
