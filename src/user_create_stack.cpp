@@ -203,8 +203,10 @@ void UserCreateStack::OnGenerateButtonClicked() {
         valid = false;
     }
     if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid
-                                         && kdb::Person::Id != exclude_id).count() +
-        litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid).count()) {
+                                         && kdb::Person::Id != exclude_id
+                                         && kdb::Person::Active == true).count() +
+        litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid
+                                      && kdb::Key::Active == true).count()) {
         nfc_error_label_->set_text(Tr().user_create.error_card_in_use);
         valid = false;
     }

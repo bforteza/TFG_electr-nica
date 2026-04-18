@@ -126,6 +126,12 @@ void HomeStack::PersonLogged(std::shared_ptr<kdb::Person> person) {
         solenoid_panel_button_->show();
         history_button_->show();
     }
+
+    if (((std::string)person->uid).empty())
+        SelfEditProfile(person);
+    else if (access_== 0){
+        OnViewKeysButtonClicked();
+    }
 }
 
 // --- Navegación ---

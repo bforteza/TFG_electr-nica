@@ -168,9 +168,11 @@ void KeyCreateStack::OnGenerateButtonClicked() {
         valid = false;
     }
     // Validar UID único (excluyendo la llave actual en modo edición).
-    if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid).count() +
+    if (litesql::select<kdb::Person>(*db, kdb::Person::Uid == uid
+                                          && kdb::Person::Active == true).count() +
         litesql::select<kdb::Key>(*db, kdb::Key::Uid == uid
-                                      && kdb::Key::Id != exclude_id).count()) {
+                                      && kdb::Key::Id != exclude_id
+                                      && kdb::Key::Active == true).count()) {
         uid_error_label_->set_text(Tr().key_create.error_card_in_use);
         valid = false;
     }

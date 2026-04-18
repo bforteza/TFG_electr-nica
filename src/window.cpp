@@ -115,8 +115,6 @@ void Window::OnBackButtonClicked() {
 void Window::OnUserLogged(std::shared_ptr<kdb::Person> person) {
     main_stack_->set_visible_child("HomeView");
     home_stack_.PersonLogged(person);
-    if (((std::string)person->uid).empty())
-        home_stack_.SelfEditProfile(person);
     ResetInactivityTimer();
 }
 
