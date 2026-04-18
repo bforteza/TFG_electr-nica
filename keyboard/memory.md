@@ -92,10 +92,11 @@ Hereda de `Gtk.Window`. Al construirse:
 3. Construye la UI: título opcional → campo `Gtk.Entry` → 3 filas de teclas → fila inferior.
 
 Cada tecla es un `Gtk.Button` con la clase CSS `.key`. Los botones especiales reciben clases adicionales:
-- `.key-shift` — teclas ⇧
-- `.key-dead`  — teclas de acento muerto (´ y `)
-- `.key-clear` — botón "Borrar todo"
-- `.key-enter` — botón "Intro"
+- `.key-shift`     — teclas ⇧
+- `.key-dead`      — teclas de acento muerto (´ y `)
+- `.key-clear`     — botón "Borrar todo"
+- `.key-backspace` — botón ⌫ (borra la última letra introducida)
+- `.key-enter`     — botón "Intro"
 
 ### Estado interno
 

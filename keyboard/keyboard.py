@@ -80,6 +80,11 @@ class KeyboardWindow(Gtk.Window):
         space.get_style_context().add_class('key-space')
         space.connect('clicked', self.on_key, ' ')
 
+        backspace = Gtk.Button(label='⌫')
+        backspace.get_style_context().add_class('key')
+        backspace.get_style_context().add_class('key-backspace')
+        backspace.connect('clicked', self.on_key, '⌫')
+
         enter = Gtk.Button(label='Intro ↵')
         enter.get_style_context().add_class('key')
         enter.get_style_context().add_class('key-enter')
@@ -87,6 +92,7 @@ class KeyboardWindow(Gtk.Window):
 
         bottom.pack_start(clear, True, True, 0)
         bottom.pack_start(space, True, True, 0)
+        bottom.pack_start(backspace, True, True, 0)
         bottom.pack_start(enter, True, True, 0)
         vbox.pack_start(bottom, True, True, 0)
 

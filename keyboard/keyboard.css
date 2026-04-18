@@ -143,3 +143,22 @@ entry {
     font-size: 18px;
     color: #1a1a2e;
 }
+
+
+/* --- Borrar última letra (backspace) ---------------------- */
+
+.key-backspace {
+    background-image: none;
+    background-color: #f0a050;
+    border-color: #c97a20;
+}
+
+.key-backspace:active {
+    background-color: #c97a20;
+}
+
+.key-backspace label {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+}
