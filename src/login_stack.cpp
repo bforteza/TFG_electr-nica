@@ -104,6 +104,7 @@ void LoginStack::OnPasswordEntered()
     } catch (...) {
         error_label_->set_text(Tr().login.error_invalid_credentials);
         SoundManager::Play(SoundEvent::kLoginError);
+        password_entry_->set_text("");
     }
 }
 

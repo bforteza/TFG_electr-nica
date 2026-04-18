@@ -53,6 +53,7 @@ private:
     // Widgets de Glade
     Gtk::Box*    panel_box_;
     Gtk::Button* back_button_;
+    Gtk::Button* quit_button_;
 
     // Widgets creados programáticamente
     Gtk::Grid*   grid_;
@@ -87,6 +88,7 @@ private:
     void StartOpenSequence(int solenoid_ms);
 
     void OnBackButtonClicked();
+    void OnQuitButtonClicked();
     void OnRepeatButtonClicked();
     void OnActionButtonClicked();         // "Coger otra llave"
     void OnSlotButtonClicked(int idx);    // Solo en modo ADMIN

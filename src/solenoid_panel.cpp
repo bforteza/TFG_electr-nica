@@ -23,6 +23,12 @@ SolenoidPanel::SolenoidPanel(const Glib::RefPtr<Gtk::Builder>& builder,
     back_button_->signal_clicked().connect(
         sigc::mem_fun(*this, &SolenoidPanel::OnBackButtonClicked));
 
+    builder->get_widget("QuitButtonSolenoid", quit_button_);
+    if (!quit_button_)
+        throw std::runtime_error("No \"QuitButtonSolenoid\" object in MainWindow.glade");
+    quit_button_->signal_clicked().connect(
+        sigc::mem_fun(*this, &SolenoidPanel::OnQuitButtonClicked));
+
     BuildWidgets();
 }
 
@@ -242,6 +248,12 @@ void SolenoidPanel::OnBackButtonClicked() {
         signal_logout.emit();
     else
         signal_go_home.emit();
+}
+
+void SolenoidPanel::OnQuitButtonClicked() {
+    StopTimer();
+    hw_ctrl->Deactivate();
+    signal_logout.emit();
 }
 
 void SolenoidPanel::OnRepeatButtonClicked() {

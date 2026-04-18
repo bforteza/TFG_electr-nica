@@ -368,7 +368,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="QuitButtonSolenoid">
                     <property name="label">gtk-quit</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
