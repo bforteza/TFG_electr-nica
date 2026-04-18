@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <cstdint>
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -35,10 +36,6 @@ static bool WriteRegRetry(int fd, uint8_t reg, uint8_t value) {
             return true;
         std::this_thread::sleep_for(std::chrono::milliseconds(kI2cRetryDelayMs));
     }
-    std::ostringstream oss;
-    oss << "WriteReg failed: reg=0x" << std::hex << (int)reg
-        << " tras " << std::dec << kI2cRetries << " intentos";
-    AppLogger::Error("I2C", oss.str());
     return false;
 }
 
@@ -64,15 +61,20 @@ bool I2cController::Init() {
     WriteRegRetry(fd_, kRegConfigPort1, 0x00);
 
     // Pre-set outputs a LOW.
-    WriteRegRetry(fd_, kRegOutputPort0, 0x00);
-    WriteRegRetry(fd_, kRegOutputPort1, 0x00);
+    WriteState(0x0000);
 
     return true;
 }
 
 void I2cController::WriteState(uint16_t state) {
-    WriteRegRetry(fd_, kRegOutputPort0, static_cast<uint8_t>(state & 0xFF));
-    WriteRegRetry(fd_, kRegOutputPort1, static_cast<uint8_t>(state >> 8));
+    bool ok0 = WriteRegRetry(fd_, kRegOutputPort0, static_cast<uint8_t>(state & 0xFF));
+    bool ok1 = WriteRegRetry(fd_, kRegOutputPort1, static_cast<uint8_t>(state >> 8));
+    if (!ok0 || !ok1) {
+        std::ostringstream oss;
+        oss << "WriteState failed: state=0x"
+            << std::hex << std::setw(4) << std::setfill('0') << state;
+        AppLogger::Error("I2C", oss.str());
+    }
 }
 
 uint16_t I2cController::DoorBit() const {
