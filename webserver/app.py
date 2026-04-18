@@ -316,13 +316,13 @@ def api_users_create(body: UserIn):
                 db.close()
                 return {"success": False, "message": "La contraseña ya está en uso"}, 409
         cur.execute(
-            "INSERT INTO Person_ (type_, name_, password_, uid_, level_) VALUES ('Person', %s, %s, '', %s)",
-            (body.name, body.password, body.level),
+            "INSERT INTO Person_ (type_, name_, password_, uid_, level_, active_) VALUES ('Person', %s, %s, '', %s, %s)",
+            (body.name, body.password, body.level, int(body.active)),
         )
         new_id = cur.lastrowid
     db.commit()
     db.close()
-    return {"id": new_id, "name": body.name, "level": body.level}, 201
+    return {"id": new_id, "name": body.name, "level": body.level, "active": body.active}, 201
 
 
 @app.get("/api/users/<int:user_id>", tags=[tag_users], summary="Consultar un usuario",
