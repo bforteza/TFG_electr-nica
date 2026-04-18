@@ -543,7 +543,7 @@ def api_users_update(path: PathUserId, body: UserIn):
 @app.get("/api/keys", tags=[tag_keys], summary="Listar todas las llaves",
          responses={"200": KeyOut})
 def api_keys_list():
-    """Devuelve la lista de llaves con posición, estado y quién la tiene actualmente."""
+    """Lista todas las llaves con posición, estado activo, visibilidad y portador actual."""
     db = get_db()
     with db.cursor() as cur:
         cur.execute("SELECT id_, name_, ubi_, pos_, active_, pub_ FROM Key_ ORDER BY pos_")
@@ -572,11 +572,11 @@ def api_keys_list():
           responses={"201": KeyOut, "409": ErrorResponse, "422": ErrorResponse})
 def api_keys_create(body: KeyIn):
     """
-    Crea una nueva llave. Devuelve la llave creada con su id asignado.
+    Crea una nueva llave. Devuelve el registro creado con el id asignado.
 
-    - **pos**: posición en el armario en formato "A1"–"D8". Vacío = sin asignar.
-    - **pub**: si es True, la llave es accesible por todos (authorized_ids se ignora).
-    - **authorized_ids**: lista de ids de usuarios autorizados.
+    - **active**: False = llave creada como inactiva (no se registra evento en historial)
+    - **pub**: True = accesible por todos los usuarios (authorized_ids se ignora)
+    - **authorized_ids**: lista de ids de usuarios autorizados (solo si pub = False)
     """
     authorized_ids = [] if body.pub else body.authorized_ids
     db = get_db()
@@ -593,7 +593,8 @@ def api_keys_create(body: KeyIn):
         new_id = cur.lastrowid
         for pid in authorized_ids:
             cur.execute("INSERT INTO Key_Person_Acces (Key1_, Person2_) VALUES (%s, %s)", (new_id, pid))
-    log_history(db, etype=3, keyid=new_id, keyname=body.name, pos=0)
+    if body.active:
+        log_history(db, etype=3, keyid=new_id, keyname=body.name, pos=0)
     db.commit()
     db.close()
     return {"id": new_id, "name": body.name, "pos": "-", "active": body.active, "pub": body.pub}, 201
@@ -602,7 +603,7 @@ def api_keys_create(body: KeyIn):
 @app.get("/api/keys/<int:key_id>", tags=[tag_keys], summary="Consultar una llave",
          responses={"200": KeyDetailOut, "404": ErrorResponse})
 def api_keys_get(path: PathKeyId):
-    """Devuelve los datos completos de una llave, incluyendo los usuarios autorizados."""
+    """Devuelve todos los campos de una llave, incluyendo portador y lista de usuarios autorizados."""
     db = get_db()
     with db.cursor() as cur:
         cur.execute("SELECT id_, name_, ubi_, commentary_, pos_, active_, pub_ FROM Key_ WHERE id_=%s", (path.key_id,))
@@ -640,50 +641,48 @@ def api_keys_get(path: PathKeyId):
          responses={"200": SuccessResponse, "404": ErrorResponse, "409": ErrorResponse, "422": ErrorResponse})
 def api_keys_update(path: PathKeyId, body: KeyIn):
     """
-    Modifica los datos de una llave existente.
-    Pasar todos los campos aunque no cambien.
+    Reemplaza todos los datos de una llave existente.
+
+    - **active**: al desactivar (True→False) registra etype=4 en historial; al reactivar (False→True) registra etype=3 y resetea el uid NFC
+    - **pub**: True = accesible por todos (authorized_ids se ignora)
+    - **authorized_ids**: lista de ids de usuarios autorizados (solo si pub = False)
     """
     authorized_ids = [] if body.pub else body.authorized_ids
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id_ FROM Key_ WHERE id_=%s", (path.key_id,))
-        if not cur.fetchone():
-            db.close()
-            return {"success": False, "message": "Llave no encontrada"}, 404
+        cur.execute("SELECT active_, pos_, name_ FROM Key_ WHERE id_=%s", (path.key_id,))
+        existing = cur.fetchone()
+    if not existing:
+        db.close()
+        return {"success": False, "message": "Llave no encontrada"}, 404
+    with db.cursor() as cur:
         cur.execute("SELECT id_ FROM Key_ WHERE name_=%s AND id_!=%s", (body.name, path.key_id))
         if cur.fetchone():
             db.close()
             return {"success": False, "message": "Ya existe una llave con ese nombre"}, 409
-        cur.execute(
-            "UPDATE Key_ SET name_=%s, ubi_=%s, commentary_=%s, active_=%s, pub_=%s WHERE id_=%s",
-            (body.name, body.ubi, body.commentary, int(body.active), int(body.pub), path.key_id),
-        )
+    reactivating  = (not existing["active_"]) and body.active
+    deactivating  = existing["active_"] and (not body.active)
+    with db.cursor() as cur:
+        if reactivating:
+            cur.execute(
+                "UPDATE Key_ SET name_=%s, ubi_=%s, commentary_=%s, active_=%s, pub_=%s, uid_='' WHERE id_=%s",
+                (body.name, body.ubi, body.commentary, int(body.active), int(body.pub), path.key_id),
+            )
+        else:
+            cur.execute(
+                "UPDATE Key_ SET name_=%s, ubi_=%s, commentary_=%s, active_=%s, pub_=%s WHERE id_=%s",
+                (body.name, body.ubi, body.commentary, int(body.active), int(body.pub), path.key_id),
+            )
         cur.execute("DELETE FROM Key_Person_Acces WHERE Key1_=%s", (path.key_id,))
         for pid in authorized_ids:
             cur.execute("INSERT INTO Key_Person_Acces (Key1_, Person2_) VALUES (%s, %s)", (path.key_id, pid))
+    if reactivating:
+        log_history(db, etype=3, keyid=path.key_id, keyname=existing["name_"], pos=existing["pos_"] or 0)
+    elif deactivating:
+        log_history(db, etype=4, keyid=path.key_id, keyname=existing["name_"], pos=existing["pos_"] or 0)
     db.commit()
     db.close()
     return {"success": True, "message": "Llave actualizada"}
-
-
-@app.delete("/api/keys/<int:key_id>", tags=[tag_keys], summary="Eliminar una llave",
-            responses={"200": SuccessResponse, "404": ErrorResponse})
-def api_keys_delete(path: PathKeyId):
-    """Elimina una llave y todas sus relaciones."""
-    db = get_db()
-    with db.cursor() as cur:
-        cur.execute("SELECT id_, name_, pos_ FROM Key_ WHERE id_=%s", (path.key_id,))
-        key = cur.fetchone()
-        if not key:
-            db.close()
-            return {"success": False, "message": "Llave no encontrada"}, 404
-        cur.execute("DELETE FROM Key_Person_Acces WHERE Key1_=%s", (path.key_id,))
-        cur.execute("DELETE FROM Key_Person_Keep  WHERE Key1_=%s", (path.key_id,))
-        cur.execute("DELETE FROM Key_ WHERE id_=%s", (path.key_id,))
-    log_history(db, etype=4, keyid=path.key_id, keyname=key["name_"], pos=key["pos_"] or 0)
-    db.commit()
-    db.close()
-    return {"success": True, "message": "Llave eliminada"}
 
 
 # ── Historial ─────────────────────────────────────────────────────────────────

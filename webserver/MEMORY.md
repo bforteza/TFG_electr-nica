@@ -160,10 +160,9 @@ Base URL: `http://<IP>:5000/api/`
 | Método | Ruta | Respuestas |
 |---|---|---|
 | GET | `/api/users` | 200: `[UserOut]` |
-| POST | `/api/users` | 201: `UserOut` · 409: contraseña duplicada · 422: validación |
-| GET | `/api/users/<id>` | 200: `UserOut` · 404 |
+| POST | `/api/users` | 201: `UserOut` · 409: nombre o contraseña duplicada · 422: validación |
+| GET | `/api/users/<id>` | 200: `UserDetailOut` · 404 |
 | PUT | `/api/users/<id>` | 200: `SuccessResponse` · 404 · 409 · 422 |
-| DELETE | `/api/users/<id>` | 200: `SuccessResponse` · 404 |
 
 ### Llaves
 
@@ -173,7 +172,6 @@ Base URL: `http://<IP>:5000/api/`
 | POST | `/api/keys` | 201: `KeyOut` · 409: nombre duplicado · 422 |
 | GET | `/api/keys/<id>` | 200: `KeyDetailOut` · 404 |
 | PUT | `/api/keys/<id>` | 200: `SuccessResponse` · 404 · 409 · 422 |
-| DELETE | `/api/keys/<id>` | 200: `SuccessResponse` · 404 |
 
 ### Historial
 
@@ -189,9 +187,10 @@ Máx. 1000 eventos, ordenados por fecha desc.
 ## Modelos Pydantic
 
 ```
-UserIn:          name, password (≥5 dígitos si no vacía), level (0-2)
-UserOut:         id, name, level
-KeyIn:           name, ubi, commentary, pos ("A1"/...), active, pub, authorized_ids
+UserIn:          name, password (≥3 dígitos, obligatoria), level (0-2), active (bool)
+UserOut:         id, name, level, active
+UserDetailOut:   hereda UserOut + password  ← usado por GET /api/users/<id>
+KeyIn:           name, ubi, commentary, active, pub, authorized_ids
 KeyOut:          id, name, ubi, commentary, pos (str), active, pub, keeper (str|None)
 KeyDetailOut:    hereda KeyOut + authorized_users ([{id, name}])
 HistoryEventOut: id, etype, etype_name, timestamp, key_id, key_name, person_id, person_name, pos
@@ -218,9 +217,24 @@ Incluye 404, 409 y 422 (normalizado por `_validation_error_callback`).
 
 ## Validaciones de negocio
 
-- Contraseña: mínimo 5 dígitos si se especifica; debe ser única en `Person_`
+- Contraseña: mínimo 3 dígitos, obligatoria; debe ser única en `Person_`
+- Nombre de usuario: único en `Person_`
 - Nombre de llave: único en `Key_`
 - Posición: puede estar vacía (→ `pos_=0`); si `pub=True`, `authorized_ids` se ignora
+
+## Lógica de activación/desactivación
+
+### Usuarios (`PUT /api/users/<id>`)
+- Al **reactivar** (`active 0→1`): se resetea `uid_=''` para forzar nuevo registro NFC
+- No se pueden eliminar usuarios por API (DELETE eliminado)
+
+### Llaves (`PUT /api/keys/<id>`)
+- Al **desactivar** (`active 1→0`): registra `etype=4` (Llave desactivada) en `HistoryEvent_`
+- Al **reactivar** (`active 0→1`): registra `etype=3` (Llave creada) en `HistoryEvent_` y resetea `uid_=''`
+- No se pueden eliminar llaves por API (DELETE eliminado)
+
+### Creación de llaves (`POST /api/keys`)
+- Solo registra evento `etype=3` en historial si `active=True`; si se crea inactiva no genera evento
 
 ---
 
