@@ -25,5 +25,6 @@ webserver/__pycache__/
 webserver/*.pyc
 webserver/openapi.json
 
-# Logs del sistema (generados en runtime, no deben versionarse)
+# Logs y backups del sistema (generados en runtime, no deben versionarse)
 logs/
+backups/

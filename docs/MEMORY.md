@@ -277,6 +277,45 @@ YYYY-MM-DD HH:MM:SS [LEVEL] [SOURCE ] mensaje
 ```
 `LEVEL`: `INFO ` / `ERROR` / `WARN ` (5 chars). `SOURCE`: 7 chars con padding. Ver `docs/log_reference.md` para catálogo completo de mensajes.
 
+## Sistema de Copia de Seguridad
+
+### Estrategia
+- **Hora**: 12:00 (mediodía) — la Pi está encendida durante la jornada laboral. No se programa de noche porque el sistema puede estar apagado.
+- **Destinos**: dos destinos independientes ejecutados en orden:
+  1. **Local** — `~/TFG_electr-nica/backups/` (siempre se intenta)
+  2. **Servidor** — carpeta SMB/SSH de la empresa (solo si la red está disponible)
+- **Contenido**: volcado comprimido de MariaDB (`mysqldump` → `.sql.gz`) + copia del log `armario.log`. Dump completo de todas las tablas (incluyendo `HistoryEvent_`) — el tamaño total es ~150 KB comprimido, no justifica hacerlo incremental.
+- **Condición**: la Pi debe estar encendida a las 12:00. Si está apagada, ese día no se realiza la copia.
+
+### Gestión de espacio (rotación automática)
+Misma lógica aplicada a ambos destinos independientemente. Espacio reservado: **200 MB en cada destino**.
+
+1. Antes de copiar, comprueba si el nuevo fichero cabe en el espacio reservado (`BACKUP_MAX_MB=200` en el script).
+2. Si no cabe, borra la copia **más antigua** y repite la comprobación.
+3. Si no quedan copias antiguas y aún no hay espacio → `[WARN] LOCAL BACKUP space full` / `[WARN] REMOTE BACKUP space full` y **realiza la copia igualmente** (se sobrepasa el límite).
+4. Tras cada backup loguea el espacio libre restante.
+
+Con backups de ~150 KB/día, 200 MB dan para ~1.333 copias (~3,5 años) en cada destino.
+
+### Implementación pendiente
+- Script bash `scripts/backup.sh` que ejecuta `mysqldump`, comprime, aplica la rotación en ambos destinos y escribe en el log con la fuente `[BAK]` (ver `docs/log_reference.md`).
+- Entrada en `crontab` del usuario pi: `0 12 * * * /home/pi/TFG_electr-nica/scripts/backup.sh`.
+- Añadir `~/TFG_electr-nica/backups/` a `.gitignore`.
+- Añadir creación del cron y del directorio `backups/` en `install.sh` una vez confirmado el método de conexión con el informático.
+
+### Preguntas pendientes al informático
+1. ¿Tiene el servidor Windows una carpeta compartida (SMB) accesible desde la red local?
+2. ¿Tiene el servidor OpenSSH instalado (disponible en Windows Server 2019+)?
+3. ¿Qué espacio puede asignar para las copias?
+
+### Opciones de conexión Pi → Windows Server
+| Opción | Requisito en el servidor | Comando en la Pi |
+|--------|--------------------------|------------------|
+| SMB/CIFS | Carpeta compartida con usuario/contraseña | `mount -t cifs //server/share /mnt/backup` |
+| SSH/rsync | OpenSSH + clave pública de la Pi autorizada | `rsync -az archivo user@server:/ruta/` |
+
+La opción SSH es más segura (sin contraseña en texto plano). La SMB es más sencilla si el informático ya tiene carpetas compartidas configuradas.
+
 ## Partes Pendientes de Implementar
 1. **Devolución de llaves por NFC**: modo RETURN definido en SolenoidPanel y `OnKeyLogged` en Window, pero flujo no probado (sin hardware NFC disponible actualmente).
 2. **Ajuste pin mapping**: `kRowPins` y `kColPins` en `hardware_config.h` deben verificarse contra el cableado real de la PCB antes del despliegue en Raspberry Pi.

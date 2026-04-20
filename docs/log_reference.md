@@ -11,7 +11,7 @@ Backup:  `~/TFG_electr-nica/logs/armario.log.bak` (se crea al superar 5 MB)
 ```
 
 - **LEVEL**: `INFO ` · `ERROR` · `WARN `
-- **SOURCE**: `APP    ` · `DB     ` · `I2C    ` · `NFC    ` · `WEB    `
+- **SOURCE**: `APP    ` · `DB     ` · `I2C    ` · `NFC    ` · `WEB    ` · `BAK    `
 
 ---
 
@@ -70,6 +70,43 @@ Backup:  `~/TFG_electr-nica/logs/armario.log.bak` (se crea al superar 5 MB)
 | INFO   | `Network UP` | La red se recuperó después de haber estado caída (transición DOWN→UP detectada por el hilo monitor) |
 | ERROR  | `Network DOWN` | La red cayó mientras el webserver estaba corriendo (transición UP→DOWN detectada por el hilo monitor cada 30 s) |
 | ERROR  | `DB connection error: <detalle>` | PyMySQL no pudo conectar a MariaDB al atender una petición HTTP. Causas: MariaDB caído, credenciales incorrectas en `config.py` |
+
+---
+
+---
+
+### `[BAK]` — Copia de seguridad
+
+Script cron que se ejecuta a las 12:00. Copia la BD (mysqldump comprimido) y el log al servidor de la empresa.
+
+| Nivel  | Mensaje | Cuándo ocurre |
+|--------|---------|---------------|
+El prefijo `LOCAL` indica copia en `~/TFG_electr-nica/backups/`. El prefijo `REMOTE` indica copia en el servidor de la empresa. Ambos destinos siguen la misma lógica de rotación por espacio (200 MB cada uno).
+
+| Nivel  | Mensaje | Cuándo ocurre |
+|--------|---------|---------------|
+| INFO   | `BACKUP START` | El script arranca — se intentarán ambos destinos |
+| INFO   | `LOCAL CLEANUP: N ficheros eliminados` | Se borraron N copias locales antiguas para liberar espacio |
+| WARN   | `LOCAL space full: no hay espacio` | Sin copias locales que borrar y sin espacio. Copia realizada igualmente |
+| INFO   | `LOCAL DB OK: <archivo.sql.gz>` | `mysqldump` local completado |
+| ERROR  | `LOCAL DB ERROR: <motivo>` | `mysqldump` ha fallado |
+| INFO   | `LOCAL LOG OK` | Copia del log al destino local completada |
+| ERROR  | `LOCAL LOG ERROR: <motivo>` | Error copiando el log localmente |
+| INFO   | `LOCAL space free: X MB` | Espacio libre local tras la copia |
+| INFO   | `LOCAL BACKUP COMPLETE` | Copia local completada con éxito |
+| ERROR  | `LOCAL BACKUP FAILED` | Copia local fallida — ver líneas anteriores |
+| INFO   | `REMOTE CLEANUP: N ficheros eliminados` | Se borraron N copias del servidor para liberar espacio |
+| WARN   | `REMOTE space full: no hay espacio` | Sin copias en servidor que borrar y sin espacio. Copia realizada igualmente |
+| INFO   | `REMOTE DB OK: <archivo.sql.gz>` | Copia de BD al servidor completada |
+| ERROR  | `REMOTE DB ERROR: <motivo>` | Error copiando la BD al servidor |
+| INFO   | `REMOTE LOG OK` | Copia del log al servidor completada |
+| ERROR  | `REMOTE LOG ERROR: <motivo>` | Error copiando el log al servidor (red caída, servidor no disponible) |
+| INFO   | `REMOTE space free: X MB` | Espacio libre en el servidor tras la copia |
+| INFO   | `REMOTE BACKUP COMPLETE` | Copia en servidor completada con éxito |
+| ERROR  | `REMOTE BACKUP FAILED` | Copia en servidor fallida — ver líneas anteriores |
+| INFO   | `BACKUP COMPLETE` | Ambos destinos completados con éxito |
+| WARN   | `BACKUP COMPLETE (local only)` | Solo la copia local ha tenido éxito (servidor no disponible) |
+| ERROR  | `BACKUP FAILED` | Ambos destinos han fallado |
 
 ---
 

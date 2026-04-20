@@ -1,12 +1,13 @@
 """
 Sistema de log persistente para el webserver. Escribe en ../logs/armario.log
 (mismo archivo que la app C++). Usa WatchedFileHandler para detectar rotaciones.
-Hilo daemon monitoriza el estado de red cada 30 s y loguea transiciones UP/DOWN.
+Hilo daemon monitoriza la red cada 30 s (UDP socket trick) y loguea transiciones UP/DOWN.
 """
 
 import logging
 import logging.handlers
 import os
+import socket
 import threading
 import time
 
@@ -35,16 +36,17 @@ def error(source: str, msg: str) -> None:
 
 
 def _check_net() -> bool:
+    # Conectar un socket UDP no envía datos pero obliga al kernel a resolver
+    # la tabla de rutas. Si la IP resultante no es loopback, hay red disponible.
     try:
-        for iface in os.listdir('/sys/class/net'):
-            if iface == 'lo':
-                continue
-            with open(f'/sys/class/net/{iface}/operstate') as f:
-                if f.read().strip() == 'up':
-                    return True
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        s.connect(('10.254.254.254', 1))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip != '' and not ip.startswith('127.')
     except Exception:
-        pass
-    return False
+        return False
 
 
 def _net_monitor() -> None:
